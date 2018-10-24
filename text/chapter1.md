@@ -105,7 +105,7 @@ Code samples will appear in a monospaced font, as follows:
 ```haskell
 module Example where
 
-import Control.Monad.Eff.Console (log)
+import Effect.Console (log)
 
 main = log "Hello, World!"
 ```
