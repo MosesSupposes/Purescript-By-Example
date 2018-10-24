@@ -25,17 +25,17 @@ import Data.Maybe (Maybe)
 Here, we import several modules:
 
 - The `Control.Plus` module, which defines the `empty` value.
-- The `Data.List` module, which is provided by the `purescript-lists` package which can be installed using Bower. It contains a few functions which we will need for working with linked lists.
+- The `Data.List` module, which is provided by the `purescript-lists` package which can be installed using psc-package. It contains a few functions which we will need for working with linked lists.
 - The `Data.Maybe` module, which defines data types and functions for working with optional values.
 
 Notice that the imports for these modules are listed explicitly in parentheses. This is generally a good practice, as it helps to avoid conflicting imports.
 
-Assuming you have cloned the book's source code repository, the project for this chapter can be built using Pulp, with the following commands:
+Assuming you have cloned the book's source code repository, the project for this chapter can be built using psc-package, with the following commands:
 
 ```text
 $ cd chapter3
-$ bower update
-$ pulp build
+$ psc-package install 
+$ psc-package build
 ```
 
 ## Simple Types
