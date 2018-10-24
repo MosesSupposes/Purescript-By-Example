@@ -179,17 +179,15 @@ $ pulp build
 
 The generated modules will be placed in the `output` directory by default. Each PureScript module will be compiled to its own CommonJS module, in its own subdirectory.
 
-## Tracking Dependencies with Bower
+## Tracking Dependencies with psc-package 
 
 To write the `diagonal` function (the goal of this chapter), we will need to be able to compute square roots. The `purescript-math` package contains type definitions for functions defined on the JavaScript `Math` object, so let's install it:
 
 ```text
-$ bower install purescript-math --save
+$ psc-package install math
 ```
 
-The `--save` option causes the dependency to be added to the `bower.json` configuration file.
-
-The `purescript-math` library sources should now be available in the `bower_components` subdirectory, and will be included when you compile your project.
+The `purescript-math` library sources should now be available in the `.psc-package/psc-0.12.0/math` subdirectory, and will be included when you compile your project. Note that we did not include `purescript-` from the full package name `purescript-math`. By default Pulp uses [Bower](https://bower.io/) dependency management, and for some nuanced reason Bower necessitated the prefix `purescript-` in front of PureScript library names. The PureScript community is slowly moving away from Bower in favor of `psc-package` and the `purescript-` prefix has been dropped. If you forget to drop the prefix, `psc-package` will give you a helpful reminder. 
 
 ## Computing Diagonals
 
