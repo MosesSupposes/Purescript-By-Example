@@ -187,7 +187,7 @@ To write the `diagonal` function (the goal of this chapter), we will need to be 
 $ psc-package install math
 ```
 
-The `purescript-math` library sources should now be available in the `.psc-package/psc-0.12.0/math` subdirectory, and will be included when you compile your project. Note that we did not include `purescript-` from the full package name `purescript-math`. By default Pulp uses [Bower](https://bower.io/) dependency management, and for some nuanced reason Bower necessitated the prefix `purescript-` in front of PureScript library names. The PureScript community is slowly moving away from Bower in favor of `psc-package` and the `purescript-` prefix has been dropped. If you forget to drop the prefix, `psc-package` will give you a helpful reminder. 
+The `purescript-math` library sources should now be available in the `.psc-package/psc-0.12.0/math` subdirectory, and will be included when you compile your project. Note that we did not include `purescript-` from the full package name `purescript-math`. By default Pulp uses [Bower](https://bower.io/) for dependency management, and for some nuanced reason Bower necessitated the prefix `purescript-` in front of PureScript library names. The PureScript community is slowly moving away from Bower in favor of `psc-package` and the `purescript-` prefix has been dropped. If you forget to drop the prefix, `psc-package` will give you a helpful reminder. 
 
 ## Computing Diagonals
 
