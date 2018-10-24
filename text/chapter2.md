@@ -12,7 +12,8 @@ Here are the tools we will be using to set up our PureScript development environ
 
 - [`purs`](http://purescript.org) - The PureScript compiler itself.
 - [`npm`](http://npmjs.org) - The Node Package Manager, which will allow us to install the rest of our development tools.
-- [Pulp](https://github.com/bodil/pulp) - A command-line tool which automates many of the tasks associated with managing PureScript projects.
+- [psc-package](https://github.com/purescript/psc-package) - A command-line tool which automates many of the tasks associated with managing PureScript dependencies.
+- [Pulp](https://github.com/purescript-contrib/pulp) - A command-line tool which automates many of the tasks associated with managing PureScript projects.
 
 The rest of the chapter will guide you through installing and configuring these tools.
 
@@ -38,37 +39,37 @@ If you do not have a working installation of [NodeJS](http://nodejs.org/), you s
 You will also need to install the Pulp command line tool, and the Bower package manager using `npm`, as follows:
 
 ```text
-$ npm install -g pulp bower
+$ npm install -g pulp psc-package 
 ```
 
-This will place the `pulp` and `bower` command line tools on your path. At this point, you will have all the tools needed to create your first PureScript project.
+This will place the `pulp` and `psc-package` command line tools on your path. At this point, you will have all the tools needed to create your first PureScript project.
 
 ## Hello, PureScript!
 
 Let's start out simple. We'll use Pulp to compile and run a simple Hello World! program.
 
-Begin by creating a project in an empty directory, using the `pulp init` command:
+Begin by creating a project in an empty directory, using the `pulp --psc-package init` command:
 
 ```text
 $ mkdir my-project
 $ cd my-project
-$ pulp init
+$ pulp --psc-package init
 
 * Generating project skeleton in ~/my-project
 
 $ ls
 
-bower.json	src		test
+psc-package.json	src		test
 ```
 
-Pulp has created two directories, `src` and `test`, and a `bower.json` configuration file for us. The `src` directory will contain our source files, and the `test` directory will contain our tests. We will use the `test` directory later in the book.
+Pulp has created two directories, `src` and `test`, and a `psc-package.json` configuration file for us. The `src` directory will contain our source files, and the `test` directory will contain our tests. We will use the `test` directory later in the book.
 
 Modify the `src/Main.purs` file to contain the following content:
 
 ```haskell
 module Main where
 
-import Control.Monad.Eff.Console
+import Effect.Console
 
 main = log "Hello, World!"
 ```
@@ -76,7 +77,7 @@ main = log "Hello, World!"
 This small sample illustrates a few key ideas:
 
 - Every file begins with a module header. A module name consists of one or more capitalized words separated by dots. In this case, only a single word is used, but `My.First.Module` would be an equally valid module name.
-- Modules are imported using their full names, including dots to separate the parts of the module name. Here, we import the `Control.Monad.Eff.Console` module, which provides the `log` function.
+- Modules are imported using their full names, including dots to separate the parts of the module name. Here, we import the `Effect.Console` module, which provides the `log` function.
 - The `main` program is defined as a function application. In PureScript, function application is indicated with whitespace separating the function name from its arguments.
 
 Let's build and run this code using the following command:
