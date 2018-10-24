@@ -628,4 +628,5 @@ In this chapter, we covered several new functional programming concepts:
 - How to avoid null values by using the `Maybe` type.
 - Using techniques like eta conversion and function composition to refactor code into a clear specification.
 
+
 In the following chapters, we'll build on these ideas.
