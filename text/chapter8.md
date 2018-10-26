@@ -1,19 +1,19 @@
-# The Eff Monad
+# The Effect Monad
 
 ## Chapter Goals
 
 In the last chapter, we introduced applicative functors, an abstraction which we used to deal with _side-effects_: optional values, error messages and validation. This chapter will introduce another abstraction for dealing with side-effects in a more expressive way: _monads_.
 
-The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_. We will build upon the address book example of the previous chapters, by using a particular monad to handle the side-effects of building a user interface in the browser. The monad we will use is an important monad in PureScript - the `Eff` monad - used to encapsulate so-called _native_ effects.
+The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_. We will build upon the address book example of the previous chapters, by using a particular monad to handle the side-effects of building a user interface in the browser. The monad we will use is an important monad in PureScript - the `Effect` monad - used to encapsulate so-called _native_ effects.
 
 ## Project Setup
 
 The source code for this project builds on the source for the previous chapter. The modules from the previous project are included in the `src` directory for this project.
 
-The project adds the following Bower dependencies:
+The project adds the following psc-package dependencies:
 
-- `purescript-eff`, which defines the `Eff` monad, the subject of the second half of the chapter.
-- `purescript-react`, a set of bindings to the React user interface library, which we will use to build a user interface for our address book application.
+- `purescript-effect`, which defines the `Effect` monad, the subject of the second half of the chapter.
+- `purescript-react-basic`, a set of bindings to the React user interface library, which we will use to build a user interface for our address book application.
 
 In addition to the modules from the previous chapter, this chapter's project adds a `Main` module, which provides the entry point to the application, and functions to render the user interface.
 

@@ -2,30 +2,25 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Effect (Effect)
+import Effect.Console (log)
 import Control.Monad.Except (runExcept)
 import Data.AddressBook (Address(..), Person(..), PhoneNumber(..), examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
 import Data.Array ((..), length, modifyAt, zipWith)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
-import Data.Foreign (ForeignError, readString, toForeign)
-import Data.Foreign.Index (index)
+import Foreign (ForeignError, readString, unsafeToForeign)
+import Foreign.Index (index)
 import Data.Maybe (fromJust, fromMaybe)
 import Data.List.NonEmpty (NonEmptyList)
-import DOM (DOM())
-import DOM.HTML (window)
-import DOM.HTML.Types (htmlDocumentToDocument)
-import DOM.HTML.Window (document)
-import DOM.Node.NonElementParentNode (getElementById)
-import DOM.Node.Types (ElementId(..), documentToNonElementParentNode)
+import Web.HTML (window)
+import Web.HTML.Window (document)
 import Partial.Unsafe (unsafePartial)
-import React (ReactClass, ReadWrite, ReactState, Event, ReactThis,
-              createFactory, readState, spec, createClass, writeState)
-import React.DOM as D
-import React.DOM.Props as P
-import ReactDOM (render)
+
+import React.Basic as React
+import React.Basic.DOM as R
+import React.Basic.Events as Events
 
 newtype AppState = AppState
   { person :: Person
@@ -40,7 +35,7 @@ initialState = AppState
 
 valueOf :: Event -> Either (NonEmptyList ForeignError) String
 valueOf e = runExcept do
-  target <- index (toForeign e) "target"
+  target <- index (unsafeToForeign e) "target"
   value <- index target "value"
   readString value
 
@@ -49,10 +44,7 @@ updateAppState
    . ReactThis props AppState
   -> (String -> Person)
   -> Event
-  -> Eff ( console :: CONSOLE
-         , state :: ReactState ReadWrite
-         | eff
-         ) Unit
+  -> Effect Unit
 updateAppState ctx update e =
   for_ (valueOf e) \s -> do
     let newPerson = update s
@@ -62,11 +54,11 @@ updateAppState ctx update e =
       Left errors -> writeState ctx (AppState { person: newPerson, errors: errors })
       Right _ -> writeState ctx (AppState { person: newPerson, errors: [] })
 
-addressBook :: forall props. ReactClass props
+addressBook :: forall props. React.Component props
 addressBook = createClass $ spec initialState \ctx -> do
   AppState { person: Person person@{ homeAddress: Address address }, errors } <- readState ctx
 
-  let renderValidationError err = D.li' [ D.text err ]
+  let renderValidationError err = R.li { children : [ R.text err ] }
 
       renderValidationErrors [] = []
       renderValidationErrors xs =
@@ -124,12 +116,10 @@ addressBook = createClass $ spec initialState \ctx -> do
                   ]
           ]
 
-main :: Eff ( console :: CONSOLE
-            , dom :: DOM
-            ) Unit
+main :: Effect Unit
 main = void do
   log "Rendering address book component"
-  let component = D.div [] [ createFactory addressBook unit ]
-  doc <- window >>= document
-  ctr <- getElementById (ElementId "main") (documentToNonElementParentNode (htmlDocumentToDocument doc))
-  render component (unsafePartial fromJust ctr)
+  --let component = D.div [] [ createFactory addressBook unit ]
+  --doc <- window >>= document
+  --ctr <- getElementById (ElementId "main") (documentToNonElementParentNode (htmlDocumentToDocument doc))
+  --render component (unsafePartial fromJust ctr)
