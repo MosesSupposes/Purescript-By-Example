@@ -12,7 +12,7 @@ We will also see a collection of standard type classes from PureScript's Prelude
 
 The source code for this chapter is defined in the file `src/Data/Hashable.purs`. 
 
-The project has the following Bower dependencies:
+The project has the following psc-package dependencies:
 
 - `purescript-maybe`, which defines the `Maybe` data type, which represents optional values.
 - `purescript-tuples`, which defines the `Tuple` data type, which represents pairs of values.
@@ -20,7 +20,7 @@ The project has the following Bower dependencies:
 - `purescript-strings`, which defines functions which operate on strings.
 - `purescript-functions`, which defines some helper functions for defining PureScript functions.
 
-The module `Data.Hashable` imports several modules provided by these Bower packages.
+The module `Data.Hashable` imports several modules provided by these psc-package packages.
 
 ## Show Me!
 
@@ -348,7 +348,7 @@ Here, we might have annotated this function as `Int -> Int`, or `Number -> Numbe
 
 ## Overlapping Instances
 
-PureScript has another rule regarding type class instances, called the _overlapping instances rule_. Whenever a type class instance is required at a function call site, PureScript will use the information inferred by the type checker to choose the correct instance. At that time, there should be exactly one appropriate instance for that type. If there are multiple valid instances, the compiler will issue a warning.
+PureScript has another rule regarding type class instances, called the _overlapping instances rule_. Whenever a type class instance is required at a function call site, PureScript will use the information inferred by the type checker to choose the correct instance. At that time, there should be exactly one appropriate instance for that type. If there are multiple valid instances, the compiler will issue a error.
 
 To demonstrate this, we can try creating two conflicting type class instances for an example type. In the following code, we create two overlapping `Show` instances for the type `T`:
 
@@ -366,10 +366,10 @@ instance showT2 :: Show T where
   show _ = "Instance 2"
 ```
 
-This module will compile with no warnings. However, if we _use_ `show` at type `T` (requiring the compiler to to find a `Show` instance), the overlapping instances rule will be enforced, resulting in a warning:
+This module will not compile. The overlapping instances rule will be enforced, resulting in an error:
 
 ```text
-Overlapping instances found for Prelude.Show T
+Overlapping instances found for Data.Show.Show T
 ```
 
 The overlapping instances rule is enforced so that automatic selection of type class instances is a predictable process. If we allowed two type class instances for a type to exist, then either could be chosen depending on the order of module imports, and that could lead to unpredictable behavior of the program at runtime, which is undesirable.
