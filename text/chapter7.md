@@ -503,7 +503,7 @@ validateAddress (Address o) =
 
 or with _applicative do_
 
-```
+```haskell
 validateAddressAdo :: Address -> V Errors Address
 validateAddressAdo (Address o) = ado
   street  <- (nonEmpty "Street" o.street *> pure o.street)
