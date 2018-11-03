@@ -1,24 +1,26 @@
-# The Effect Monad
+# The Effect and Aff Monads
 
 ## Chapter Goals
 
 In the last chapter, we introduced applicative functors, an abstraction which we used to deal with _side-effects_: optional values, error messages and validation. This chapter will introduce another abstraction for dealing with side-effects in a more expressive way: _monads_.
 
-The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_. We will build upon the address book example of the previous chapters, by using a particular monad to handle the side-effects of building a user interface in the browser. The monad we will use is an important monad in PureScript - the `Effect` monad - used to encapsulate so-called _native_ effects.
+The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_. <!-- We will build upon the address book example of the previous chapters, by using a particular monad to handle the side-effects of building a user interface in the browser. The monad we will use is an important monad in PureScript - the `Effect` monad - used to encapsulate so-called _native_ effects. -->
+TODO: describe how Effect and Aff will be used in examples
 
 ## Project Setup
-
+TODO: describe the project setup
+<!--
 The source code for this project builds on the source for the previous chapter. The modules from the previous project are included in the `src` directory for this project.
 
 The project adds the following psc-package dependencies:
 
 - `purescript-effect`, which defines the `Effect` monad, the subject of the second half of the chapter.
-- `purescript-react-basic`, a set of bindings to the React user interface library, which we will use to build a user interface for our address book application.
+- `purescript-aff`, a set of bindings to the React user interface library, which we will use to build a user interface for our address book application.
 
 In addition to the modules from the previous chapter, this chapter's project adds a `Main` module, which provides the entry point to the application, and functions to render the user interface.
 
 To compile this project, first install React using `npm install`, and then build and bundle the JavaScript source with `pulp browserify --to dist/Main.js`. To run the project, open the `html/index.html` file in your web browser.
-
+-->
 ## Monads and Do Notation
 
 Do notation was first introduced when we covered _array comprehensions_. Array comprehensions provide syntactic sugar for the `concatMap` function from the `Data.Array` module.
@@ -374,9 +376,9 @@ X>     ```
 
 ## Native Effects
 
-We will now look at one particular monad which is of central importance in PureScript - the `Eff` monad.
+We will now look at one particular monad which is of central importance in PureScript - the `Effect` monad.
 
-The `Eff` monad is defined in the Prelude, in the `Control.Monad.Eff` module. It is used to manage so-called _native_ side-effects.
+The `Effect` monad is defined in the `Effect` module. It is used to manage so-called _native_ side-effects. If you are familiar with Haskell, it is the equivalent of the `IO` monad.
 
 What are native side-effects? They are the side-effects which distinguish JavaScript expressions from idiomatic PureScript expressions, which typically are free from side-effects. Some examples of native effects are:
 
@@ -398,7 +400,7 @@ We have already seen plenty of examples of "non-native" side-effects:
 - Errors, as represented by the `Either` data type
 - Multi-functions, as represented by arrays or lists
 
-Note that the distinction is subtle. It is true, for example, that an error message is a possible side-effect of a JavaScript expression, in the form of an exception. In that sense, exceptions do represent native side-effects, and it is possible to represent them using `Eff`. However, error messages implemented using `Either` are not a side-effect of the JavaScript runtime, and so it is not appropriate to implement error messages in that style using `Eff`. So it is not the effect itself which is native, but rather how it is implemented at runtime.
+Note that the distinction is subtle. It is true, for example, that an error message is a possible side-effect of a JavaScript expression, in the form of an exception. In that sense, exceptions do represent native side-effects, and it is possible to represent them using `Effect`. However, error messages implemented using `Either` are not a side-effect of the JavaScript runtime, and so it is not appropriate to implement error messages in that style using `Effect`. So it is not the effect itself which is native, but rather how it is implemented at runtime.
 
 ## Side-Effects and Purity
 
@@ -408,15 +410,13 @@ The answer is that PureScript does not aim to eliminate side-effects. It aims to
 
 Values with side-effects have different types from pure values. As such, it is not possible to pass a side-effecting argument to a function, for example, and have side-effects performed unexpectedly.
 
-The only way in which side-effects managed by the `Eff` monad will be presented is to run a computation of type `Eff eff a` from JavaScript.
+The only way in which side-effects managed by the `Effect` monad will be presented is to run a computation of type `Effect a` from JavaScript.
 
-The Pulp build tool (and other tools) provide a shortcut, by generating additional JavaScript to invoke the `main` computation when the application starts. `main` is required to be a computation in the `Eff` monad.
+The Pulp build tool (and other tools) provide a shortcut, by generating additional JavaScript to invoke the `main` computation when the application starts. `main` is required to be a computation in the `Effect` monad.
 
-In this way, we know exactly what side-effects to expect: exactly those used by `main`. In addition, we can use the `Eff` monad to restrict what types of side-effects `main` is allowed to have, so that we can say with certainty for example, that our application will interact with the console, but nothing else.
+## The Effect Monad
 
-## The Eff Monad
-
-The goal of the `Eff` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient Javascript. It is also called the monad of _extensible effects_, which will be explained shortly.
+The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient Javascript. 
 
 Here is an example. It uses the `purescript-random` package, which defines functions for generating random numbers:
 
@@ -425,9 +425,10 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Eff.Random (random)
-import Control.Monad.Eff.Console (logShow)
+import Effect.Random (random)
+import Effect.Console (logShow)
 
+main :: Effect Unit
 main = do
   n <- random
   logShow n
@@ -441,160 +442,9 @@ $ pulp run
 
 Running this command, you will see a randomly chosen number between `0` and `1` printed to the console.
 
-This program uses do notation to combine two types of native effects provided by the Javascript runtime: random number generation and console IO.
+This program uses do notation to combine two native effects provided by the Javascript runtime: random number generation and console IO.
 
-## Extensible Effects
-
-We can inspect the type of main by opening the module in PSCi:
-
-```text
-> import Main
-
-> :type main
-forall eff. Eff (console :: CONSOLE, random :: RANDOM | eff) Unit
-```
-
-This type looks quite complicated, but is easily explained by analogy with PureScript’s records.
-
-Consider a simple function which uses a record type:
-
-```haskell
-fullName person = person.firstName <> " " <> person.lastName
-```
-
-This function creates a full name string from a record containing `firstName` and `lastName` properties. If you find the type of this function in PSCi as before, you will see this:
-
-```haskell
-forall r. { firstName :: String, lastName :: String | r } -> String
-```
-
-This type reads as follows: “`fullName` takes a record with `firstName` and `lastName` fields _and any other properties_ and returns a `String`”.
-
-That is, `fullName` does not care if you pass a record with more fields, as long as the `firstName` and `lastName` properties are present:
-
-```text
-> firstName { firstName: "Phil", lastName: "Freeman", location: "Los Angeles" }
-Phil Freeman
-```
-
-Similarly, the type of `main` above can be interpreted as follows: “`main` is a _computation with side-effects_, which can be run in any environment which supports random number generation and console IO, _and any other types of side effect_, and which returns a value of type `Unit`”.
-
-This is the origin of the name “extensible effects”: we can always extend the set of side-effects, as long as we can support the set of effects that we need.
-
-## Interleaving Effects
-
-This extensibility allows code in the `Eff` monad to _interleave_ different types of side-effect.
-
-The `random` function which we used has the following type:
-
-```haskell
-forall eff1. Eff (random :: RANDOM | eff1) Number
-```
-
-The set of effects `(random :: RANDOM | eff1)` here is _not_ the same as those appearing in `main`.
-
-However, we can _instantiate_ the type of `random` in such a way that the effects do match. If we choose `eff1` to be `(console :: CONSOLE | eff)`, then the two sets of effects become equal, up to reordering.
-
-Similarly, `logShow` has a type which can be specialized to match the effects of `main`:
-
-```haskell
-forall eff2. Show a => a -> Eff (console :: CONSOLE | eff2) Unit
-```
-
-This time we have to choose `eff2` to be `(random :: RANDOM | eff)`.
-
-The point is that the types of `random` and `logShow` indicate the side-effects which they contain, but in such a way that other side-effects can be _mixed-in_, to build larger computations with larger sets of side-effects.
-
-Note that we don't have to give a type for `main`. The compiler will find a most general type for `main` given the polymorphic types of `random` and `logShow`.
-
-## The Kind of Eff
-
-The type of `main` is unlike other types we've seen before. To explain it, we need to consider the _kind_ of `Eff`. Recall that types are classified by their kinds just like values are classified by their types. So far, we've only seen kinds built from `Type` (the kind of types) and `->` (which builds kinds for type constructors).
-
-To find the kind of `Eff`, use the `:kind` command in PSCi:
-
-```text
-> import Control.Monad.Eff
-
-> :kind Eff
-# Control.Monad.Eff.Effect -> Type -> Type
-```
-
-There are two kinds here that we have not seen before.
-
-`Control.Monad.Eff.Effect` is the kind of _effects_, which represents _type-level labels_ for different types of side-effects. To understand this, note that the two labels we saw in `main` above both have kind `Control.Monad.Eff.Effect`:
-
-```text
-> import Control.Monad.Eff.Console
-> import Control.Monad.Eff.Random
-
-> :kind CONSOLE
-Control.Monad.Eff.Effect
-
-> :kind RANDOM
-Control.Monad.Eff.Effect
-```
-
-The `#` kind constructor is used to construct kinds for _rows_, i.e. unordered, labelled sets.
-
-So `Eff` is parameterized by a row of effects, and its return type. That is, the first argument to `Eff` is an unordered, labelled set of effect types, and the second argument is the return type.
-
-We can now read the type of `main` above:
-
-```text
-forall eff. Eff (console :: CONSOLE, random :: RANDOM | eff) Unit
-```
-
-The first argument to `Eff` is `(console :: CONSOLE, random :: RANDOM | eff)`. This is a row which contains the `CONSOLE` effect and the `RANDOM` effect. The pipe symbol `|` separates the labelled effects from the _row variable_ `eff` which represents _any other side-effects_ we might want to mix in.
-
-The second argument to `Eff` is `Unit`, which is the return type of the computation.
-
-## Records And Rows
-
-Considering the kind of `Eff` allows us to make a deeper connection between extensible effects and records.
-
-Take the function we defined above:
-
-```haskell
-fullName :: forall r. { firstName :: String, lastName :: String | r } -> String
-fullName person = person.firstName <> " " <> person.lastName
-```
-
-The kind of the type on the left of the function arrow must be `Type`, because only types of kind `Type` have values.
-
-The curly braces are actually syntactic sugar, and the full type as understood by the PureScript compiler is as follows:
-
-```haskell
-fullName :: forall r. Record (firstName :: String, lastName :: String | r) -> String
-```
-
-Note that the curly braces have been removed, and there is an extra `Record` constructor. `Record` is a built-in type constructor defined in the `Prim` module. If we find its kind, we see the following:
-
-```text
-> :kind Record
-# Type -> Type
-```
-
-That is, `Record` is a type constructor which takes a _row of types_ and constructs a type. This is what allows us to write row-polymorphic functions on records.
-
-The type system uses the same machinery to handle extensible effects as is used for row-polymorphic records (or _extensible records_). The only difference is the _kind_ of the types appearing in the labels. Records are parameterized by a row of types, and `Eff` is parameterized by a row of effects.
-
-The same type system feature could even be used to build other types which were parameterized on rows of type constructors, or even rows of other rows!
-
-## Fine-Grained Effects
-
-Type annotations are usually not required when using `Eff`, since rows of effects can be inferred, but they can be used to indicate to the compiler which effects are expected in a computation.
-
-If we annotate the previous example with a _closed_ row of effects:
-
-``` haskell
-main :: Eff (console :: CONSOLE, random :: RANDOM) Unit
-main = do
-  n <- random
-  print n
-```
-
-(note the lack of the row variable `eff` here), then we cannot accidentally include a subcomputation which makes use of a different type of effect. In this way, we can control the side-effects that our code is allowed to have.
+****************************** BEGIN HERE ****************************************
 
 ## Handlers and Actions
 
