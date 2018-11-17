@@ -517,7 +517,7 @@ main = launchAff_  do
 
 ```
 
-`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 1 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statment more clear by moving the *boilerplate* out of the way to the right. 
+`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statment more clear by moving the *boilerplate* out of the way to the right. 
 
 # launchAff_ vs launchAff
 
@@ -529,6 +529,8 @@ launchAff_ :: forall a. Aff a -> Effect Unit
 ```haskell
 launchAff :: forall a. Aff a -> Effect (Fiber a)
 ```
+
+`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchonous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`. 
 
 # MonadError
 
@@ -638,4 +640,7 @@ main = launchAff_ do
 
 ```
 
-Note here that `quickCheckout` is much cleaner and the intent of the code is much clearer. This is made possible by the `rethrow` function, which uses `throwError` from `MonadError` to *eliminate* the `Either` type. Your next question might be, "but what happens to the error?". Notice in the `main` function, `try` is called on the result of `quickCheckout`. `try` will catch the error thrown by `throwError` - if one is thrown - and wrap the result in an either, so you can handle it from there. If one doesn't use `try` as is done in the `main` function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of `MonadError` it's a good idea to call `try` on an `Aff` before converting it into an `Effect`.  
+Note here that `quickCheckout` is much cleaner and the intent of the code is much clearer. This is made possible by the `rethrow` function, which uses `throwError` from `MonadError` to *eliminate* the `Either` type. Your next question might be, "but what happens to the error?". Notice in the `main` function, `try` is called on the result of `quickCheckout`. `try` will catch the error thrown by `throwError` - if one is thrown - and wrap the result in an `Either`, so you can handle it from there. If one doesn't use `try` as is done in the `main` function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of `MonadError` it's a good idea to call `try` on an `Aff` before converting it into an `Effect`.  
+
+
+
