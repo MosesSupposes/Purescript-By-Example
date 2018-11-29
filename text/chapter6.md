@@ -442,7 +442,7 @@ module Stream where
 
 import Data.Array as Array
 import Data.Maybe (Maybe)
-import Data.String as String
+import Data.String.CodeUnits as String
 
 class Stream stream element where
   uncons :: stream -> Maybe { head :: element, tail :: stream }
