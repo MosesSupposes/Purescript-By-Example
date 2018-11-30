@@ -83,7 +83,7 @@ The software requirements for this book are minimal: the first chapter will guid
 
 The PureScript compiler itself can be downloaded as a binary distribution, or built from source on any system running an up-to-date installation of the GHC Haskell compiler, and we will walk through this process in the next chapter.
 
-The code in this version of the book is compatible with versions `0.11.*` of
+The code in this version of the book is compatible with versions `0.12.*` of
 the PureScript compiler.
 
 ## About You
@@ -105,7 +105,7 @@ Code samples will appear in a monospaced font, as follows:
 ```haskell
 module Example where
 
-import Control.Monad.Eff.Console (log)
+import Effect.Console (log)
 
 main = log "Hello, World!"
 ```

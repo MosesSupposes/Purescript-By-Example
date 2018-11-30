@@ -14,7 +14,7 @@ The goal of the chapter will be to write a library to describe and manipulate si
 
 The source code for this chapter is defined in the file `src/Data/Picture.purs`. 
 
-The project uses some Bower packages which we have already seen, and adds the following new dependencies:
+The project uses some psc-package packages which we have already seen, and adds the following new dependencies:
 
 - `purescript-globals`, which provides access to some common JavaScript values and functions.
 - `purescript-math`, which provides access to the JavaScript `Math` module.
@@ -204,8 +204,6 @@ Note that we could have also written
 ```
 
 and PSCi would have inferred the same type.
-
-We will see row polymorphism again later, when we discuss _extensible effects_.
 
 ## Nested Patterns
 
@@ -564,6 +562,6 @@ In this chapter, we covered pattern matching, a basic but powerful technique fro
 
 This chapter also introduced algebraic data types, which are closely related to pattern matching. We saw how algebraic data types allow concise descriptions of data structures, and provide a modular way to extend data types with new operations.
 
-Finally, we covered _row polymorphism_, a powerful type of abstraction which allows many idiomatic JavaScript functions to be given a type. We will see this idea again later in the book.
+Finally, we covered _row polymorphism_, a powerful type of abstraction which allows many idiomatic JavaScript functions to be given a type. 
 
 In the rest of the book, we will use ADTs and pattern matching extensively, so it will pay dividends to become familiar with them now. Try creating your own algebraic data types and writing functions to consume them using pattern matching.

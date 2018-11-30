@@ -1,8 +1,10 @@
 module Main where
 
-import Prelude ((+), (*))
-import Control.Monad.Eff.Console (logShow)
+import Prelude
+
+import Effect.Console (logShow)
 import Math (sqrt)
+
 
 diagonal :: Number -> Number -> Number
 diagonal w h = sqrt (w * w + h * h)

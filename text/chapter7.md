@@ -12,7 +12,7 @@ The example code for this chapter will be a continuation of the address book exa
 
 The source code for this chapter is defined in the files `src/Data/AddressBook.purs` and `src/Data/AddressBook/Validation.purs`.
 
-The project has a number of Bower dependencies, many of which we have seen before. There are two new dependencies:
+The project has a number of psc-package dependencies, many of which we have seen before. There are two new dependencies:
 
 - `purescript-control`, which defines functions for abstracting control flow using type classes like `Applicative`.
 - `purescript-validation`, which defines a functor for _applicative validation_, the subject of this chapter.
@@ -158,6 +158,23 @@ Nothing
 
 Try lifting some other functions of various numbers of arguments over `Maybe` in this way.
 
+Alternatively _applicative do notation_ can be used for the same purpose in a way that looks similar to the familiar _do notation_. Here is `lift3` using _applicative do notation_. Note `ado` is used instead of `do`, and `in` is used on the final line to denote the yielded value: 
+
+```haskell
+lift3 :: forall a b c d f
+       . Apply f
+      => (a -> b -> c -> d)
+      -> f a
+      -> f b
+      -> f c
+      -> f d
+lift3 f x y z = ado
+  a <- x
+  b <- y
+  c <- z
+  in f a b c
+```
+
 ## The Applicative Type Class
 
 There is a related type class called `Applicative`, defined as follows:
@@ -219,6 +236,29 @@ Just ("Freeman, Phillip A")
 Nothing
 ```
 
+or with _applicative do_
+
+```text
+> import Data.Maybe
+
+> :paste… 
+… ado
+…   f <- Just "Phillip"
+…   m <- Just "A"
+…   l <- Just "Freeman"
+…   in fullName f m l
+… ^D
+(Just "Freeman, Phillip A")
+
+… ado
+…   f <- Just "Phillip"
+…   m <- Nothing
+…   l <- Just "Freeman"
+…   in fullName f m l
+… ^D
+Nothing
+```
+
 Note that the lifted function returns `Nothing` if any of the arguments was `Nothing`.
 
 This is good, because now we can send an error response back from our web service if the parameters are invalid. However, it would be better if we could indicate which field was incorrect in the response.
@@ -242,6 +282,18 @@ Now we can lift over `Either String`, providing an appropriate error message for
 …   fullName <$> (first  `withError` "First name was missing")
 …            <*> (middle `withError` "Middle name was missing")
 …            <*> (last   `withError` "Last name was missing")
+… ^D
+```
+
+or with _applicative do_
+
+```text
+> :paste
+… fullNameEither first middle last = ado 
+…  f <- first  `withError` "First name was missing"
+…  m <- middle `withError` "Middle name was missing"
+…  l <- last   `withError` "Last name was missing"
+…  in fullName f m l
 … ^D
 
 > :type fullNameEither
@@ -400,6 +452,16 @@ validatePerson (Person o) =
          <*> pure o.phones
 ```
 
+or with _applicative do_
+
+```haskell
+validatePersonAdo :: Person -> Either String Person
+validatePersonAdo (Person o) = ado
+  f <- nonEmpty o.firstName *> pure o.firstName
+  l <- nonEmpty o.lastName *> pure o.firstName
+  in person f l o.homeAddress o.phones
+```
+
 In the first two lines, we use the `nonEmpty` function to validate a non-empty string. `nonEmpty` returns an error (indicated with the `Left` constructor) if its input is empty, or a successful empty value (`unit`) using the `Right` constructor otherwise. We use the sequencing operator `*>` to indicate that we want to perform two validations, returning the result from the validator on the right. In this case, the validator on the right simply uses `pure` to return the input unchanged.
 
 The final lines do not perform any validation but simply provide the `address` and `phones` fields to the `person` function as the remaining arguments.
@@ -426,7 +488,7 @@ nonEmpty :: String -> String -> V Errors Unit
 nonEmpty field "" = invalid ["Field '" <> field <> "' cannot be empty"]
 nonEmpty _     _  = pure unit
 
-lengthIs :: String -> Number -> String -> V Errors Unit
+lengthIs :: String -> Int -> String -> V Errors Unit
 lengthIs field len value | S.length value /= len =
   invalid ["Field '" <> field <> "' must have length " <> show len]
 lengthIs _     _   _     =
@@ -437,6 +499,17 @@ validateAddress (Address o) =
   address <$> (nonEmpty "Street" o.street *> pure o.street)
           <*> (nonEmpty "City"   o.city   *> pure o.city)
           <*> (lengthIs "State" 2 o.state *> pure o.state)
+```
+
+or with _applicative do_
+
+```haskell
+validateAddressAdo :: Address -> V Errors Address
+validateAddressAdo (Address o) = ado
+  street  <- (nonEmpty "Street" o.street *> pure o.street)
+  city    <- (nonEmpty "City"   o.city   *> pure o.city)
+  state   <- (lengthIs "State" 2 o.state *> pure o.state)
+  in address street city state
 ```
 
 `validateAddress` validates an `Address` structure. It checks that the `street` and `city` fields are non-empty, and checks that the string in the `state` field has length 2.
@@ -486,6 +559,16 @@ validatePhoneNumber (PhoneNumber o) =
               <*> (matches "Number" phoneNumberRegex o.number *> pure o.number)
 ```
 
+or with _applicative do_
+
+```haskell
+validatePhoneNumberAdo :: PhoneNumber -> V Errors PhoneNumber
+validatePhoneNumberAdo (PhoneNumber o) = ado
+  tpe     <-  pure o."type"
+  number  <-  (matches "Number" phoneNumberRegex o.number *> pure o.number)
+  in phoneNumber tpe number
+```
+
 Again, try running this validator against some valid and invalid inputs in PSCi:
 
 ```text
@@ -521,6 +604,21 @@ validatePerson (Person o) =
 	       <*> validateAddress o.address
          <*> (arrayNonEmpty "Phone Numbers" o.phones *>
               traverse validatePhoneNumber o.phones)
+```
+
+or with _applicative do_
+
+```haskell
+validatePersonAdo :: Person -> V Errors Person
+validatePersonAdo (Person o) = ado
+  firstName   <- (nonEmpty "First Name" o.firstName *> 
+                  pure o.firstName)
+  lastName    <- (nonEmpty "Last Name"  o.lastName  *> 
+                  pure o.lastName)
+  address     <- validateAddress o.homeAddress
+  numbers     <- (arrayNonEmpty "Phone Numbers" o.phones *> 
+                  traverse validatePhoneNumber o.phones)
+  in person firstName lastName address numbers
 ```
 
 There is one more interesting function here, which we haven't seen yet - `traverse`, which appears in the final line.
