@@ -4,10 +4,13 @@
   "source": "https://github.com/purescript/package-sets.git",
   "depends": [
     "aff",
+    "affjax",
     "console",
+    "debug",
     "effect",
     "foreign",
     "psci-support",
-    "random"
+    "random",
+    "web-html"
   ]
 }
