@@ -48,11 +48,7 @@ examplePerson =
          ]
 
 instance showAddress :: Show Address where
-  show (Address o) = "Address " <>
-    "{ street: " <> show o.street <>
-    ", city: "   <> show o.city <>
-    ", state: "  <> show o.state <>
-    " }"
+  show (Address o) = "Address " <> show o
 
 instance showPhoneType :: Show PhoneType where
   show HomePhone = "HomePhone"
@@ -61,15 +57,7 @@ instance showPhoneType :: Show PhoneType where
   show OtherPhone = "OtherPhone"
 
 instance showPhoneNumber :: Show PhoneNumber where
-  show (PhoneNumber o) = "PhoneNumber " <>
-    "{ type: "   <> show o."type" <>
-    ", number: " <> show o.number <>
-    " }"
+  show (PhoneNumber o) = "PhoneNumber " <> show o
 
 instance showPerson :: Show Person where
-  show (Person o) = "Person " <>
-    "{ firstName: "   <> show o.firstName <>
-    ", lastName: "    <> show o.lastName <>
-    ", homeAddress: " <> show o.homeAddress <>
-    ", phones: "      <> show o.phones <>
-    " }"
+  show (Person o) = "Person " <> show o

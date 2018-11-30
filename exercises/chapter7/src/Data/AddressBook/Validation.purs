@@ -40,10 +40,25 @@ validateAddress (Address o) =
           <*> (nonEmpty "City"   o.city   *> pure o.city)
           <*> (lengthIs "State" 2 o.state *> pure o.state)
 
+validateAddressAdo :: Address -> V Errors Address
+validateAddressAdo (Address o) = ado
+  street  <- (nonEmpty "Street" o.street *> pure o.street)
+  city    <- (nonEmpty "City"   o.city   *> pure o.city)
+  state   <- (lengthIs "State" 2 o.state *> pure o.state)
+  in address street city state
+
+
 validatePhoneNumber :: PhoneNumber -> V Errors PhoneNumber
 validatePhoneNumber (PhoneNumber o) =
   phoneNumber <$> pure o."type"
               <*> (matches "Number" phoneNumberRegex o.number *> pure o.number)
+
+validatePhoneNumberAdo :: PhoneNumber -> V Errors PhoneNumber
+validatePhoneNumberAdo (PhoneNumber o) = ado
+  tpe     <-  pure o."type"
+  number  <-  (matches "Number" phoneNumberRegex o.number *> pure o.number)
+  in phoneNumber tpe number
+
 
 validatePerson :: Person -> V Errors Person
 validatePerson (Person o) =
@@ -51,6 +66,15 @@ validatePerson (Person o) =
          <*> (nonEmpty "Last Name"  o.lastName  *> pure o.lastName)
          <*> validateAddress o.homeAddress
          <*> (arrayNonEmpty "Phone Numbers" o.phones *> traverse validatePhoneNumber o.phones)
+
+validatePersonAdo :: Person -> V Errors Person
+validatePersonAdo (Person o) = ado
+  firstName   <- (nonEmpty "First Name" o.firstName *> pure o.firstName)
+  lastName    <- (nonEmpty "Last Name"  o.lastName  *> pure o.lastName)
+  address     <- validateAddress o.homeAddress
+  numbers     <- (arrayNonEmpty "Phone Numbers" o.phones *> traverse validatePhoneNumber o.phones)
+  in person firstName lastName address numbers
+
 
 validatePerson' :: Person -> Either Errors Person
 validatePerson' p = unV Left Right $ validatePerson p

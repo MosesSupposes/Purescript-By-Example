@@ -16,7 +16,7 @@ The `Data.Path` module contains a model of a virtual filesystem. You do not need
 
 The `FileOperations` module contains functions which use the `Data.Path` API. Solutions to the exercises can be completed in this file.
 
-The project has the following Bower dependencies:
+The project has the following psc-package dependencies:
 
 - `purescript-maybe`, which defines the `Maybe` type constructor
 - `purescript-arrays`, which defines functions for working with arrays
