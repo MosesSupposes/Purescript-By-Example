@@ -416,7 +416,7 @@ The Pulp build tool (and other tools) provide a shortcut, by generating addition
 
 ## The Effect Monad
 
-The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient Javascript. 
+The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient JavaScript. 
 
 Here is an example. It uses the `purescript-random` package, which defines functions for generating random numbers:
 
@@ -444,7 +444,7 @@ $ pulp run
 
 Running this command, you will see a randomly chosen number between `0` and `1` printed to the console.
 
-This program uses do notation to combine two native effects provided by the Javascript runtime: random number generation and console IO.
+This program uses do notation to combine two native effects provided by the JavaScript runtime: random number generation and console IO.
 
 As mentioned previously, the `Effect` monad is of central importance to PureScript. The reason why it's central is because it is the conventional way to interoperate with PureScript's `Foreign Function Interface`, which provides the mechanism to execute a program and perform side effects. While it's desireable to avoid using the `Foreign Function Interface`, it's fairly critical to understand how it works and how to use it, so I recommend reading that chapter before doing any serious PureScript work. That said, the `Effect` monad is fairly simple. It has a few helper functions, but aside from that it doesn't do much except encapsulate side effects. 
 
@@ -471,7 +471,7 @@ The `Aff` monad solves this problem similar to how `Promise` solves it in JavaSc
 
 ## Effect to Aff and Aff to Effect
 
-Any synchonous `Effect` can by lifted into an asynchronous `Aff` with `liftEffect`. Similarly, any `Aff` can be converted to an `Effect Unit` with `launchAff_`. Below is the code that prints a random number in terms of `Aff`, written in a few different styles:
+Any synchronous `Effect` can by lifted into an asynchronous `Aff` with `liftEffect`. Similarly, any `Aff` can be converted to an `Effect Unit` with `launchAff_`. Below is the code that prints a random number in terms of `Aff`, written in a few different styles:
 
 ```haskell
 module Main where
