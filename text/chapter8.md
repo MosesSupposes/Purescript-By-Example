@@ -416,7 +416,7 @@ The Pulp build tool (and other tools) provide a shortcut, by generating addition
 
 ## The Effect Monad
 
-The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient Javascript. 
+The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient JavaScript. 
 
 Here is an example. It uses the `purescript-random` package, which defines functions for generating random numbers:
 
@@ -444,7 +444,7 @@ $ pulp run
 
 Running this command, you will see a randomly chosen number between `0` and `1` printed to the console.
 
-This program uses do notation to combine two native effects provided by the Javascript runtime: random number generation and console IO.
+This program uses do notation to combine two native effects provided by the JavaScript runtime: random number generation and console IO.
 
 As mentioned previously, the `Effect` monad is of central importance to PureScript. The reason why it's central is because it is the conventional way to interoperate with PureScript's `Foreign Function Interface`, which provides the mechanism to execute a program and perform side effects. While it's desireable to avoid using the `Foreign Function Interface`, it's fairly critical to understand how it works and how to use it, so I recommend reading that chapter before doing any serious PureScript work. That said, the `Effect` monad is fairly simple. It has a few helper functions, but aside from that it doesn't do much except encapsulate side effects. 
 
@@ -462,7 +462,7 @@ The same thing can be modeled with the `Effect` monad:
 
 ```haskell
 asyncFunction :: forall success error. (success -> Effect Unit) -> (error -> Effect Unit) -> Effect Unit 
-asyncFunction onSucces onError = ...
+asyncFunction onSuccess onError = ...
 ```
 
 But as is true in JavaScript, this can quickly get out of hand and result in "callback hell". 
@@ -471,7 +471,7 @@ The `Aff` monad solves this problem similar to how `Promise` solves it in JavaSc
 
 ## Effect to Aff and Aff to Effect
 
-Any synchonous `Effect` can by lifted into an asynchronous `Aff` with `liftEffect`. Similarly, any `Aff` can be converted to an `Effect Unit` with `launchAff_`. Below is the code that prints a random number in terms of `Aff`, written in a few different styles:
+Any synchronous `Effect` can by lifted into an asynchronous `Aff` with `liftEffect`. Similarly, any `Aff` can be converted to an `Effect Unit` with `launchAff_`. Below is the code that prints a random number in terms of `Aff`, written in a few different styles:
 
 ```haskell
 module Main where
@@ -517,7 +517,7 @@ main = launchAff_  do
 
 ```
 
-`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statment more clear by moving the *boilerplate* out of the way to the right. 
+`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statement more clear by moving the *boilerplate* out of the way to the right. 
 
 # launchAff_ vs launchAff
 
@@ -530,7 +530,7 @@ launchAff_ :: forall a. Aff a -> Effect Unit
 launchAff :: forall a. Aff a -> Effect (Fiber a)
 ```
 
-`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchonous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`. 
+`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchronous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`. 
 
 # MonadError
 
