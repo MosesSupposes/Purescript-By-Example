@@ -250,6 +250,7 @@ Patterns do not only appear in top-level function declarations. It is possible t
 Here is an example. This function computes "longest zero suffix" of an array (the longest suffix which sums to zero):
 
 ```haskell
+import Data.Foldable (sum)
 import Data.Array.Partial (tail)
 import Partial.Unsafe (unsafePartial)
 
