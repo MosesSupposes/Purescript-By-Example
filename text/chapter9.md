@@ -17,7 +17,7 @@ The HTML file `html/index.html` contains a single `canvas` element which will be
 
 ## Simple Shapes
 
-The `Example/Rectangle.purs` file contains a simple introductory example, which draws a single blue rectangle at the center of the canvas. The module imports the `Control.Monad.Eff` module, and also the `Graphics.Canvas` module, which contains actions in the `Eff` monad for working with the Canvas API.
+The `Example/Rectangle.purs` file contains a simple introductory example, which draws a single blue rectangle at the center of the canvas. The module imports the `Effect` Type from the `Effect` module, and also the `Graphics.Canvas` module, which contains actions in the `Effect` monad for working with the Canvas API.
 
 The `main` action starts, like in the other modules, by using the `getCanvasElementById` action to get a reference to the canvas object, and the `getContext2D` action to access the 2D rendering context for the canvas:
 
@@ -32,9 +32,9 @@ _Note_: the call to `unsafePartial` here is necessary since the pattern match on
 The types of these actions can be found using PSCi or by looking at the documentation:
 
 ```haskell
-getCanvasElementById :: forall eff. String -> Eff (canvas :: CANVAS | eff) (Maybe CanvasElement)
+getCanvasElementById :: String -> Effect (Maybe CanvasElement)
 
-getContext2D :: forall eff. CanvasElement -> Eff (canvas :: CANVAS | eff) Context2D
+getContext2D :: CanvasElement -> Effect Context2D
 ```
 
 `CanvasElement` and `Context2D` are types defined in the `Graphics.Canvas` module. The same module also defines the `Canvas` effect, which is used by all of the actions in the module.
@@ -44,7 +44,7 @@ The graphics context `ctx` manages the state of the canvas, and provides methods
 We continue by setting the fill style to solid blue, by using the `setFillStyle` action:
 
 ```haskell
-  setFillStyle "#0000FF" ctx
+  setFillStyle ctx "#0000FF" 
 ```
 
 Note that the `setFillStyle` action takes the graphics context as an argument. This is a common pattern in the `Graphics.Canvas` module.
@@ -52,9 +52,7 @@ Note that the `setFillStyle` action takes the graphics context as an argument. T
 Finally, we use the `fillPath` action to fill the rectangle. `fillPath` has the following type:
 
 ```haskell
-fillPath :: forall eff a. Context2D ->
-                          Eff (canvas :: CANVAS | eff) a ->
-                          Eff (canvas :: CANVAS | eff) a
+fillPath :: forall a. Context2D -> Effect a -> Effect a
 ```
 
 `fillPath` takes a graphics context, and another action which builds the path to render. To build a path, we can use the `rect` action. `rect` takes a graphics context, and a record which provides the position and size of the rectangle:
@@ -63,8 +61,8 @@ fillPath :: forall eff a. Context2D ->
   fillPath ctx $ rect ctx
     { x: 250.0
     , y: 250.0
-    , w: 100.0
-    , h: 100.0
+    , width: 100.0
+    , height: 100.0
     }
 ```
 
@@ -89,8 +87,8 @@ We have seen that the `rect` function takes a record as its argument. In fact, t
 type Rectangle =
   { x :: Number
   , y :: Number
-  , w :: Number
-  , h :: Number
+  , width :: Number
+  , height :: Number
   }
 ```
 
@@ -100,11 +98,11 @@ To render an arc segment, we can use the `arc` function, passing a record with t
 
 ```haskell
 type Arc =
-  { x     :: Number
-  , y     :: Number
-  , r     :: Number
-  , start :: Number
-  , end   :: Number
+  { x      :: Number
+  , y      :: Number
+  , radius :: Number
+  , start  :: Number
+  , end    :: Number
   }
 ```
 
@@ -116,7 +114,7 @@ For example, this code fills an arc segment centered at `(300, 300)` with radius
   fillPath ctx $ arc ctx
     { x      : 300.0
     , y      : 300.0
-    , r      : 50.0
+    , radius : 50.0
     , start  : Math.pi * 5.0 / 8.0
     , end    : Math.pi * 2.0
     }
@@ -187,10 +185,9 @@ X>     which represents a 2D point, write a function `renderPath` which strokes 
 X>
 X>     ```haskell
 X>     renderPath
-X>       :: forall eff
-X>        . Context2D
+X>       :: Context2D
 X>       -> Array Point
-X>       -> Eff (canvas :: Canvas | eff) Unit
+X>       -> Effect Unit
 X>     ```
 X>
 X>     Given a function
@@ -205,13 +202,13 @@ X>     Experiment by rendering different paths by varying the function `f`.
 
 ## Drawing Random Circles
 
-The `Example/Random.purs` file contains an example which uses the `Eff` monad to interleave two different types of side-effect: random number generation, and canvas manipulation. The example renders one hundred randomly generated circles onto the canvas.
+The `Example/Random.purs` file contains an example which uses the `Effect` monad to interleave two different types of side-effect: random number generation, and canvas manipulation. The example renders one hundred randomly generated circles onto the canvas.
 
 The `main` action obtains a reference to the graphics context as before, and then sets the stroke and fill styles:
 
 ```haskell
-  setFillStyle "#FF0000" ctx
-  setStrokeStyle "#000000" ctx
+  setFillStyle ctx "#FF0000" 
+  setStrokeStyle ctx "#000000" 
 ```
 
 Next, the code uses the `for_` function to loop over the integers between `0` and `100`:
@@ -234,7 +231,7 @@ Next, for each circle, the code creates an `Arc` based on these parameters and f
     let path = arc ctx
          { x     : x * 600.0
          , y     : y * 600.0
-         , r     : r * 50.0
+         , radius: r * 50.0
          , start : 0.0
          , end   : Math.pi * 2.0
          }
@@ -257,25 +254,21 @@ There is more to the canvas than just rendering simple shapes. Every canvas main
 The `purescript-canvas` library supports these transformations using the following functions:
 
 ```haskell
-translate :: forall eff
-           . TranslateTransform
-          -> Context2D
-          -> Eff (canvas :: Canvas | eff) Context2D
+translate :: Context2D
+          -> translateTransform
+          -> Effect Context2D
 
-rotate    :: forall eff
-           . Number
-          -> Context2D
-          -> Eff (canvas :: Canvas | eff) Context2D
+rotate    :: Context2D
+          -> Number
+          -> Effect Context2D
 
-scale     :: forall eff
-           . ScaleTransform
-          -> Context2D
-          -> Eff (canvas :: CANVAS | eff) Context2D
+scale     :: Context2D
+          -> ScaleTransform
+          -> Effect Context2D
 
-transform :: forall eff
-           . Transform
-          -> Context2D
-          -> Eff (canvas :: CANVAS | eff) Context2D
+transform :: Context2D
+          -> Transform
+          -> Effect Context2D
 ```
 
 The `translate` action performs a translation whose components are specified by the properties of the `TranslateTransform` record.
@@ -309,14 +302,12 @@ The Canvas API provides the `save` and `restore` methods, which manipulate a _st
 
 ```haskell
 save
-  :: forall eff
-   . Context2D
-  -> Eff (canvas :: CANVAS | eff) Context2D
+  :: Context2D
+  -> Effect Context2D
 
 restore
-  :: forall eff
-   . Context2D
-  -> Eff (canvas :: CANVAS | eff) Context2D
+  :: Context2D
+  -> Effect Context2D
 ```
 
 The `save` action pushes the current state of the context (including the current transformation and any styles) onto the stack, and the `restore` action pops the top state from the stack and restores it.
@@ -335,10 +326,9 @@ In the interest of abstracting over common use cases using higher-order function
 
 ```haskell
 withContext
-  :: forall eff a
-   . Context2D
-  -> Eff (canvas :: CANVAS | eff) a
-  -> Eff (canvas :: CANVAS | eff) a          
+  :: Context2D
+  -> Effect a
+  -> Effect a          
 ```
 
 We could rewrite the `rotated` function above using `withContext` as follows:
@@ -352,40 +342,31 @@ rotated ctx render =
 
 ## Global Mutable State
 
-In this section, we'll use the `purescript-refs` package to demonstrate another effect in the `Eff` monad.
+In this section, we'll use the `purescript-refs` package to demonstrate another effect in the `Effect` monad.
 
-The `Control.Monad.Eff.Ref` module provides a type constructor for global mutable references, and an associated effect:
+The `Effect.Ref` module provides a type constructor for global mutable references, and an associated effect:
 
 ```text
-> import Control.Monad.Eff.Ref
+> import Effect.Ref
 
 > :kind Ref
 Type -> Type
-
-> :kind REF
-Control.Monad.Eff.Effect
 ```
 
 A value of type `Ref a` is a mutable reference cell containing a value of type `a`, much like an `STRef h a`, which we saw in the previous chapter. The difference is that, while the `ST` effect can be removed by using `runST`, the `Ref` effect does not provide a handler. Where `ST` is used to track safe, local mutation, `Ref` is used to track global mutation. As such, it should be used sparingly.
 
-The `Example/Refs.purs` file contains an example which uses the `REF` effect to track mouse clicks on the `canvas` element.
+The `Example/Refs.purs` file contains an example which uses a `Ref` to track mouse clicks on the `canvas` element.
 
-The code starts by creating a new reference containing the value `0`, by using the `newRef` action:
+The code starts by creating a new reference containing the value `0`, by using the `new` action:
 
 ```haskell
-  clickCount <- newRef 0
+  clickCount <- Ref.new 0
 ```
 
-Inside the click event handler, the `modifyRef` action is used to update the click count:
+Inside the click event handler, the `modify` action is used to update the click count, and the updated value is returned.
 
 ```haskell
-    modifyRef clickCount (\count -> count + 1)
-```
-
-The `readRef` action is used to read the new click count:
-
-```haskell
-    count <- readRef clickCount
+    count <- Ref.modify (\count -> count + 1) clickCount
 ```
 
 In the `render` function, the click count is used to determine the transformation applied to a rectangle:
@@ -395,16 +376,16 @@ In the `render` function, the click count is used to determine the transformatio
       let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
       let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
 
-      translate { translateX: 300.0, translateY:  300.0 } ctx
-      rotate (toNumber count * Math.pi / 18.0) ctx
-      scale { scaleX: scaleX, scaleY: scaleY } ctx
-      translate { translateX: -100.0, translateY: -100.0 } ctx
+      translate ctx { translateX: 300.0, translateY:  300.0 } 
+      rotate ctx (toNumber count * Math.pi / 18.0)
+      scale ctx { scaleX: scaleX, scaleY: scaleY } 
+      translate ctx { translateX: -100.0, translateY: -100.0 } 
 
       fillPath ctx $ rect ctx
         { x: 0.0
         , y: 0.0
-        , w: 200.0
-        , h: 200.0
+        , width: 200.0
+        , height: 200.0
         }
 ```
 
@@ -492,9 +473,9 @@ Here is a first approximation to the type of `lsystem`:
 ```haskell
 forall eff. Sentence
          -> (Alphabet -> Sentence)
-         -> (Alphabet -> Eff (canvas :: Canvas | eff) Unit)
+         -> (Alphabet -> Effect Unit)
          -> Int
-         -> Eff (canvas :: CANVAS | eff) Unit
+         -> Effect Unit
 ```
 
 The first two argument types correspond to the values `initial` and `productions`.
@@ -508,9 +489,9 @@ The first observation is that the `lsystem` function should work for only one ty
 ```haskell
 forall a eff. Array a
            -> (a -> Array a)
-           -> (a -> Eff (canvas :: CANVAS | eff) Unit)
+           -> (a -> Effect Unit)
            -> Int
-           -> Eff (canvas :: CANVAS | eff) Unit
+           -> Effect Unit
 ```
 
 The second observation is that, in order to implement instructions like "turn left" and "turn right", we will need to maintain some state, namely the direction in which the path is moving at any time. We need to modify our function to pass the state through the computation. Again, the `lsystem` function should work for any type of state, so we will represent it using the type variable `s`.
@@ -520,10 +501,10 @@ We need to add the type `s` in three places:
 ```haskell
 forall a s eff. Array a
              -> (a -> Array a)
-             -> (s -> a -> Eff (canvas :: CANVAS | eff) s)
+             -> (s -> a -> Effect s)
              -> Int
              -> s
-             -> Eff (canvas :: CANVAS | eff) s
+             -> Effect s
 ```
 
 Firstly, the type `s` was added as the type of an additional argument to `lsystem`. This argument will represent the initial state of the L-system.
@@ -557,17 +538,17 @@ It seems reasonable that `lsystem` should recurse on its fourth argument (of typ
 lsystem :: forall a s eff
          . Array a
         -> (a -> Array a)
-        -> (s -> a -> Eff (canvas :: CANVAS | eff) s)
+        -> (s -> a -> Effect s)
         -> Int
         -> s
-        -> Eff (canvas :: CANVAS | eff) s
+        -> Effect s
 lsystem init prod interpret n state = go init n
   where
 ```
 
 The `go` function works by recursion on its second argument. There are two cases: when `n` is zero, and when `n` is non-zero.
 
-In the first case, the recursion is complete, and we simply need to interpret the current sentence according to the interpretation function. We have a sentence of type `Array a`, a state of type `s`, and a function of type `s -> a -> Eff (canvas :: CANVAS | eff) s`. This sounds like a job for the `foldM` function which we defined earlier, and which is available from the `purescript-control` package:
+In the first case, the recursion is complete, and we simply need to interpret the current sentence according to the interpretation function. We have a sentence of type `Array a`, a state of type `s`, and a function of type `s -> a -> Effect s`. This sounds like a job for the `foldM` function which we defined earlier, and which is available from the `purescript-control` package:
 
 ```haskell
   go s 0 = foldM interpret state s
@@ -581,7 +562,7 @@ What about in the non-zero case? In that case, we can simply apply the productio
 
 That's it! Note how the use of higher order functions like `foldM` and `concatMap` allowed us to communicate our ideas concisely.
 
-However, we're not quite done. The type we have given is actually still too specific. Note that we don't use any canvas operations anywhere in our implementation. Nor do we make use of the structure of the `Eff` monad at all. In fact, our function works for _any_ monad `m`!
+However, we're not quite done. The type we have given is actually still too specific. Note that we don't use any canvas operations anywhere in our implementation. Nor do we make use of the structure of the `Effect` monad at all. In fact, our function works for _any_ monad `m`!
 
 Here is the more general type of `lsystem`, as specified in the accompanying source code for this chapter:
 
@@ -681,7 +662,7 @@ X> 1. (Difficult) Use a different monad `m` in the interpretation function. You 
 
 ## Conclusion
 
-In this chapter, we learned how to use the HTML5 Canvas API from PureScript by using the `purescript-canvas` library. We also saw a practical demonstration of many of the techniques we have learned already: maps and folds, records and row polymorphism, and the `Eff` monad for handling side-effects.
+In this chapter, we learned how to use the HTML5 Canvas API from PureScript by using the `purescript-canvas` library. We also saw a practical demonstration of many of the techniques we have learned already: maps and folds, records and row polymorphism, and the `Effect` monad for handling side-effects.
 
 The examples also demonstrated the power of higher-order functions and _separating data from implementation_. It would be possible to extend these ideas to completely separate the representation of a scene from its rendering function, using an algebraic data type, for example:
 
