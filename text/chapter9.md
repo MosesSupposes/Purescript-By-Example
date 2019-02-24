@@ -285,9 +285,9 @@ In fact, the effect of each of these functions is to _post-multiply_ the transfo
 
 ```haskell
 transformations ctx = do
-  translate { translateX: 10.0, translateY: 10.0 } ctx
-  scale { scaleX: 2.0, scaleY: 2.0 } ctx
-  rotate (Math.pi / 2.0) ctx
+  translate ctx { translateX: 10.0, translateY: 10.0 } 
+  scale ctx { scaleX: 2.0, scaleY: 2.0 } 
+  rotate ctx (Math.pi / 2.0) 
 
   renderScene
 ```
@@ -404,10 +404,10 @@ $ pulp build -O --main Example.Refs --to dist/Main.js
 
 and open the `html/index.html` file. If you click the canvas repeatedly, you should see a green rectangle rotating around the center of the canvas.
 
-X> ## Examples
+X> ## Exercises
 X>
 X> 1. (Easy) Write a higher-order function which strokes and fills a path simultaneously. Rewrite the `Random.purs` example using your function.
-X> 1. (Medium) Use the `RANDOM` and `DOM` effects to create an application which renders a circle with random position, color and radius to the canvas when the mouse is clicked.
+X> 1. (Medium) Use `Random` and `Dom` to create an application which renders a circle with random position, color and radius to the canvas when the mouse is clicked.
 X> 1. (Medium) Write a function which transforms the scene by rotating it around a point with specified coordinates. _Hint_: use a translation to first translate the scene to the origin.
 
 ## L-Systems
@@ -471,11 +471,11 @@ Now we can implement a function `lsystem` which will take a specification in thi
 Here is a first approximation to the type of `lsystem`:
 
 ```haskell
-forall eff. Sentence
-         -> (Alphabet -> Sentence)
-         -> (Alphabet -> Effect Unit)
-         -> Int
-         -> Effect Unit
+Sentence
+-> (Alphabet -> Sentence)
+-> (Alphabet -> Effect Unit)
+-> Int
+-> Effect Unit
 ```
 
 The first two argument types correspond to the values `initial` and `productions`.
@@ -487,11 +487,11 @@ The final argument is a number representing the number of iterations of the prod
 The first observation is that the `lsystem` function should work for only one type of `Alphabet`, but for any type, so we should generalize our type accordingly. Let's replace `Alphabet` and `Sentence` with `a` and `Array a` for some quantified type variable `a`:
 
 ```haskell
-forall a eff. Array a
-           -> (a -> Array a)
-           -> (a -> Effect Unit)
-           -> Int
-           -> Effect Unit
+forall a. Array a
+          -> (a -> Array a)
+          -> (a -> Effect Unit)
+          -> Int
+          -> Effect Unit
 ```
 
 The second observation is that, in order to implement instructions like "turn left" and "turn right", we will need to maintain some state, namely the direction in which the path is moving at any time. We need to modify our function to pass the state through the computation. Again, the `lsystem` function should work for any type of state, so we will represent it using the type variable `s`.
@@ -499,12 +499,12 @@ The second observation is that, in order to implement instructions like "turn le
 We need to add the type `s` in three places:
 
 ```haskell
-forall a s eff. Array a
-             -> (a -> Array a)
-             -> (s -> a -> Effect s)
-             -> Int
-             -> s
-             -> Effect s
+forall a s. Array a
+            -> (a -> Array a)
+            -> (s -> a -> Effect s)
+            -> Int
+            -> s
+            -> Effect s
 ```
 
 Firstly, the type `s` was added as the type of an additional argument to `lsystem`. This argument will represent the initial state of the L-system.
@@ -535,7 +535,7 @@ Now let's try to implement the `lsystem` function. We will find that its definit
 It seems reasonable that `lsystem` should recurse on its fourth argument (of type `Int`). On each step of the recursion, the current sentence will change, having been updated by using the production rules. With that in mind, let's begin by introducing names for the function arguments, and delegating to a helper function:
 
 ```haskell
-lsystem :: forall a s eff
+lsystem :: forall a s 
          . Array a
         -> (a -> Array a)
         -> (s -> a -> Effect s)
@@ -581,10 +581,10 @@ We can understand this type as saying that our interpretation function is free t
 
 This function is a good example of the power of separating data from implementation. The advantage of this approach is that we gain the freedom to interpret our data in multiple different ways. We might even factor `lsystem` into two smaller functions: the first would build the sentence using repeated application of `concatMap`, and the second would interpret the sentence using `foldM`. This is also left as an exercise for the reader.
 
-Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Alphabet` and `s` to be `State`, and for the monad `m` we can choose `Eff (canvas :: CANVAS)`. This gives us the following type:
+Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Alphabet` and `s` to be `State`, and for the monad `m` we can choose `Effect`. This gives us the following type:
 
 ```haskell
-interpret :: State -> Alphabet -> Eff (canvas :: CANVAS) State
+interpret :: State -> Alphabet -> Effect State
 ```
 
 To implement this function, we need to handle the three data constructors of the `Alphabet` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
@@ -658,7 +658,7 @@ X>     data Alphabet = L | R | F Boolean
 X>     ```
 X>
 X>     Implement this L-system again using this representation of the alphabet.
-X> 1. (Difficult) Use a different monad `m` in the interpretation function. You might try using the `CONSOLE` effect to write the L-system onto the console, or using the `RANDOM` effect to apply random "mutations" to the state type.
+X> 1. (Difficult) Use a different monad `m` in the interpretation function. You might try using `Effect.Console` to write the L-system onto the console, or using `Effect.Random` to apply random "mutations" to the state type.
 
 ## Conclusion
 
