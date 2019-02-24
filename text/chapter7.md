@@ -266,7 +266,6 @@ This is good, because now we can send an error response back from our web servic
 Instead of lifting over `Maybe`, we can lift over `Either String`, which allows us to return an error message. First, let's write an operator to convert optional inputs into computations which can signal an error using `Either String`:
 
 ```text
-> import Data.Either
 > :paste
 … withError Nothing  err = Left err
 … withError (Just a) _   = Right a
