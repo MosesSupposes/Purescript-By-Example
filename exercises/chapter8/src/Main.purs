@@ -9,6 +9,7 @@ import Data.Argonaut.Core (toArray, toObject, toString) as JSON
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Traversable (traverse)
+import Data.String.NonEmpty as NonEmpty
 import Debug.Trace (spy)
 import Effect (Effect, foreachE)
 import Effect.Aff (Aff, error, launchAff_, throwError, try)
@@ -17,7 +18,7 @@ import Effect.Console (error, log) as Console
 import Foreign.Object (lookup) as Object
 import Web.DOM (Document) as DOM
 import Web.DOM.Document (createElement, toNonElementParentNode) as DOM
-import Web.DOM.Element (Element, getAttribute, setAttribute, setId, toEventTarget, toNode) as DOM
+import Web.DOM.Element (Element, setAttribute, setId, toEventTarget, toNode) as DOM
 import Web.DOM.Node (appendChild, parentNode, removeChild, setTextContent) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
 import Web.Event.Event (Event) as Event
@@ -26,6 +27,7 @@ import Web.HTML (window) as HTML
 import Web.HTML.Event.EventTypes (click) as Event
 import Web.HTML.HTMLDocument (body, toDocument) as HTML
 import Web.HTML.HTMLElement (toNode) as HTML
+import Web.HTML.HTMLInputElement (fromElement, value) as HTMLInput
 import Web.HTML.Window (document) as HTML
 
 type RedditPost = { title :: String, selftext :: Maybe String, id :: String }
@@ -132,8 +134,10 @@ controls document = do
             input         <- DOM.getElementById "subreddit" (DOM.toNonElementParentNode document) 
                               # liftEffect
                               >>= liftMaybe "Couldn't find subreddit text field"
-            value         <- DOM.getAttribute "value" input # liftEffect >>= liftMaybe "No value in the text field!"
-            redditPosts   <- fetchPosts value 
+            value         <- traverse HTMLInput.value (HTMLInput.fromElement input) 
+                              # liftEffect  >>= liftMaybe "Subreddit Element is not an input field"
+            neVal         <- NonEmpty.fromString value # liftMaybe "Subreddit is empty"
+            redditPosts   <- fetchPosts $ NonEmpty.toString neVal
             postsSection  <- DOM.getElementById "posts" (DOM.toNonElementParentNode document) 
                               # liftEffect
                               >>= liftMaybe "Couldn't find the 'posts' section"
