@@ -5,7 +5,7 @@
 This chapter will introduce PureScript's _foreign function interface_ (or _FFI_), which enables communication from PureScript code to JavaScript code, and vice versa. We will cover the following:
 
 - How to call pure JavaScript functions from PureScript,
-- How to create new effect types and actions for use with the `Eff` monad, based on existing JavaScript code,
+- How to create new effect types and actions for use with the `Effect` monad, based on existing JavaScript code,
 - How to call PureScript code from JavaScript,
 - How to understand the representation of PureScript values at runtime,
 - How to work with untyped data using the `purescript-foreign` package.
@@ -19,10 +19,10 @@ Towards the end of this chapter, we will revisit our recurring address book exam
 
 The source code for this module is a continuation of the source code from chapters 3, 7 and 8. As such, the source tree includes the appropriate source files from those chapters.
 
-This chapter adds two new Bower dependencies:
+This chapter adds two new dependencies:
 
 1. The `purescript-foreign` library, which provides a data type and functions for working with _untyped data_.
-1. The `purescript-foreign-generic` library, which adds support for _datatype generic programming_ to the `purescript-foreign` library.
+2. The `purescript-foreign-generic` library, which adds support for _datatype generic programming_ to the `purescript-foreign` library.
 
 _Note_: to avoid browser-specific issues with local storage when the webpage is served from a local file, it might be necessary to run this chapter's project over HTTP.
 
@@ -322,7 +322,7 @@ This approach works well for simple JavaScript values, but is of limited use for
 We might want to wrap Javascript values and functions for a number of reasons:
 
 - A function takes multiple arguments, but we want to call it like a curried function.
-- We might want to use the `Eff` monad to keep track of any JavaScript side-effects.
+- We might want to use the `Effect` monad to keep track of any JavaScript side-effects.
 - It might be necessary to handle corner cases like `null` or `undefined`, to give a function the correct runtime representation.
 
 For example, suppose we wanted to recreate the `head` function on arrays by using a foreign declaration. In JavaScript, we might write the function as follows:
@@ -451,36 +451,32 @@ var add = function (n, m) {
 
 ## Representing Side Effects
 
-The `Eff` monad is also defined as a foreign type in the Prelude. Its runtime representation is quite simple - an expression of type `Eff eff a` should evaluate to a JavaScript function of no arguments, which performs any side-effects and returns a value with the correct runtime representation for type `a`.
+The `Effect` monad is also defined as a foreign type. Its runtime representation is quite simple - an expression of type `Effect a` should evaluate to a JavaScript function of no arguments, which performs any side-effects and returns a value with the correct runtime representation for type `a`.
 
-The definition of the `Eff` type constructor is given in the `Control.Monad.Eff` module as follows:
+The definition of the `Effect` type constructor is given in the `Effect` module as follows:
 
 ```haskell
-foreign import data Eff :: # Effect -> Type -> Type
+foreign import data Effect :: Type -> Type
 ```
-
-Recall that the `Eff` type constructor is parameterized by a row of effects and a return type, which is reflected in its kind.
 
 As a simple example, consider the `random` function defined in the `purescript-random` package. Recall that its type was:
 
 ```haskell
-foreign import random :: forall eff. Eff (random :: RANDOM | eff) Number
+foreign import random :: Effect Number
 ```
 
 The definition of the `random` function is given here:
 
 ```javascript
-exports.random = function() {
-  return Math.random();
-};
+exports.random = Math.random;
 ```
 
 Notice that the `random` function is represented at runtime as a function of no arguments. It performs the side effect of generating a random number, and returns it, and the return value matches the runtime representation of the `Number` type: it is a non-null JavaScript number.
 
-As a slightly more interesting example, consider the `log` function defined by the `Control.Monad.Eff.Console` module in the `purescript-console` package. The `log` function has the following type:
+As a slightly more interesting example, consider the `log` function defined by the `Effect.Console` module in the `purescript-console` package. The `log` function has the following type:
 
 ```haskell
-foreign import log :: forall eff. String -> Eff (console :: CONSOLE | eff) Unit
+foreign import log :: String -> Effect Unit
 ```
 
 And here is its definition:
@@ -495,15 +491,7 @@ exports.log = function (s) {
 
 The representation of `log` at runtime is a JavaScript function of a single argument, returning a function of no arguments. The inner function performs the side-effect of writing a message to the console.
 
-The effects `RANDOM` and `CONSOLE` are also defined as foreign types. Their kinds are defined to be `Effect`, the kind of effects. For example:
-
-```haskell
-foreign import data RANDOM :: Effect
-```
-
-In fact, it is possible to define new effects in this way, as we will soon see.
-
-Expressions of type `Eff eff a` can be invoked from JavaScript like regular JavaScript methods. For example, since the `main` function is required to have type `Eff eff a` for some set of effects `eff` and some type `a`, it can be invoked as follows:
+Expressions of type `Effect a` can be invoked from JavaScript like regular JavaScript methods. For example, since the `main` function is required to have type `Effect a` for some type `a`, it can be invoked as follows:
 
 ```javascript
 require('Main').main();
@@ -513,20 +501,12 @@ When using `pulp build -O --to` or `pulp run`, this call to `main` is generated 
 
 ## Defining New Effects
 
-The source code for this chapter defines two new effects. The simplest is the `ALERT` effect, defined in the `Control.Monad.Eff.Alert` module. It is used to indicate that a computation might alert the user using a popup window.
+The source code for this chapter defines two new effects. The simplest is `alert`, defined in the `Effect.Alert` module. It is used to indicate that a computation might alert the user using a popup window.
 
-The effect is defined first, using a foreign type declaration:
-
-```haskell
-foreign import data ALERT :: Effect
-```
-
-`ALERT` is given the kind `Effect`, indicating that it represents an effect, as opposed to a type.
-
-Next, the `alert` action is defined. The `alert` action displays a popup, and adds the `ALERT` effect to the row of effects:
+The effect is defined using a foreign type declaration:
 
 ```haskell
-foreign import alert :: forall eff. String -> Eff (alert :: ALERT | eff) Unit
+foreign import alert :: String -> Effect Unit
 ```
 
 The foreign Javascript module is straightforward, defining the `alert` function by assigning it to the `exports` variable:
@@ -537,54 +517,42 @@ The foreign Javascript module is straightforward, defining the `alert` function 
 exports.alert = function(msg) {
     return function() {
         window.alert(msg);
+        return {};
     };
 };
 
 ```
 
-The `alert` action is very similar to the `log` action from the `Control.Monad.Eff.Console` module. The only difference is that the `alert` action uses the `window.alert` method, whereas the `log` action uses the `console.log` method. As such, `alert` can only be used in environments where `window.alert` is defined, such as a web browser.
+The `alert` action is very similar to the `log` action from the `Effect.Console` module. The only difference is that the `alert` action uses the `window.alert` method, whereas the `log` action uses the `console.log` method. As such, `alert` can only be used in environments where `window.alert` is defined, such as a web browser.
 
-Note that, as in the case of `log`, the `alert` function uses a function of no arguments to represent the computation of type `Eff (alert :: ALERT | eff) Unit`.
+Note that, as in the case of `log`, the `alert` function uses a function of no arguments to represent the computation of type `Effect Unit`.
 
-The second effect defined in this chapter is the `STORAGE` effect, which is defined in the `Control.Monad.Eff.Storage` module. It is used to indicate that a computation might read or write values using the Web Storage API.
+The second effect defined in this chapter is the `Storage` effect, which is defined in the `Effect.Storage` module. It is used to indicate that a computation might read or write values using the Web Storage API.
 
-The effect is defined in the same way:
-
-```haskell
-foreign import data STORAGE :: Effect
-```
-
-The `Control.Monad.Eff.Storage` module defines two actions: `getItem`, which retrieves a value from local storage, and `setItem` which inserts or updates a value in local storage. The two functions have the following types:
+The `Effect.Storage` module defines two actions: `getItem`, which retrieves a value from local storage, and `setItem` which inserts or updates a value in local storage. The two functions have the following types:
 
 ```haskell
-foreign import getItem
-  :: forall eff
-   . String
-  -> Eff (storage :: STORAGE | eff) Foreign
+foreign import getItem :: String -> Effect Foreign
 
-foreign import setItem
-  :: forall eff
-   . String
-  -> String
-  -> Eff (storage :: STORAGE | eff) Unit
+foreign import setItem :: String -> String -> Effect Unit
 ```
 
 The interested reader can inspect the source code for this module to see the definitions of these actions.
 
 `setItem` takes a key and a value (both strings), and returns a computation which stores the value in local storage at the specified key.
 
-The type of `getItem` is more interesting. It takes a key, and attempts to retrieve the associated value from local storage. However, since the `getItem` method on `window.localStorage` can return `null`, the return type is not `String`, but `Foreign` which is defined by the `purescript-foreign` package in the `Data.Foreign` module.
+The type of `getItem` is more interesting. It takes a key, and attempts to retrieve the associated value from local storage. However, since the `getItem` method on `window.localStorage` can return `null`, the return type is not `String`, but `Foreign` which is defined by the `purescript-foreign` package in the `Foreign` module.
 
-`Data.Foreign` provides a way to work with _untyped data_, or more generally, data whose runtime representation is uncertain.
+`Foreign` provides a way to work with _untyped data_, or more generally, data whose runtime representation is uncertain.
 
 X> ## Exercises
 X>
-X> 1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Control.Monad.Eff.Alert` module.
-X> 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Control.Monad.Eff.Storage` module.
+X> 1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
+X> 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
 
 ## Working With Untyped Data
 
-In this section, we will see how we can use the `Data.Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
+In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
 
 The code for this chapter builds on the address book example from chapter 8, by adding a Save button at the bottom of the form. When the Save button is clicked, the state of the form is serialized to JSON and stored in local storage. When the page is reloaded, the JSON document is retrieved from local storage and parsed.
 
@@ -772,7 +740,7 @@ In this chapter, we've learned how to work with foreign JavaScript code from Pur
 
 - We've seen the importance of the _runtime representation_ of data, and ensuring that foreign functions have the correct representation.
 - We learned how to deal with corner cases like null values and other types of JavaScript data, by using foreign types, or the `Foreign` data type.
-- We looked at some common foreign types defined in the Prelude, and how they can be used to interoperate with idiomatic JavaScript code. In particular, the representation of side-effects in the `Eff` monad was introduced, and we saw how to use the `Eff` monad to capture new side effects.
+- We looked at some common foreign types defined in the Prelude, and how they can be used to interoperate with idiomatic JavaScript code. In particular, the representation of side-effects in the `Effect` monad was introduced, and we saw how to use the `Effect` monad to capture new side effects.
 - We saw how to safely deserialize JSON data using the `Decode` type class.
 
 For more examples, the `purescript`, `purescript-contrib` and `purescript-node` GitHub organizations provide plenty of examples of libraries which use the FFI. In the remaining chapters, we will see some of these libraries put to use to solve real-world problems in a type-safe way.
