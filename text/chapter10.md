@@ -427,25 +427,25 @@ We can create a function of two arguments by using the `mkFn2` function, as foll
 ```haskell
 import Data.Function.Uncurried
 
-divides :: Fn2 Int Int Boolean
-divides = mkFn2 \n m -> m % n == 0
+add :: Fn2 Int Int Int
+add = mkFn2 \n m -> m + n 
 ```
 
 and we can apply a function of two arguments by using the `runFn2` function:
 
 ```haskell
-> runFn2 divides 2 10
-true
+> runFn2 add 2 10
+12
 
-> runFn2 divides 3 10
-false
+> runFn2 add 3 10
+13
 ```
 
 The key here is that the compiler _inlines_ the `mkFn2` and `runFn2` functions whenever they are fully applied. The result is that the generated code is very compact:
 
 ```javascript
-exports.divides = function(n, m) {
-    return m % n === 0;
+var add = function (n, m) {
+    return m + n | 0;
 };
 ```
 
