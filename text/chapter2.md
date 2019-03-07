@@ -36,7 +36,7 @@ Other options for installing the PureScript compiler include:
 
 If you do not have a working installation of [NodeJS](http://nodejs.org/), you should install it. This should also install the `npm` package manager on your system. Make sure you have `npm` installed and available on your path.
 
-You will also need to install the Pulp command line tool, and the Bower package manager using `npm`, as follows:
+You will also need to install the Pulp command line tool, and the psc-package package manager using `npm`, as follows:
 
 ```text
 $ npm install -g pulp psc-package 
