@@ -554,7 +554,7 @@ X> 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage`
 
 In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
 
-The code for this chapter builds on the address book example from chapter 8, by adding a Save button at the bottom of the form. When the Save button is clicked, the state of the form is serialized to JSON and stored in local storage. When the page is reloaded, the JSON document is retrieved from local storage and parsed.
+The code for this chapter demonstrates how a record can be serialized to JSON and stored in / retrieved from local storage. 
 
 The `Main` module defines a type for the saved form data:
 
@@ -562,11 +562,6 @@ The `Main` module defines a type for the saved form data:
 newtype FormData = FormData
   { firstName  :: String
   , lastName   :: String
-  , street     :: String
-  , city       :: String
-  , state      :: String
-  , homePhone  :: String
-  , cellPhone  :: String
   }
 ```
 
@@ -580,9 +575,9 @@ Let's try the `purescript-foreign` and `purescript-foreign-generic` libraries in
 Start by importing some modules:
 
 ```text
-> import Data.Foreign
-> import Data.Foreign.Generic
-> import Data.Foreign.JSON
+> import Foreign
+> import Foreign.Generic
+> import Foreign.JSON
 ```
 
 A good way to obtain a `Foreign` value is to parse a JSON document. `purescript-foreign-generic` defines the following two functions:
@@ -592,13 +587,13 @@ parseJSON :: String -> F Foreign
 decodeJSON :: forall a. Decode a => String -> F a
 ```
 
-The type constructor `F` is actually just a type synonym, defined in `Data.Foreign`:
+The type constructor `F` is actually just a type synonym, defined in `Foreign`:
 
 ```haskell
-type F = Except (NonEmptyList ForeignError)
+type F = Except MultipleErrors
 ```
 
-Here, `Except` is an monad for handling exceptions in pure code, much like `Either`. We can convert a value in the `F` monad into a value in the `Either` monad by using the `runExcept` function.
+Here, `Except` is a monad for handling exceptions in pure code, much like `Either`. We can convert a value in the `F` monad into a value in the `Either` monad by using the `runExcept` function.
 
 Most of the functions in the `purescript-foreign` and `purescript-foreign-generic` libraries return a value in the `F` monad, which means that we can use do notation and the applicative functor combinators to build typed values.
 
@@ -630,33 +625,25 @@ The `purescript-foreign-generic` library tells us where in the JSON document the
 
 ## Handling Null and Undefined Values
 
-Real-world JSON documents contain null and undefined values, so we need to be able to handle those too.
-
-`purescript-foreign-generic` defines a type constructors which solves this problem: `NullOrUndefined`. It serves a similar purpose to the `Undefined` type constructor that we defined earlier, but uses the `Maybe` type constructor internally to represent missing values.
-
-The module also provides a function `unNullOrUndefined` to unwrap the inner value. We can lift the appropriate function over the `decodeJSON` action to parse JSON documents which permit null values:
+Real-world JSON documents contain null and undefined values, so we need to be able to handle those too. `purescript-foreign-generic` solves this problem with the 'Maybe' type constructor to represent missing values.
 
 ```text
 > import Prelude
-> import Data.Foreign.NullOrUndefined
+> import Foreign.NullOrUndefined
 
-> runExcept (unNullOrUndefined <$> decodeJSON "42" :: F (NullOrUndefined Int))
+> runExcept (decodeJSON "42" :: F (Maybe Int))
 (Right (Just 42))
 
-> runExcept (unNullOrUndefined <$> decodeJSON "null" :: F (NullOrUndefined Int))
+> runExcept (decodeJSON "null" :: F (Maybe Int))
 (Right Nothing)
 ```
 
-In each case, the type annotation applies to the term to the right of the `<$>` operator. For example, `decodeJSON "42"` has the type `F (NullOrUndefined Int)`. The `unNullOrUndefined` function is then lifted over `F` to give the final type `F (Maybe Int)`.
-
-The type `NullOrUndefined Int` represents values which are either integers, or null. What if we wanted to parse more interesting values, like arrays of integers, where each element might be `null`? In that case, we could lift the function `map unNullOrUndefined` over the `decodeJSON` action, as follows:
+The type `Maybe Int` represents values which are either integers, or null. What if we wanted to parse more interesting values, like arrays of integers, where each element might be `null`? `decodeJSON` handles such cases as well: 
 
 ```text
-> runExcept (map unNullOrUndefined <$> decodeJSON "[1, 2, null]" :: F (Array (NullOrUndefined Int)))
+> runExcept (decodeJSON "[1,2,null]" :: F (Array (Maybe Int)))
 (Right [(Just 1),(Just 2),Nothing])
 ```
-
-In general, using newtypes to wrap an existing type is a good way to provide different serialization strategies for the same type. The `NullOrUndefined` type is defined as a newtype around the `Maybe` type constructor.
 
 ## Generic JSON Serialization
 
@@ -665,12 +652,14 @@ In fact, we rarely need to write instances for the `Decode` class, since the `pu
 To derive a `Decode` instance for our `FormData` type (so that we may deserialize it from its JSON representation), we first use the `derive` keyword to derive an instance of the `Generic` type class, which looks like this:
 
 ```haskell
+import Data.Generic.Rep
 derive instance genericFormData :: Generic FormData _
 ```
 
 Next, we simply define the `decode` function using the `genericDecode` function, as follows:
 
 ```haskell
+import Foreign.Class
 instance decodeFormData :: Decode FormData where
   decode = genericDecode (defaultOptions { unwrapSingleConstructors = true })
 ```
@@ -682,9 +671,16 @@ instance encodeFormData :: Encode FormData where
   encode = genericEncode (defaultOptions { unwrapSingleConstructors = true })
 ```
 
+And even an instance of Show which comes in handy for logging the result:
+
+```haskell
+instance showFormData :: Show FormData where
+  show = genericShow
+```
+
 It is important that we use the same options in the decoder and encoder, otherwise our encoded JSON documents might not get decoded correctly.
 
-Now, when the Save button is clicked, a value of type `FormData` is passed to the `encode` function, serializing it as a JSON document. The `FormData` type is a newtype for a record, so a value of type `FormData` passed to `encode` will be serialized as a JSON _object_. This is because we used the `unwrapSingleConstructors` option when defining our JSON encoder.
+Now, in our main function, a value of type `FormData` is passed to the `encode` function, serializing it as a JSON document. The `FormData` type is a newtype for a record, so a value of type `FormData` passed to `encode` will be serialized as a JSON _object_. This is because we used the `unwrapSingleConstructors` option when defining our JSON encoder.
 
 Our `Decode` type class instance is used with `decodeJSON` to parse the JSON document when it is retrieved from local storage, as follows:
 
@@ -709,7 +705,7 @@ There are three possibilities for the result of `FormData`:
 - If the outer constructor is `Right`, but the inner constructor is `Nothing`, then `getItem` also returned `Nothing` which means that the key did not exist in local storage. In this case, the application continues quietly.
 - Finally, a value matching the pattern `Right (Just _)` indicates a successfully parsed JSON document. In this case, the application updates the form fields with the appropriate values.
 
-Try out the code, by running `pulp build -O --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to save the form fields' contents to local storage by clicking the Save button, and then see the fields repopulated when the page is refreshed.
+Try out the code, by running `pulp build -O --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to see what's going on in the console.
 
 _Note_: You may need to serve the HTML and Javascript files from a HTTP server locally in order to avoid certain browser-specific issues.
 
