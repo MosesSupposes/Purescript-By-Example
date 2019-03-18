@@ -342,7 +342,7 @@ $ pulp repl
 > import Data.AddressBook
 ```
 
-We can create an entry by using a record literal, which looks just like an anonymous object in JavaScript. Bind it to a name with a `let` expression:
+We can create an entry by using a record literal, which looks just like an anonymous object in JavaScript.
 
 ```text
 > address = { street: "123 Fake St.", city: "Faketown", state: "CA" }
