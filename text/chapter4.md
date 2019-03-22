@@ -549,7 +549,8 @@ X>
 X>     ```haskell
 X>     import Prelude
 X>     import Data.Array.Partial (head, tail)
-X>     
+X>     import Partial.Unsafe (unsafePartial)
+X>
 X>     count :: forall a. (a -> Boolean) -> Array a -> Int
 X>     count _ [] = 0
 X>     count p xs = if p (unsafePartial head xs)
