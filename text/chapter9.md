@@ -255,7 +255,7 @@ The `purescript-canvas` library supports these transformations using the followi
 
 ```haskell
 translate :: Context2D
-          -> translateTransform
+          -> TranslateTransform
           -> Effect Context2D
 
 rotate    :: Context2D
