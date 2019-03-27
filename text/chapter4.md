@@ -62,25 +62,26 @@ Just as we branch based on whether the input is non-zero, in the array case, we 
 ```haskell
 import Prelude
 
-import Data.Array (null)
-import Data.Array.Partial (tail)
-import Partial.Unsafe (unsafePartial)
+import Data.Array (null, tail)
+import Data.Maybe (fromMaybe)
 
 length :: forall a. Array a -> Int
 length arr =
   if null arr
     then 0
-    else 1 + length (unsafePartial tail arr)
+    else 1 + (length $ fromMaybe [] $ tail arr)
 ```
 
 In this function, we use an `if .. then .. else` expression to branch based on the emptiness of the array. The `null` function returns `true` on an empty array. Empty arrays have length zero, and a non-empty array has a length that is one more than the length of its tail.
+
+The `tail` function returns a `Maybe` wrapping the given array without its first element. If the array is empty (i.e. it doesn't has a tail) `Nothing` is returned. The `fromMaybe` function takes a default value and a `Maybe` value. If the latter is `Nothing` it returns the default, in the other case it returns the value wrapped by `Just`.
 
 This example is obviously a very impractical way to find the length of an array in JavaScript, but should provide enough help to allow you to complete the following exercises:
 
 X> ## Exercises
 X>
 X> 1. (Easy) Write a recursive function which returns `true` if and only if its input is an even integer.
-X> 2. (Medium) Write a recursive function which counts the number of even integers in an array. _Hint_: the function `unsafePartial head` (where `head` is also imported from `Data.Array.Partial`) can be used to find the first element in a non-empty array.
+X> 2. (Medium) Write a recursive function which counts the number of even integers in an array. _Hint_: the function `head` (also available in `Data.Array`) can be used to find the first element in a non-empty array.
 
 ## Maps
 
@@ -494,37 +495,40 @@ Notice that the recursive call to `fact` is the last thing that happens in this 
 
 One common way to turn a function which is not tail recursive into a tail recursive function is to use an _accumulator parameter_. An accumulator parameter is an additional parameter which is added to a function which _accumulates_ a return value, as opposed to using the return value to accumulate the result.
 
-For example, consider this array recursion which reverses the input array by appending elements at the head of the input array to the end of the result.
+For example, consider again the `length` function presented in the beginning of the chapter:
 
 ```haskell
-reverse :: forall a. Array a -> Array a
-reverse [] = []
-reverse xs = snoc (reverse (unsafePartial tail xs))
-                  (unsafePartial head xs)
+length :: forall a. Array a -> Int
+length arr =
+  if null arr
+    then 0
+    else 1 + (length $ fromMaybe [] $ tail arr)
 ```
 
 This implementation is not tail recursive, so the generated JavaScript will cause a stack overflow when executed on a large input array. However, we can make it tail recursive, by introducing a second function argument to accumulate the result instead:
 
 ```haskell
-reverse :: forall a. Array a -> Array a
-reverse = reverse' []
+length' :: forall a. Array a -> Int
+length' arr = length arr 0
   where
-    reverse' acc [] = acc
-    reverse' acc xs = reverse' (unsafePartial head xs : acc)
-                               (unsafePartial tail xs)
+    length :: forall a. Array a -> Int -> Int
+    length arr acc =
+      if null arr
+        then 0
+        else length (fromMaybe [] $ tail arr) acc + 1
 ```
 
-In this case, we delegate to the helper function `reverse'`, which performs the heavy lifting of reversing the array. Notice though that the function `reverse'` is tail recursive - its only recursive call is in the last case, and is in tail position. This means that the generated code will be a _while loop_, and will not blow the stack for large inputs.
+In this case, we delegate to the helper function `length`, which is tail recursive - its only recursive call is in the last case, and is in tail position. This means that the generated code will be a _while loop_, and will not blow the stack for large inputs.
 
-To understand the second implementation of `reverse`, note that the helper function `reverse'` essentially uses the accumulator parameter to maintain an additional piece of state - the partially constructed result. The result starts out empty, and grows by one element for every element in the input array. However, because later elements are added at the front of the array, the result is the original array in reverse!
+To understand the implementation of `length'`, note that the helper function `length` essentially uses the accumulator parameter to maintain an additional piece of state - the partial result. It starts out at 0, and grows by adding 1 for every element in the input array.
 
-Note also that while we might think of the accumulator as "state", there is no direct mutation going on. The accumulator is an immutable array, and we simply use function arguments to thread the state through the computation.
+Note also that while we might think of the accumulator as "state", there is no direct mutation going on.
 
 ## Prefer Folds to Explicit Recursion
 
 If we can write our recursive functions using tail recursion, then we can benefit from tail recursion optimization, so it becomes tempting to try to write all of our functions in this form. However, it is often easy to forget that many functions can be written directly as a fold over an array or similar data structure. Writing algorithms directly in terms of combinators such as `map` and `fold` has the added advantage of code simplicity - these combinators are well-understood, and as such, communicate the _intent_ of the algorithm much better than explicit recursion.
 
-For example, the `reverse` example can be written as a fold in at least two ways. Here is a version which uses `foldr`:
+For example, we can reverse an array using `foldr`:
 
 ```text
 > import Data.Foldable
@@ -544,20 +548,7 @@ X> ## Exercises
 X>
 X> 1. (Easy) Use `foldl` to test whether an array of boolean values are all true.
 X> 2. (Medium) Characterize those arrays `xs` for which the function `foldl (==) false xs` returns true.
-X> 3. (Medium) Rewrite the following function in tail recursive form using an accumulator parameter:
-X>
-X>     ```haskell
-X>     import Prelude
-X>     import Data.Array.Partial (head, tail)
-X>     import Partial.Unsafe (unsafePartial)
-X>
-X>     count :: forall a. (a -> Boolean) -> Array a -> Int
-X>     count _ [] = 0
-X>     count p xs = if p (unsafePartial head xs)
-X>                    then count p (unsafePartial tail xs) + 1
-X>                    else count p (unsafePartial tail xs)
-X>     ```
-X>
+X> 3. (Medium) Rewrite the `fib` function in tail recursive form using an accumulator parameter:
 X> 4. (Medium) Write `reverse` in terms of `foldl`.
 
 ## A Virtual Filesystem
