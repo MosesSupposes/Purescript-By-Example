@@ -534,7 +534,7 @@ Functional dependencies can be quite useful when using multi-parameter type clas
 
 We can even define type classes with zero type arguments! These correspond to compile-time assertions about our functions, allowing us to track global properties of our code in the type system.
 
-An important example is the `Partial` class which we saw earlier when discussing partial functions. We've seen the partial functions `head` and `tail`, defined in `Data.Array.Partial` already:
+An important example is the `Partial` class which we saw earlier when discussing partial functions. Take for example the functions `head` and `tail` defined in `Data.Array.Partial` that allow us to get the head or tail of an array without wrapping them in a `Maybe`, so they can fail if the array is empty:
 
 ```haskell
 head :: forall a. Partial => Array a -> a
