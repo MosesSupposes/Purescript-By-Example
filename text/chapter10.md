@@ -251,18 +251,18 @@ We can call this function from JavaScript by passing an explicit type class dict
 shout(require('Prelude').showNumber)(42);
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) What are the runtime representations of these types?
-X>
-X>     ```haskell
-X>     forall a. a
-X>     forall a. a -> a -> a
-X>     forall a. Ord a => Array a -> Boolean
-X>     ```
-X>
-X>     What can you say about the expressions which have these types?
-X> 1. (Medium) Try using the functions defined in the `purescript-arrays` package, calling them from JavaScript, by compiling the library using `pulp build` and importing modules using the `require` function in NodeJS. _Hint_: you may need to configure the output path so that the generated CommonJS modules are available on the NodeJS module path.
+ ## Exercises
+
+ 1. (Easy) What are the runtime representations of these types?
+
+     ```haskell
+     forall a. a
+     forall a. a -> a -> a
+     forall a. Ord a => Array a -> Boolean
+     ```
+
+     What can you say about the expressions which have these types?
+ 1. (Medium) Try using the functions defined in the `purescript-arrays` package, calling them from JavaScript, by compiling the library using `pulp build` and importing modules using the `require` function in NodeJS. _Hint_: you may need to configure the output path so that the generated CommonJS modules are available on the NodeJS module path.
 
 ## Using JavaScript Code From PureScript
 
@@ -545,10 +545,10 @@ The type of `getItem` is more interesting. It takes a key, and attempts to retri
 
 `Foreign` provides a way to work with _untyped data_, or more generally, data whose runtime representation is uncertain.
 
-X> ## Exercises
-X>
-X> 1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
-X> 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
+ ## Exercises
+
+ 1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
+ 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
 
 ## Working With Untyped Data
 
@@ -709,26 +709,26 @@ Try out the code, by running `pulp build -O --to dist/Main.js`, and then opening
 
 _Note_: You may need to serve the HTML and Javascript files from a HTTP server locally in order to avoid certain browser-specific issues.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `decodeJSON` to parse a JSON document representing a two-dimensional JavaScript array of integers, such as `[[1, 2, 3], [4, 5], [6]]`. What if the elements are allowed to be null? What if the arrays themselves are allowed to be null?
-X> 1. (Medium) Convince yourself that the implementation of `savedData` should type-check, and write down the inferred types of each subexpression in the computation.
-X> 1. (Medium) The following data type represents a binary tree with values at the leaves:
-X>
-X>     ```haskell
-X>     data Tree a = Leaf a | Branch (Tree a) (Tree a)
-X>     ```
-X>
-X>     Derive `Encode` and `Decode` instances for this type using `purescript-foreign-generic`, and verify that encoded values can correctly be decoded in PSCi.
-X> 1. (Difficult) The following `data` type should be represented directly in JSON as either an integer or a string:
-X>
-X>     ```haskell
-X>     data IntOrString
-X>       = IntOrString_Int Int
-X>       | IntOrString_String String
-X>     ```
-X>
-X>     Write instances for `Encode` and `Decode` for the `IntOrString` data type which implement this behavior, and verify that encoded values can correctly be decoded in PSCi.
+ ## Exercises
+
+ 1. (Easy) Use `decodeJSON` to parse a JSON document representing a two-dimensional JavaScript array of integers, such as `[[1, 2, 3], [4, 5], [6]]`. What if the elements are allowed to be null? What if the arrays themselves are allowed to be null?
+ 1. (Medium) Convince yourself that the implementation of `savedData` should type-check, and write down the inferred types of each subexpression in the computation.
+ 1. (Medium) The following data type represents a binary tree with values at the leaves:
+
+     ```haskell
+     data Tree a = Leaf a | Branch (Tree a) (Tree a)
+     ```
+
+     Derive `Encode` and `Decode` instances for this type using `purescript-foreign-generic`, and verify that encoded values can correctly be decoded in PSCi.
+ 1. (Difficult) The following `data` type should be represented directly in JSON as either an integer or a string:
+
+     ```haskell
+     data IntOrString
+       = IntOrString_Int Int
+       | IntOrString_String String
+     ```
+
+     Write instances for `Encode` and `Decode` for the `IntOrString` data type which implement this behavior, and verify that encoded values can correctly be decoded in PSCi.
 
 ## Conclusion
 

@@ -261,21 +261,21 @@ main =
     logShow
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `readFileCont` and `writeFileCont` to write a function which concatenates two text files.
-X> 1. (Medium) Use the FFI to give an appropriate type to the `setTimeout` function. Write a wrapper function which uses the `Async` monad:
-X>
-X>     ```haskell
-X>     type Milliseconds = Int
-X>
-X>     foreign import data TIMEOUT :: Effect
-X>
-X>     setTimeoutCont
-X>       :: forall eff
-X>        . Milliseconds
-X>       -> Async (timeout :: TIMEOUT | eff) Unit
-X>     ```
+ ## Exercises
+
+ 1. (Easy) Use `readFileCont` and `writeFileCont` to write a function which concatenates two text files.
+ 1. (Medium) Use the FFI to give an appropriate type to the `setTimeout` function. Write a wrapper function which uses the `Async` monad:
+
+     ```haskell
+     type Milliseconds = Int
+
+     foreign import data TIMEOUT :: Effect
+
+     setTimeoutCont
+       :: forall eff
+        . Milliseconds
+       -> Async (timeout :: TIMEOUT | eff) Unit
+     ```
 
 ## Putting ExceptT To Work
 
@@ -319,10 +319,10 @@ copyFileContEx src dest = do
   writeFileContEx dest content
 ```
 
-X> ## Exercises
-X>
-X> 1. (Medium) Modify your solution which concatenated two files, using `ExceptT` to handle any errors.
-X> 1. (Medium) Write a function `concatenateMany` to concatenate multiple text files, given an array of input file names. _Hint_: use `traverse`.
+ ## Exercises
+
+ 1. (Medium) Modify your solution which concatenated two files, using `ExceptT` to handle any errors.
+ 1. (Medium) Write a function `concatenateMany` to concatenate multiple text files, given an array of input file names. _Hint_: use `traverse`.
 
 ## A HTTP Client
 
@@ -381,11 +381,11 @@ get req = ContT \k ->
   runFn3 getImpl req (k <<< Right) (k <<< Left)
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `runContT` to test `get` in PSCi, printing the result to the console.
-X> 1. (Medium) Use `ExceptT` to write a function `getEx` which wraps `get`, as we did previously for `readFileCont` and `writeFileCont`.
-X> 1. (Difficult) Write a function which saves the response body of a request to a file on disk using `getEx` and `writeFileContEx`.
+ ## Exercises
+
+ 1. (Easy) Use `runContT` to test `get` in PSCi, printing the result to the console.
+ 1. (Medium) Use `ExceptT` to write a function `getEx` which wraps `get`, as we did previously for `readFileCont` and `writeFileCont`.
+ 1. (Difficult) Write a function which saves the response body of a request to a file on disk using `getEx` and `writeFileContEx`.
 
 ## Parallel Computations
 
@@ -430,35 +430,35 @@ Because applicative functors support lifting of functions of arbitrary arity, we
 
 We can also combine parallel computations with sequential portions of code, by using applicative combinators in a do notation block, or vice versa, using `parallel` and `sequential` to change type constructors where appropriate.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `parallel` and `sequential` to make two HTTP requests and collect their response bodies in parallel. Your combining function should concatenate the two response bodies, and your continuation should use `print` to print the result to the console.
-X> 1. (Medium) The applicative functor which corresponds to `Async` is also an instance of `Alternative`. The `<|>` operator defined by this instance runs two computations in parallel, and returns the result from the computation which completes first.
-X>
-X>     Use this `Alternative` instance in conjunction with your `setTimeoutCont` function to define a function
-X>
-X>     ```haskell
-X>     timeout :: forall a eff
-X>              . Milliseconds
-X>             -> Async (timeout :: TIMEOUT | eff) a
-X>             -> Async (timeout :: TIMEOUT | eff) (Maybe a)
-X>     ```
-X>
-X>     which returns `Nothing` if the specified computation does not provide a result within the given number of milliseconds.
-X> 1. (Medium) `purescript-parallel` also provides instances of the `Parallel` class for several monad transformers, including `ExceptT`.
-X>
-X>     Rewrite the parallel file IO example to use `ExceptT` for error handling, instead of lifting `append` with `lift2`. Your solution should use the `ExceptT` transformer to transform the `Async` monad.
-X>
-X>     Use this approach to modify your `concatenateMany` function to read multiple input files in parallel.
-X> 1. (Difficult, Extended) Suppose we are given a collection of JSON documents on disk, such that each document contains an array of references to other files on disk:
-X>
-X>     ```javascript
-X>     { references: ['/tmp/1.json', '/tmp/2.json'] }
-X>     ```
-X>     
-X>     Write a utility which takes a single filename as input, and spiders the JSON files on disk referenced transitively by that file, collecting a list of all referenced files.
-X>
-X>     Your utility should use the `purescript-foreign` library to parse the JSON documents, and should fetch files referenced by a single file in parallel.
+ ## Exercises
+
+ 1. (Easy) Use `parallel` and `sequential` to make two HTTP requests and collect their response bodies in parallel. Your combining function should concatenate the two response bodies, and your continuation should use `print` to print the result to the console.
+ 1. (Medium) The applicative functor which corresponds to `Async` is also an instance of `Alternative`. The `<|>` operator defined by this instance runs two computations in parallel, and returns the result from the computation which completes first.
+
+     Use this `Alternative` instance in conjunction with your `setTimeoutCont` function to define a function
+
+     ```haskell
+     timeout :: forall a eff
+              . Milliseconds
+             -> Async (timeout :: TIMEOUT | eff) a
+             -> Async (timeout :: TIMEOUT | eff) (Maybe a)
+     ```
+
+     which returns `Nothing` if the specified computation does not provide a result within the given number of milliseconds.
+ 1. (Medium) `purescript-parallel` also provides instances of the `Parallel` class for several monad transformers, including `ExceptT`.
+
+     Rewrite the parallel file IO example to use `ExceptT` for error handling, instead of lifting `append` with `lift2`. Your solution should use the `ExceptT` transformer to transform the `Async` monad.
+
+     Use this approach to modify your `concatenateMany` function to read multiple input files in parallel.
+ 1. (Difficult, Extended) Suppose we are given a collection of JSON documents on disk, such that each document contains an array of references to other files on disk:
+
+     ```javascript
+     { references: ['/tmp/1.json', '/tmp/2.json'] }
+     ```
+     
+     Write a utility which takes a single filename as input, and spiders the JSON files on disk referenced transitively by that file, collecting a list of all referenced files.
+
+     Your utility should use the `purescript-foreign` library to parse the JSON documents, and should fetch files referenced by a single file in parallel.
 
 ## Conclusion
 

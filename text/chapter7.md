@@ -376,11 +376,11 @@ But the `combineList` function works for any `Applicative`! We can use it to com
 
 We will see the `combineList` function again later, when we consider `Traversable` functors.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `lift2` to write lifted versions of the numeric operators `+`, `-`, `*` and `/` which work with optional arguments.
-X> 1. (Medium) Convince yourself that the definition of `lift3` given above in terms of `<$>` and `<*>` does type check.
-X> 1. (Difficult) Write a function `combineMaybe` which has type `forall a f. Applicative f => Maybe (f a) -> f (Maybe a)`. This function takes an optional computation with side-effects, and returns a side-effecting computation which has an optional result.
+ ## Exercises
+
+ 1. (Easy) Use `lift2` to write lifted versions of the numeric operators `+`, `-`, `*` and `/` which work with optional arguments.
+ 1. (Medium) Convince yourself that the definition of `lift3` given above in terms of `<$>` and `<*>` does type check.
+ 1. (Difficult) Write a function `combineMaybe` which has type `forall a f. Applicative f => Maybe (f a) -> f (Maybe a)`. This function takes an optional computation with side-effects, and returns a side-effecting computation which has an optional result.
 
 ## Applicative Validation
 
@@ -580,10 +580,10 @@ Valid (PhoneNumber { type: HomePhone, number: "555-555-5555" })
 Invalid (["Field 'Number' did not match the required format"])
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use a regular expression validator to ensure that the `state` field of the `Address` type contains two alphabetic characters. _Hint_: see the source code for `phoneNumberRegex`.
-X> 1. (Medium) Using the `matches` validator, write a validation function which checks that a string is not entirely whitespace. Use it to replace `nonEmpty` where appropriate.
+ ## Exercises
+
+ 1. (Easy) Use a regular expression validator to ensure that the `state` field of the `Address` type contains two alphabetic characters. _Hint_: see the source code for `phoneNumberRegex`.
+ 1. (Medium) Using the `matches` validator, write a validation function which checks that a string is not entirely whitespace. Use it to replace `nonEmpty` where appropriate.
 
 ## Traversable Functors
 
@@ -698,18 +698,18 @@ These examples show that traversing the `Nothing` value returns `Nothing` with n
 
 Other traversable functors include `Array`, and `Tuple a` and `Either a` for any type `a`. Generally, most "container" data type constructors have `Traversable` instances. As an example, the exercises will include writing a `Traversable` instance for a type of binary trees.
 
-X> ## Exercises
-X>
-X> 1. (Medium) Write a `Traversable` instance for the following binary tree data structure, which combines side-effects from left-to-right:
-X>
-X>     ```haskell
-X>     data Tree a = Leaf | Branch (Tree a) a (Tree a)
-X>     ```
-X>
-X>     This corresponds to an in-order traversal of the tree. What about a preorder traversal? What about reverse order?
-X>
-X> 1. (Medium) Modify the code to make the `address` field of the `Person` type optional using `Data.Maybe`. _Hint_: Use `traverse` to validate a field of type `Maybe a`.
-X> 1. (Difficult) Try to write `sequence` in terms of `traverse`. Can you write `traverse` in terms of `sequence`?
+ ## Exercises
+
+ 1. (Medium) Write a `Traversable` instance for the following binary tree data structure, which combines side-effects from left-to-right:
+
+     ```haskell
+     data Tree a = Leaf | Branch (Tree a) a (Tree a)
+     ```
+
+     This corresponds to an in-order traversal of the tree. What about a preorder traversal? What about reverse order?
+
+ 1. (Medium) Modify the code to make the `address` field of the `Person` type optional using `Data.Maybe`. _Hint_: Use `traverse` to validate a field of type `Maybe a`.
+ 1. (Difficult) Try to write `sequence` in terms of `traverse`. Can you write `traverse` in terms of `sequence`?
 
 ## Applicative Functors for Parallelism
 

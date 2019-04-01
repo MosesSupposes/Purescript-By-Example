@@ -247,16 +247,16 @@ unit
 
 Note, however, that no changes had to be made to the `render` function, because the underlying data representation never changed. This is one of the benefits of the smart constructors approach - it allows us to separate the internal data representation for a module from the representation which is perceived by users of its external API.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use the `Data.DOM.Smart` module to experiment by creating new HTML documents using `render`.
-X> 1. (Medium) Some HTML attributes such as `checked` and `disabled` do not require values, and may be rendered as _empty attributes_:
-X>
-X>     ```html
-X>     <input disabled>
-X>     ```
-X>
-X>     Modify the representation of an `Attribute` to take empty attributes into account. Write a function which can be used in place of `attribute` or `:=` to add an empty attribute to an element.
+ ## Exercises
+
+ 1. (Easy) Use the `Data.DOM.Smart` module to experiment by creating new HTML documents using `render`.
+ 1. (Medium) Some HTML attributes such as `checked` and `disabled` do not require values, and may be rendered as _empty attributes_:
+
+     ```html
+     <input disabled>
+     ```
+
+     Modify the representation of an `Attribute` to take empty attributes into account. Write a function which can be used in place of `attribute` or `:=` to add an empty attribute to an element.
 
 ## Phantom Types
 
@@ -350,17 +350,17 @@ Now we find it is impossible to represent these invalid HTML documents, and we a
 unit
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Create a data type which represents either pixel or percentage lengths. Write an instance of `IsValue` for your type. Modify the `width` and `height` attributes to use your new type.
-X> 1. (Difficult) By defining type-level representatives for the Boolean values `true` and `false`, we can use a phantom type to encode whether an `AttributeKey` represents an _empty attribute_ such as `disabled` or `checked`.
-X>
-X>     ```haskell
-X>     data True
-X>     data False
-X>     ```
-X>
-X>     Modify your solution to the previous exercise to use a phantom type to prevent the user from using the `attribute` operator with an empty attribute.
+ ## Exercises
+
+ 1. (Easy) Create a data type which represents either pixel or percentage lengths. Write an instance of `IsValue` for your type. Modify the `width` and `height` attributes to use your new type.
+ 1. (Difficult) By defining type-level representatives for the Boolean values `true` and `false`, we can use a phantom type to encode whether an `AttributeKey` represents an _empty attribute_ such as `disabled` or `checked`.
+
+     ```haskell
+     data True
+     data False
+     ```
+
+     Modify your solution to the previous exercise to use a phantom type to prevent the user from using the `attribute` operator with an empty attribute.
 
 ## The Free Monad
 
@@ -567,9 +567,9 @@ That's it! We can test our new monadic API in PSCi, as follows:
 unit
 ```
 
-X> ## Exercises
-X>
-X> 1. (Medium) Add a new data constructor to the `ContentF` type to support a new action `comment`, which renders a comment in the generated HTML. Implement the new action using `liftF`. Update the interpretation `renderContentItem` to interpret your new constructor appropriately.
+ ## Exercises
+
+ 1. (Medium) Add a new data constructor to the `ContentF` type to support a new action `comment`, which renders a comment in the generated HTML. Implement the new action using `liftF`. Update the interpretation `renderContentItem` to interpret your new constructor appropriately.
 
 ## Extending the Language
 
@@ -702,23 +702,23 @@ unit
 
 You can verify that multiple calls to `newName` do in fact result in unique names.
 
-X> ## Exercises
-X>
-X> 1. (Medium) We can simplify the API further by hiding the `Element` type from its users. Make these changes in the following steps:
-X>     
-X>     - Combine functions like `p` and `img` (with return type `Element`) with the `elem` action to create new actions with return type `Content Unit`.
-X>     - Change the `render` function to accept an argument of type `Content Unit` instead of `Element`.
-X> 1. (Medium) Hide the implementation of the `Content` monad by using a `newtype` instead of a type synonym. You should not export the data
-X>     constructor for your `newtype`.
-X> 1. (Difficult) Modify the `ContentF` type to support a new action
-X>
-X>     ```haskell
-X>     isMobile :: Content Boolean
-X>     ```
-X>
-X>     which returns a boolean value indicating whether or not the document is being rendered for display on a mobile device.
-X>
-X>     _Hint_: use the `ask` action and the `ReaderT` monad transformer to interpret this action. Alternatively, you might prefer to use the `RWS` monad.
+ ## Exercises
+
+ 1. (Medium) We can simplify the API further by hiding the `Element` type from its users. Make these changes in the following steps:
+     
+     - Combine functions like `p` and `img` (with return type `Element`) with the `elem` action to create new actions with return type `Content Unit`.
+     - Change the `render` function to accept an argument of type `Content Unit` instead of `Element`.
+ 1. (Medium) Hide the implementation of the `Content` monad by using a `newtype` instead of a type synonym. You should not export the data
+     constructor for your `newtype`.
+ 1. (Difficult) Modify the `ContentF` type to support a new action
+
+     ```haskell
+     isMobile :: Content Boolean
+     ```
+
+     which returns a boolean value indicating whether or not the document is being rendered for display on a mobile device.
+
+     _Hint_: use the `ask` action and the `ReaderT` monad transformer to interpret this action. Alternatively, you might prefer to use the `RWS` monad.
 
 ## Conclusion
 

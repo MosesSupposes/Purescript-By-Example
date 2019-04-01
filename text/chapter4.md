@@ -78,10 +78,10 @@ The `tail` function returns a `Maybe` wrapping the given array without its first
 
 This example is obviously a very impractical way to find the length of an array in JavaScript, but should provide enough help to allow you to complete the following exercises:
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a recursive function which returns `true` if and only if its input is an even integer.
-X> 2. (Medium) Write a recursive function which counts the number of even integers in an array. _Hint_: the function `head` (also available in `Data.Array`) can be used to find the first element in a non-empty array.
+ ## Exercises
+
+ 1. (Easy) Write a recursive function which returns `true` if and only if its input is an even integer.
+ 2. (Medium) Write a recursive function which counts the number of even integers in an array. _Hint_: the function `head` (also available in `Data.Array`) can be used to find the first element in a non-empty array.
 
 ## Maps
 
@@ -189,11 +189,11 @@ For example, suppose we wanted to compute an array of all numbers between 1 and 
 [2,4,6,8,10]
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use the `map` or `<$>` function to write a function which calculates the squares of an array of numbers.
-X> 1. (Easy) Use the `filter` function to write a function which removes the negative numbers from an array of numbers.
-X> 1. (Medium) Define an infix synonym `<$?>` for `filter`. Rewrite your answer to the previous question to use your new operator. Experiment with the precedence level and associativity of your operator in PSCi.
+ ## Exercises
+
+ 1. (Easy) Use the `map` or `<$>` function to write a function which calculates the squares of an array of numbers.
+ 1. (Easy) Use the `filter` function to write a function which removes the negative numbers from an array of numbers.
+ 1. (Medium) Define an infix synonym `<$?>` for `filter`. Rewrite your answer to the previous question to use your new operator. Experiment with the precedence level and associativity of your operator in PSCi.
 
 ## Flattening Arrays
 
@@ -381,12 +381,12 @@ That is, if `guard` is passed an expression which evaluates to `true`, then it r
 
 This means that if the guard fails, then the current branch of the array comprehension will terminate early with no results. This means that a call to `guard` is equivalent to using `filter` on the intermediate array. Depending on the application, you might prefer to use `guard` instead of a `filter`. Try the two definitions of `factors` to verify that they give the same results.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use the `factors` function to define a function `isPrime` which tests if its integer argument is prime or not.
-X> 1. (Medium) Write a function which uses do notation to find the _cartesian product_ of two arrays, i.e. the set of all pairs of elements `a`, `b`, where `a` is an element of the first array, and `b` is an element of the second.
-X> 1. (Medium) A _Pythagorean triple_ is an array of numbers `[a, b, c]` such that `a² + b² = c²`. Use the `guard` function in an array comprehension to write a function `triples` which takes a number `n` and calculates all Pythagorean triples whose components are less than `n`. Your function should have type `Int -> Array (Array Int)`.
-X> 1. (Difficult) Write a function `factorizations` which produces all _factorizations_ of an integer `n`, i.e. arrays of integers whose product is `n`. _Hint_: for an integer greater than 1, break the problem down into two subproblems: finding the first factor, and finding the remaining factors.
+ ## Exercises
+
+ 1. (Easy) Use the `factors` function to define a function `isPrime` which tests if its integer argument is prime or not.
+ 1. (Medium) Write a function which uses do notation to find the _cartesian product_ of two arrays, i.e. the set of all pairs of elements `a`, `b`, where `a` is an element of the first array, and `b` is an element of the second.
+ 1. (Medium) A _Pythagorean triple_ is an array of numbers `[a, b, c]` such that `a² + b² = c²`. Use the `guard` function in an array comprehension to write a function `triples` which takes a number `n` and calculates all Pythagorean triples whose components are less than `n`. Your function should have type `Int -> Array (Array Int)`.
+ 1. (Difficult) Write a function `factorizations` which produces all _factorizations_ of an integer `n`, i.e. arrays of integers whose product is `n`. _Hint_: for an integer greater than 1, break the problem down into two subproblems: finding the first factor, and finding the remaining factors.
 
 ## Folds
 
@@ -544,12 +544,12 @@ For example, we can reverse an array using `foldr`:
 
 Writing `reverse` in terms of `foldl` will be left as an exercise for the reader.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use `foldl` to test whether an array of boolean values are all true.
-X> 2. (Medium) Characterize those arrays `xs` for which the function `foldl (==) false xs` returns true.
-X> 3. (Medium) Rewrite the `fib` function in tail recursive form using an accumulator parameter:
-X> 4. (Medium) Write `reverse` in terms of `foldl`.
+ ## Exercises
+
+ 1. (Easy) Use `foldl` to test whether an array of boolean values are all true.
+ 2. (Medium) Characterize those arrays `xs` for which the function `foldl (==) false xs` returns true.
+ 3. (Medium) Rewrite the `fib` function in tail recursive form using an accumulator parameter:
+ 4. (Medium) Write `reverse` in terms of `foldl`.
 
 ## A Virtual Filesystem
 
@@ -641,21 +641,21 @@ allFiles' file = file : do
 
 Try out the new version in PSCi - you should get the same result. I'll let you decide which version you find clearer.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a function `onlyFiles` which returns all _files_ (not directories) in all subdirectories of a directory.
-X> 1. (Medium) Write a fold to determine the largest and smallest files in the filesystem.
-X> 1. (Difficult) Write a function `whereIs` to search for a file by name. The function should return a value of type `Maybe Path`, indicating the directory containing the file, if it exists. It should behave as follows:
-X>
-X>     ```text
-X>     > whereIs "/bin/ls"
-X>     Just (/bin/)
-X>     
-X>     > whereIs "/bin/cat"
-X>     Nothing
-X>     ```
-X>
-X>     _Hint_: Try to write this function as an array comprehension using do notation.
+ ## Exercises
+
+ 1. (Easy) Write a function `onlyFiles` which returns all _files_ (not directories) in all subdirectories of a directory.
+ 1. (Medium) Write a fold to determine the largest and smallest files in the filesystem.
+ 1. (Difficult) Write a function `whereIs` to search for a file by name. The function should return a value of type `Maybe Path`, indicating the directory containing the file, if it exists. It should behave as follows:
+
+     ```text
+     > whereIs "/bin/ls"
+     Just (/bin/)
+     
+     > whereIs "/bin/cat"
+     Nothing
+     ```
+
+     _Hint_: Try to write this function as an array comprehension using do notation.
 
 ## Conclusion
 

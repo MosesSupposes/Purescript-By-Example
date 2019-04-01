@@ -171,34 +171,34 @@ $ pulp build -O --main Example.Shapes --to dist/Main.js
 
 and open `html/index.html` again to see the result. You should see the three different types of shapes rendered to the canvas.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Experiment with the `strokePath` and `setStrokeStyle` functions in each of the examples so far.
-X> 1. (Easy) The `fillPath` and `strokePath` functions can be used to render complex paths with a common style by using a do notation block inside the function argument. Try changing the `Rectangle` example to render two rectangles side-by-side using the same call to `fillPath`. Try rendering a sector of a circle by using a combination of a piecewise-linear path and an arc segment.
-X> 1. (Medium) Given the following record type:
-X>
-X>     ```haskell
-X>     type Point = { x :: Number, y :: Number }
-X>     ```
-X>
-X>     which represents a 2D point, write a function `renderPath` which strokes a closed path constructed from a number of points:
-X>
-X>     ```haskell
-X>     renderPath
-X>       :: Context2D
-X>       -> Array Point
-X>       -> Effect Unit
-X>     ```
-X>
-X>     Given a function
-X>
-X>     ```haskell
-X>     f :: Number -> Point
-X>     ```
-X>
-X>     which takes a `Number` between `0` and `1` as its argument and returns a `Point`, write an action which plots `f` by using your `renderPath` function. Your action should approximate the path by sampling `f` at a finite set of points.
-X>
-X>     Experiment by rendering different paths by varying the function `f`.
+ ## Exercises
+
+ 1. (Easy) Experiment with the `strokePath` and `setStrokeStyle` functions in each of the examples so far.
+ 1. (Easy) The `fillPath` and `strokePath` functions can be used to render complex paths with a common style by using a do notation block inside the function argument. Try changing the `Rectangle` example to render two rectangles side-by-side using the same call to `fillPath`. Try rendering a sector of a circle by using a combination of a piecewise-linear path and an arc segment.
+ 1. (Medium) Given the following record type:
+
+     ```haskell
+     type Point = { x :: Number, y :: Number }
+     ```
+
+     which represents a 2D point, write a function `renderPath` which strokes a closed path constructed from a number of points:
+
+     ```haskell
+     renderPath
+       :: Context2D
+       -> Array Point
+       -> Effect Unit
+     ```
+
+     Given a function
+
+     ```haskell
+     f :: Number -> Point
+     ```
+
+     which takes a `Number` between `0` and `1` as its argument and returns a `Point`, write an action which plots `f` by using your `renderPath` function. Your action should approximate the path by sampling `f` at a finite set of points.
+
+     Experiment by rendering different paths by varying the function `f`.
 
 ## Drawing Random Circles
 
@@ -404,11 +404,11 @@ $ pulp build -O --main Example.Refs --to dist/Main.js
 
 and open the `html/index.html` file. If you click the canvas repeatedly, you should see a green rectangle rotating around the center of the canvas.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a higher-order function which strokes and fills a path simultaneously. Rewrite the `Random.purs` example using your function.
-X> 1. (Medium) Use `Random` and `Dom` to create an application which renders a circle with random position, color and radius to the canvas when the mouse is clicked.
-X> 1. (Medium) Write a function which transforms the scene by rotating it around a point with specified coordinates. _Hint_: use a translation to first translate the scene to the origin.
+ ## Exercises
+
+ 1. (Easy) Write a higher-order function which strokes and fills a path simultaneously. Rewrite the `Random.purs` example using your function.
+ 1. (Medium) Use `Random` and `Dom` to create an application which renders a circle with random position, color and radius to the canvas when the mouse is clicked.
+ 1. (Medium) Write a function which transforms the scene by rotating it around a point with specified coordinates. _Hint_: use a translation to first translate the scene to the origin.
 
 ## L-Systems
 
@@ -621,44 +621,44 @@ $ pulp build -O --main Example.LSystem --to dist/Main.js
 
 and open `html/index.html`. You should see the Koch curve rendered to the canvas.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Modify the L-system example above to use `fillPath` instead of `strokePath`. _Hint_: you will need to include a call to `closePath`, and move the call to `moveTo` outside of the `interpret` function.
-X> 1. (Easy) Try changing the various numerical constants in the code, to understand their effect on the rendered system.
-X> 1. (Medium) Break the `lsystem` function into two smaller functions. The first should build the final sentence using repeated application of `concatMap`, and the second should use `foldM` to interpret the result.
-X> 1. (Medium) Add a drop shadow to the filled shape, by using the `setShadowOffsetX`, `setShadowOffsetY`, `setShadowBlur` and `setShadowColor` actions. _Hint_: use PSCi to find the types of these functions.
-X> 1. (Medium) The angle of the corners is currently a constant (`pi/3`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
-X>
-X>     ```haskell
-X>     type Angle = Number
-X>     
-X>     data Alphabet = L Angle | R Angle | F
-X>     ```
-X>     
-X>     How can this new information be used in the production rules to create interesting shapes?
-X> 1. (Difficult) An L-system is given by an alphabet with four letters: `L` (turn left through 60 degrees), `R` (turn right through 60 degrees), `F` (move forward) and `M` (also move forward).
-X>
-X>     The initial sentence of the system is the single letter `M`.
-X>
-X>     The production rules are specified as follows:
-X>
-X>     ```text
-X>     L -> L
-X>     R -> R
-X>     F -> FLMLFRMRFRMRFLMLF
-X>     M -> MRFRMLFLMLFLMRFRM
-X>     ```
-X>
-X>     Render this L-system. _Note_: you will need to decrease the number of iterations of the production rules, since the size of the final sentence grows exponentially with the number of iterations.
-X>
-X>     Now, notice the symmetry between `L` and `M` in the production rules. The two "move forward" instructions can be differentiated using a `Boolean` value using the following alphabet type:
-X>
-X>     ```haskell
-X>     data Alphabet = L | R | F Boolean
-X>     ```
-X>
-X>     Implement this L-system again using this representation of the alphabet.
-X> 1. (Difficult) Use a different monad `m` in the interpretation function. You might try using `Effect.Console` to write the L-system onto the console, or using `Effect.Random` to apply random "mutations" to the state type.
+ ## Exercises
+
+ 1. (Easy) Modify the L-system example above to use `fillPath` instead of `strokePath`. _Hint_: you will need to include a call to `closePath`, and move the call to `moveTo` outside of the `interpret` function.
+ 1. (Easy) Try changing the various numerical constants in the code, to understand their effect on the rendered system.
+ 1. (Medium) Break the `lsystem` function into two smaller functions. The first should build the final sentence using repeated application of `concatMap`, and the second should use `foldM` to interpret the result.
+ 1. (Medium) Add a drop shadow to the filled shape, by using the `setShadowOffsetX`, `setShadowOffsetY`, `setShadowBlur` and `setShadowColor` actions. _Hint_: use PSCi to find the types of these functions.
+ 1. (Medium) The angle of the corners is currently a constant (`pi/3`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
+
+     ```haskell
+     type Angle = Number
+     
+     data Alphabet = L Angle | R Angle | F
+     ```
+     
+     How can this new information be used in the production rules to create interesting shapes?
+ 1. (Difficult) An L-system is given by an alphabet with four letters: `L` (turn left through 60 degrees), `R` (turn right through 60 degrees), `F` (move forward) and `M` (also move forward).
+
+     The initial sentence of the system is the single letter `M`.
+
+     The production rules are specified as follows:
+
+     ```text
+     L -> L
+     R -> R
+     F -> FLMLFRMRFRMRFLMLF
+     M -> MRFRMLFLMLFLMRFRM
+     ```
+
+     Render this L-system. _Note_: you will need to decrease the number of iterations of the production rules, since the size of the final sentence grows exponentially with the number of iterations.
+
+     Now, notice the symmetry between `L` and `M` in the production rules. The two "move forward" instructions can be differentiated using a `Boolean` value using the following alphabet type:
+
+     ```haskell
+     data Alphabet = L | R | F Boolean
+     ```
+
+     Implement this L-system again using this representation of the alphabet.
+ 1. (Difficult) Use a different monad `m` in the interpretation function. You might try using `Effect.Console` to write the L-system onto the console, or using `Effect.Random` to apply random "mutations" to the state type.
 
 ## Conclusion
 
