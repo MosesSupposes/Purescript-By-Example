@@ -399,13 +399,13 @@ These two type class instances are provided in the `purescript-prelude` library.
 
 When the program is compiled, the correct type class instance for `Show` is chosen based on the inferred type of the argument to `show`. The selected instance might depend on many such instance relationships, but this complexity is not exposed to the developer.
 
- ## Exercises
 
+## Exercises
  1. (Easy) The following declaration defines a type of non-empty arrays of elements of type `a`:
 
-     ```haskell
-     data NonEmpty a = NonEmpty a (Array a)
-     ```
+```haskell
+data NonEmpty a = NonEmpty a (Array a)
+```
       
      Write an `Eq` instance for the type `NonEmpty a` which reuses the instances for `Eq a` and `Eq (Array a)`.
  1. (Medium) Write a `Semigroup` instance for `NonEmpty a` by reusing the `Semigroup` instance for `Array`.
@@ -423,13 +423,13 @@ When the program is compiled, the correct type class instance for `Show` is chos
      ```haskell
      data OneMore f a = OneMore a (f a)
      ```
-         
-     The container `OneMore f` is also has an ordering, where the new element comes before any element of `f`. Write a `Foldable` instance for `OneMore f`:
-   
-     ```haskell
-     instance foldableOneMore :: Foldable f => Foldable (OneMore f) where
-       ...
-     ```
+
+     The container `OneMore f` also has an ordering, where the new element comes before any element of `f`. Write a `Foldable` instance for `OneMore f`:
+
+```haskell
+instance foldableOneMore :: Foldable f => Foldable (OneMore f) where
+...
+```
 
 ## Multi Parameter Type Classes
 
@@ -575,7 +575,7 @@ We say that one type class is a superclass of another if every instance of the s
 
 We've already seen some examples of superclass relationships: the `Eq` class is a superclass of `Ord`, and the `Semigroup` class is a superclass of `Monoid`. For every type class instance of the `Ord` class, there must be a corresponding `Eq` instance for the same type. This makes sense, since in many cases, when the `compare` function reports that two values are incomparable, we often want to use the `Eq` class to determine if they are in fact equal.
 
-In general, it makes sense to define a superclass relationship when the laws for the subclass mention the members of the superclass. For example, it is reasonable to assume, for any pair of `Ord` and `Eq` instances, that if two values are equal under the `Eq` instance, then the `compare` function should return `EQ`. In order words, `a == b` should be true exactly when `compare a b` evaluates to `EQ`. This relationship on the level of laws justifies the superclass relationship between `Eq` and `Ord`.
+In general, it makes sense to define a superclass relationship when the laws for the subclass mention the members of the superclass. For example, it is reasonable to assume, for any pair of `Ord` and `Eq` instances, that if two values are equal under the `Eq` instance, then the `compare` function should return `EQ`. In other words, `a == b` should be true exactly when `compare a b` evaluates to `EQ`. This relationship on the level of laws justifies the superclass relationship between `Eq` and `Ord`.
 
 Another reason to define a superclass relationship is in the case where there is a clear "is-a" relationship between the two classes. That is, every member of the subclass _is a_ member of the superclass as well.
 
