@@ -94,10 +94,10 @@ Error: Test 6 failed:
 
 Notice how the input `xs` and `ys` were generated as a arrays of randomly-selected integers.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a property which asserts that merging an array with the empty array does not modify the original array.
-X> 1. (Easy) Add an appropriate error message to the remaining property for `merge`.
+ ## Exercises
+
+ 1. (Easy) Write a property which asserts that merging an array with the empty array does not modify the original array.
+ 1. (Easy) Add an appropriate error message to the remaining property for `merge`.
 
 ## Testing Polymorphic Code
 
@@ -136,10 +136,10 @@ quickCheck \xs ys ->
 
 Here, `xs` and `ys` both have type `Array Int`, since the `ints` function has been used to disambiguate the unknown type.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a function `bools` which forces the types of `xs` and `ys` to be `Array Boolean`, and add additional properties which test `mergePoly` at that type.
-X> 1. (Medium) Choose a pure function from the core libraries (for example, from the `purescript-arrays` package), and write a QuickCheck property for it, including an appropriate error message. Your property should use a helper function to fix any polymorphic type arguments to either `Int` or `Boolean`.
+ ## Exercises
+
+ 1. (Easy) Write a function `bools` which forces the types of `xs` and `ys` to be `Array Boolean`, and add additional properties which test `mergePoly` at that type.
+ 1. (Medium) Choose a pure function from the core libraries (for example, from the `purescript-arrays` package), and write a QuickCheck property for it, including an appropriate error message. Your property should use a helper function to fix any polymorphic type arguments to either `Int` or `Boolean`.
 
 ## Generating Arbitrary Data
 
@@ -243,10 +243,10 @@ quickCheck \t a ->
 
 Here, the argument `t` is a randomly-generated tree of type `Tree Int`, where the type argument disambiguated by the identity function `treeOfInt`.
 
-X> ## Exercises
-X>
-X> 1. (Medium) Create a newtype for `String` with an associated `Arbitrary` instance which generates collections of randomly-selected characters in the range `a-z`. _Hint_: use the `elements` and `arrayOf` functions from the `Test.QuickCheck.Gen` module.
-X> 1. (Difficult) Write a property which asserts that a value inserted into a tree is still a member of that tree after arbitrarily many more insertions.
+ ## Exercises
+
+ 1. (Medium) Create a newtype for `String` with an associated `Arbitrary` instance which generates collections of randomly-selected characters in the range `a-z`. _Hint_: use the `elements` and `arrayOf` functions from the `Test.QuickCheck.Gen` module.
+ 1. (Difficult) Write a property which asserts that a value inserted into a tree is still a member of that tree after arbitrarily many more insertions.
 
 ## Testing Higher-Order Functions
 
@@ -387,18 +387,18 @@ Success : Success : ...
 
 `quickCheckPure` might be useful in other situations, such as generating random input data for performance benchmarks, or generating sample form data for web applications.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write `Coarbitrary` instances for the `Byte` and `Sorted` type constructors.
-X> 1. (Medium) Write a (higher-order) property which asserts associativity of the `mergeWith f` function for any function `f`. Test your property in PSCi using `quickCheckPure`.
-X> 1. (Medium) Write `Arbitrary` and `Coarbitrary` instances for the following data type:
-X>
-X>     ```haskell
-X>     data OneTwoThree a = One a | Two a a | Three a a a
-X>     ```
-X>
-X>     _Hint_: Use the `oneOf` function defined in `Test.QuickCheck.Gen` to define your `Arbitrary` instance.
-X> 1. (Medium) Use the `all` function to simplify the result of the `quickCheckPure` function - your function should return `true` if every test passes, and `false` otherwise. Try using the `First` monoid, defined in `purescript-monoids` with the `foldMap` function to preserve the first error in case of failure.
+ ## Exercises
+
+ 1. (Easy) Write `Coarbitrary` instances for the `Byte` and `Sorted` type constructors.
+ 1. (Medium) Write a (higher-order) property which asserts associativity of the `mergeWith f` function for any function `f`. Test your property in PSCi using `quickCheckPure`.
+ 1. (Medium) Write `Arbitrary` and `Coarbitrary` instances for the following data type:
+
+     ```haskell
+     data OneTwoThree a = One a | Two a a | Three a a a
+     ```
+
+     _Hint_: Use the `oneOf` function defined in `Test.QuickCheck.Gen` to define your `Arbitrary` instance.
+ 1. (Medium) Use the `all` function to simplify the result of the `quickCheckPure` function - your function should return `true` if every test passes, and `false` otherwise. Try using the `First` monoid, defined in `purescript-monoids` with the `foldMap` function to preserve the first error in case of failure.
 
 ## Conclusion
 
