@@ -109,9 +109,9 @@ No type class instance was found for
   Data.Show.Show (Int -> Int)
 ```
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use the `showShape` function from the previous chapter to define a `Show` instance for the `Shape` type.
+ ## Exercises
+
+ 1. (Easy) Use the `showShape` function from the previous chapter to define a `Show` instance for the `Shape` type.
 
 ## Common Type Classes
 
@@ -289,18 +289,18 @@ Whatever "lifting" means in the general sense, it should be true that any reason
 
 Many standard type classes come with their own set of similar laws. The laws given to a type class give structure to the functions of that type class and allow us to study its instances in generality. The interested reader can research the laws ascribed to the standard type classes that we have seen already.
 
-X> ## Exercises
-X>
-X> 1. (Easy) The following newtype represents a complex number:
-X>
-X>     ```haskell
-X>     newtype Complex = Complex
-X>       { real :: Number
-X>       , imaginary :: Number
-X>       }
-X>     ```
-X>       
-X>     Define `Show` and `Eq` instances for `Complex`.
+ ## Exercises
+
+ 1. (Easy) The following newtype represents a complex number:
+
+     ```haskell
+     newtype Complex = Complex
+       { real :: Number
+       , imaginary :: Number
+       }
+     ```
+       
+     Define `Show` and `Eq` instances for `Complex`.
 
 ## Type Annotations
 
@@ -399,37 +399,37 @@ These two type class instances are provided in the `purescript-prelude` library.
 
 When the program is compiled, the correct type class instance for `Show` is chosen based on the inferred type of the argument to `show`. The selected instance might depend on many such instance relationships, but this complexity is not exposed to the developer.
 
-X> ## Exercises
-X>
-X> 1. (Easy) The following declaration defines a type of non-empty arrays of elements of type `a`:
-X>
-X>     ```haskell
-X>     data NonEmpty a = NonEmpty a (Array a)
-X>     ```
-X>      
-X>     Write an `Eq` instance for the type `NonEmpty a` which reuses the instances for `Eq a` and `Eq (Array a)`.
-X> 1. (Medium) Write a `Semigroup` instance for `NonEmpty a` by reusing the `Semigroup` instance for `Array`.
-X> 1. (Medium) Write a `Functor` instance for `NonEmpty`.
-X> 1. (Medium) Given any type `a` with an instance of `Ord`, we can add a new "infinite" value which is greater than any other value:
-X>
-X>     ```haskell
-X>     data Extended a = Finite a | Infinite
-X>     ```
-X>         
-X>     Write an `Ord` instance for `Extended a` which reuses the `Ord` instance for `a`.
-X> 1. (Difficult) Write a `Foldable` instance for `NonEmpty`. _Hint_: reuse the `Foldable` instance for arrays.
-X> 1. (Difficult) Given an type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
-X>
-X>     ```haskell
-X>     data OneMore f a = OneMore a (f a)
-X>     ```
-X>
-X>     The container `OneMore f` also has an ordering, where the new element comes before any element of `f`. Write a `Foldable` instance for `OneMore f`:
-X>
-X>     ```haskell
-X>     instance foldableOneMore :: Foldable f => Foldable (OneMore f) where
-X>       ...
-X>     ```
+
+## Exercises
+ 1. (Easy) The following declaration defines a type of non-empty arrays of elements of type `a`:
+
+```haskell
+data NonEmpty a = NonEmpty a (Array a)
+```
+      
+     Write an `Eq` instance for the type `NonEmpty a` which reuses the instances for `Eq a` and `Eq (Array a)`.
+ 1. (Medium) Write a `Semigroup` instance for `NonEmpty a` by reusing the `Semigroup` instance for `Array`.
+ 1. (Medium) Write a `Functor` instance for `NonEmpty`.
+ 1. (Medium) Given any type `a` with an instance of `Ord`, we can add a new "infinite" value which is greater than any other value:
+
+     ```haskell
+     data Extended a = Finite a | Infinite
+     ```
+         
+     Write an `Ord` instance for `Extended a` which reuses the `Ord` instance for `a`.
+ 1. (Difficult) Write a `Foldable` instance for `NonEmpty`. _Hint_: reuse the `Foldable` instance for arrays.
+ 1. (Difficult) Given an type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
+
+     ```haskell
+     data OneMore f a = OneMore a (f a)
+     ```
+
+     The container `OneMore f` also has an ordering, where the new element comes before any element of `f`. Write a `Foldable` instance for `OneMore f`:
+
+```haskell
+instance foldableOneMore :: Foldable f => Foldable (OneMore f) where
+...
+```
 
 ## Multi Parameter Type Classes
 
@@ -579,49 +579,49 @@ In general, it makes sense to define a superclass relationship when the laws for
 
 Another reason to define a superclass relationship is in the case where there is a clear "is-a" relationship between the two classes. That is, every member of the subclass _is a_ member of the superclass as well.
 
-X> ## Exercises
-X>
-X> 1. (Medium) Define a partial function which finds the maximum of a non-empty array of integers. Your function should have type `Partial => Array Int -> Int`. Test out your function in PSCi using `unsafePartial`. _Hint_: Use the `maximum` function from `Data.Foldable`.
-X> 1. (Medium) The `Action` class is a multi-parameter type class which defines an action of one type on another:
-X>
-X>     ```haskell
-X>     class Monoid m <= Action m a where
-X>       act :: m -> a -> a
-X>     ```
-X>           
-X>     An _action_ is a function which describes how monoidal values can be used to modify a value of another type. There are two laws for the `Action` type class:
-X>
-X>     - `act mempty a = a`
-X>     - `act (m1 <> m2) a = act m1 (act m2 a)`
-X>
-X>     That is, the action respects the operations defined by the `Monoid` class.
-X>        
-X>     For example, the natural numbers form a monoid under multiplication:
-X>
-X>     ```haskell
-X>     newtype Multiply = Multiply Int
-X>
-X>     instance semigroupMultiply :: Semigroup Multiply where
-X>       append (Multiply n) (Multiply m) = Multiply (n * m)
-X>
-X>     instance monoidMultiply :: Monoid Multiply where
-X>       mempty = Multiply 1
-X>     ```
-X>
-X>     This monoid acts on strings by repeating an input string some number of times. Write an instance which implements this action:
-X>
-X>     ```haskell
-X>     instance repeatAction :: Action Multiply String
-X>     ```
-X>
-X>     Does this instance satisfy the laws listed above?
-X> 1. (Medium) Write an instance `Action m a => Action m (Array a)`, where the action on arrays is defined by acting on each array element independently.
-X> 1. (Difficult) Given the following newtype, write an instance for `Action m (Self m)`, where the monoid `m` acts on itself using `append`:
-X>
-X>     ```haskell
-X>     newtype Self m = Self m
-X>     ```
-X> 1. (Difficult) Should the arguments of the multi-parameter type class `Action` be related by some functional dependency? Why or why not?
+ ## Exercises
+
+ 1. (Medium) Define a partial function which finds the maximum of a non-empty array of integers. Your function should have type `Partial => Array Int -> Int`. Test out your function in PSCi using `unsafePartial`. _Hint_: Use the `maximum` function from `Data.Foldable`.
+ 1. (Medium) The `Action` class is a multi-parameter type class which defines an action of one type on another:
+
+     ```haskell
+     class Monoid m <= Action m a where
+       act :: m -> a -> a
+     ```
+           
+     An _action_ is a function which describes how monoidal values can be used to modify a value of another type. There are two laws for the `Action` type class:
+
+     - `act mempty a = a`
+     - `act (m1 <> m2) a = act m1 (act m2 a)`
+
+     That is, the action respects the operations defined by the `Monoid` class.
+        
+     For example, the natural numbers form a monoid under multiplication:
+
+     ```haskell
+     newtype Multiply = Multiply Int
+
+     instance semigroupMultiply :: Semigroup Multiply where
+       append (Multiply n) (Multiply m) = Multiply (n * m)
+
+     instance monoidMultiply :: Monoid Multiply where
+       mempty = Multiply 1
+     ```
+
+     This monoid acts on strings by repeating an input string some number of times. Write an instance which implements this action:
+
+     ```haskell
+     instance repeatAction :: Action Multiply String
+     ```
+
+     Does this instance satisfy the laws listed above?
+ 1. (Medium) Write an instance `Action m a => Action m (Array a)`, where the action on arrays is defined by acting on each array element independently.
+ 1. (Difficult) Given the following newtype, write an instance for `Action m (Self m)`, where the monoid `m` acts on itself using `append`:
+
+     ```haskell
+     newtype Self m = Self m
+     ```
+ 1. (Difficult) Should the arguments of the multi-parameter type class `Action` be related by some functional dependency? Why or why not?
 
 ## A Type Class for Hashes
 
@@ -710,21 +710,21 @@ What about some more interesting types? To prove the type class law for the `Arr
 
 The source code for this chapter includes several other examples of `Hashable` instances, such as instances for the `Maybe` and `Tuple` type.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Use PSCi to test the hash functions for each of the defined instances.
-X> 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubBy` function in `Data.Array` should make this task much simpler.
-X> 1. (Medium) Write a `Hashable` instance for the following newtype which satisfies the type class law:
-X>
-X>     ```haskell
-X>     newtype Hour = Hour Int
-X>     
-X>     instance eqHour :: Eq Hour where
-X>       eq (Hour n) (Hour m) = mod n 12 == mod m 12
-X>     ```
-X>     
-X>     The newtype `Hour` and its `Eq` instance represent the type of integers modulo 12, so that 1 and 13 are identified as equal, for example. Prove that the type class law holds for your instance.
-X> 1. (Difficult) Prove the type class laws for the `Hashable` instances for `Maybe`, `Either` and `Tuple`.
+ ## Exercises
+
+ 1. (Easy) Use PSCi to test the hash functions for each of the defined instances.
+ 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubBy` function in `Data.Array` should make this task much simpler.
+ 1. (Medium) Write a `Hashable` instance for the following newtype which satisfies the type class law:
+
+     ```haskell
+     newtype Hour = Hour Int
+     
+     instance eqHour :: Eq Hour where
+       eq (Hour n) (Hour m) = mod n 12 == mod m 12
+     ```
+     
+     The newtype `Hour` and its `Eq` instance represent the type of integers modulo 12, so that 1 and 13 are identified as equal, for example. Prove that the type class law holds for your instance.
+ 1. (Difficult) Prove the type class laws for the `Hashable` instances for `Maybe`, `Either` and `Tuple`.
 
 ## Conclusion
 

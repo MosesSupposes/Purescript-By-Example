@@ -110,10 +110,10 @@ In this case, the third line uses a guard to impose the extra condition that the
 
 As this example demonstrates, guards appear on the left of the equals symbol, separated from the list of patterns by a pipe character (`|`).
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write the factorial function using pattern matching. _Hint_. Consider the two cases zero and non-zero inputs.
-X> 1. (Medium) Look up _Pascal's Rule_ for computing binomial coefficients. Use it to write a function which computes binomial coefficients using pattern matching.
+ ## Exercises
+
+ 1. (Easy) Write the factorial function using pattern matching. _Hint_. Consider the two cases zero and non-zero inputs.
+ 1. (Medium) Look up _Pascal's Rule_ for computing binomial coefficients. Use it to write a function which computes binomial coefficients using pattern matching.
 
 ## Array Patterns
 
@@ -237,11 +237,11 @@ sortPair arr = arr
 
 This way, we save ourselves from allocating a new array if the pair is already sorted.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Write a function `sameCity` which uses record patterns to test whether two `Person` records belong to the same city.
-X> 1. (Medium) What is the most general type of the `sameCity` function, taking into account row polymorphism? What about the `livesInLA` function defined above?
-X> 1. (Medium) Write a function `fromSingleton` which uses an array literal pattern to extract the sole member of a singleton array. If the array is not a singleton, your function should return a provided default value. Your function should have type `forall a. a -> Array a -> a`
+ ## Exercises
+
+ 1. (Easy) Write a function `sameCity` which uses record patterns to test whether two `Person` records belong to the same city.
+ 1. (Medium) What is the most general type of the `sameCity` function, taking into account row polymorphism? What about the `livesInLA` function defined above?
+ 1. (Medium) Write a function `fromSingleton` which uses an array literal pattern to extract the sole member of a singleton array. If the array is not a singleton, your function should return a provided default value. Your function should have type `forall a. a -> Array a -> a`
 
 ## Case Expressions
 
@@ -465,11 +465,11 @@ origin = Point { x, y }
 
 This can be useful for improving readability of code in some circumstances.
 
-X> ## Exercises
-X>
-X> 1. (Easy) Construct a value of type `Shape` which represents a circle centered at the origin with radius `10.0`.
-X> 1. (Medium) Write a function from `Shape`s to `Shape`s, which scales its argument by a factor of `2.0`, center the origin.
-X> 1. (Medium) Write a function which extracts the text from a `Shape`. It should return `Maybe String`, and use the `Nothing` constructor if the input is not constructed using `Text`.
+ ## Exercises
+
+ 1. (Easy) Construct a value of type `Shape` which represents a circle centered at the origin with radius `10.0`.
+ 1. (Medium) Write a function from `Shape`s to `Shape`s, which scales its argument by a factor of `2.0`, center the origin.
+ 1. (Medium) Write a function which extracts the text from a `Shape`. It should return `Maybe String`, and use the `Nothing` constructor if the input is not constructed using `Text`.
 
 ## Newtypes
 
@@ -552,10 +552,10 @@ In the base case, we need to find the smallest bounding rectangle of an empty `P
 
 The accumulating function `combine` is defined in a `where` block. `combine` takes a bounding rectangle computed from `foldl`'s recursive call, and the next `Shape` in the array, and uses the `union` function to compute the union of the two bounding rectangles. The `shapeBounds` function computes the bounds of a single shape using pattern matching.
 
-X> ## Exercises
-X>
-X> 1. (Medium) Extend the vector graphics library with a new operation `area` which computes the area of a `Shape`. For the purposes of this exercise, the area of a piece of text is assumed to be zero.
-X> 1. (Difficult) Extend the `Shape` type with a new data constructor `Clipped`, which clips another `Picture` to a rectangle. Extend the `shapeBounds` function to compute the bounds of a clipped picture. Note that this makes `Shape` into a recursive data type.
+ ## Exercises
+
+ 1. (Medium) Extend the vector graphics library with a new operation `area` which computes the area of a `Shape`. For the purposes of this exercise, the area of a piece of text is assumed to be zero.
+ 1. (Difficult) Extend the `Shape` type with a new data constructor `Clipped`, which clips another `Picture` to a rectangle. Extend the `shapeBounds` function to compute the bounds of a clipped picture. Note that this makes `Shape` into a recursive data type.
 
 ## Conclusion
 
