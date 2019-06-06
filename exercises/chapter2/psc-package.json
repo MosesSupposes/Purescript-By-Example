@@ -1,6 +1,6 @@
 {
   "name": "chapter2",
-  "set": "psc-0.12.5",
+  "set": "psc-0.13.0",
   "source": "https://github.com/purescript/package-sets.git",
   "depends": [
     "console",
