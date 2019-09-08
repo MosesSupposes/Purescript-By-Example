@@ -609,7 +609,7 @@ Either way, this gives a clear definition of the `findEntry` function: "`findEnt
 
 I will let you make your own decision which definition is easier to understand, but it is often useful to think of functions as building blocks in this way - each function executing a single task, and solutions assembled using function composition.
 
- ## Exercises
+## Exercises
 
  1. (Easy) Test your understanding of the `findEntry` function by writing down the types of each of its major subexpressions. For example, the type of the `head` function as used is specialized to `AddressBook -> Maybe Entry`.
  1. (Medium) Write a function which looks up an `Entry` given a street address, by reusing the existing code in `findEntry`. Test your function in PSCi.
