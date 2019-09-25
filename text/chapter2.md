@@ -94,7 +94,7 @@ Congratulations! You just compiled and executed your first PureScript program.
 
 ## Compiling for the Browser
 
-Pulp can be used to turn our PureScript code into Javascript suitable for use in the web browser, by using the `pulp browserify` command:
+Pulp can be used to turn our PureScript code into JavaScript suitable for use in the web browser, by using the `pulp browserify` command:
 
 ```text
 $ pulp browserify
@@ -105,18 +105,18 @@ $ pulp browserify
 * Browserifying...
 ```
 
-Following this, you should see a large amount of Javascript code printed to the console. This is the output of the [Browserify](http://browserify.org/) tool, applied to a standard PureScript library called the _Prelude_, as well as the code in the `src` directory. This Javascript code can be saved to a file, and included in an HTML document. If you try this, you should see the words "Hello, World!" printed to your browser's console.
+Following this, you should see a large amount of JavaScript code printed to the console. This is the output of the [Browserify](http://browserify.org/) tool, applied to a standard PureScript library called the _Prelude_, as well as the code in the `src` directory. This JavaScript code can be saved to a file, and included in an HTML document. If you try this, you should see the words "Hello, World!" printed to your browser's console.
 
 ## Removing Unused Code
 
-Pulp provides an alternative command, `pulp build`, which can be used with the `-O` option to apply _dead code elimination_, which removes unnecessary Javascript from the output. The result is much smaller:
+Pulp provides an alternative command, `pulp build`, which can be used with the `-O` option to apply _dead code elimination_, which removes unnecessary JavaScript from the output. The result is much smaller:
 
 ```text
 $ pulp build -O --to output.js
 
 * Building project in ~/my-project
 * Build successful.
-* Bundling Javascript...
+* Bundling JavaScript...
 * Bundled.
 ```
 
@@ -154,7 +154,7 @@ var PS = {};
 PS["Main"].main();
 ```
 
-This illustrates a few points about the way the PureScript compiler generates Javascript code:
+This illustrates a few points about the way the PureScript compiler generates JavaScript code:
 
 - Every module gets turned into an object, created by a wrapper function, which contains the module's exported members.
 - PureScript tries to preserve the names of variables wherever possible

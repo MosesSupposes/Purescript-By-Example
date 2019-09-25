@@ -111,7 +111,7 @@ foreign import readFileImpl
          (Eff (fs :: FS | eff) Unit)
 ```
 
-In the foreign Javascript module, `readFileImpl` would be defined as:
+In the foreign JavaScript module, `readFileImpl` would be defined as:
 
 ```javascript
 exports.readFileImpl = function(path, onSuccess, onFailure) {
