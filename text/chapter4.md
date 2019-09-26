@@ -20,7 +20,7 @@ The project has the following psc-package dependencies:
 
 - `purescript-maybe`, which defines the `Maybe` type constructor
 - `purescript-arrays`, which defines functions for working with arrays
-- `purescript-strings`, which defines functions for working with Javascript strings
+- `purescript-strings`, which defines functions for working with JavaScript strings
 - `purescript-foldable-traversable`, which defines functions for folding arrays and other data structures
 - `purescript-console`, which defines functions for printing to the console
 

@@ -6,7 +6,7 @@ This chapter will introduce two building blocks of PureScript programs: function
 
 We will build a simple address book application to manage a list of contacts. This code will introduce some new ideas from the syntax of PureScript.
 
-The front-end of our application will be the interactive mode PSCi, but it would be possible to build on this code to write a front-end in Javascript. In fact, we will do exactly that in later chapters, adding form validation and save/restore functionality.
+The front-end of our application will be the interactive mode PSCi, but it would be possible to build on this code to write a front-end in JavaScript. In fact, we will do exactly that in later chapters, adding form validation and save/restore functionality.
 
 ## Project Setup
 
@@ -322,7 +322,7 @@ showAddress addr = addr.street <> ", " <>
                    addr.state
 ```
 
-A function definition begins with the name of the function, followed by a list of argument names. The result of the function is specified after the equals sign. Fields are accessed with a dot, followed by the field name. In PureScript, string concatenation uses the diamond operator (`<>`), instead of the plus operator like in Javascript.
+A function definition begins with the name of the function, followed by a list of argument names. The result of the function is specified after the equals sign. Fields are accessed with a dot, followed by the field name. In PureScript, string concatenation uses the diamond operator (`<>`), instead of the plus operator like in JavaScript.
 
 ## Test Early, Test Often
 
@@ -505,7 +505,7 @@ Let's pick apart these two types to understand their meaning.
 
 `filter` is a curried function of two arguments. Its first argument is a function, which takes a list element and returns a `Boolean` value as a result. Its second argument is a list of elements, and the return value is another list.
 
-`head` takes a list as its argument, and returns a type we haven't seen before: `Maybe a`. `Maybe a` represents an optional value of type `a`, and provides a type-safe alternative to using `null` to indicate a missing value in languages like Javascript. We will see it again in more detail in later chapters.
+`head` takes a list as its argument, and returns a type we haven't seen before: `Maybe a`. `Maybe a` represents an optional value of type `a`, and provides a type-safe alternative to using `null` to indicate a missing value in languages like JavaScript. We will see it again in more detail in later chapters.
 
 The universally quantified types of `filter` and `head` can be _specialized_ by the PureScript compiler, to the following types:
 

@@ -71,15 +71,15 @@ Test.gcd(15)(20);
 
 ## Understanding Name Generation
 
-PureScript aims to preserve names during code generation as much as possible. In particular, most identifiers which are neither PureScript nor Javascript keywords can be expected to be preserved, at least for names of top-level declarations.
+PureScript aims to preserve names during code generation as much as possible. In particular, most identifiers which are neither PureScript nor JavaScript keywords can be expected to be preserved, at least for names of top-level declarations.
 
-If you decide to use a Javascript keyword as an identifier, the name will be escaped with a double dollar symbol. For example,
+If you decide to use a JavaScript keyword as an identifier, the name will be escaped with a double dollar symbol. For example,
 
 ```haskell
 null = []
 ```
 
-generates the following Javascript:
+generates the following JavaScript:
 
 ```javascript
 var $$null = [];
@@ -91,7 +91,7 @@ In addition, if you would like to use special characters in your identifier name
 example' = 100
 ```
 
-generates the following Javascript:
+generates the following JavaScript:
 
 ```javascript
 var example$prime = 100;
@@ -267,7 +267,7 @@ shout(require('Prelude').showNumber)(42);
 ## Using JavaScript Code From PureScript
 
 The simplest way to use JavaScript code from PureScript is to give a type to an existing JavaScript value using a _foreign import_ declaration. Foreign import
-declarations should have a corresponding Javascript declaration in a _foreign Javascript module_.
+declarations should have a corresponding JavaScript declaration in a _foreign JavaScript module_.
 
 For example, consider the `encodeURIComponent` function, which can be used from JavaScript to encode a component of a URI by escaping special characters:
 
@@ -288,7 +288,7 @@ module Data.URI where
 foreign import encodeURIComponent :: String -> String
 ```
 
-We also need to write a foreign Javascript module. If the module above is saved as `src/Data/URI.purs`, then the foreign Javascript module should be saved as
+We also need to write a foreign JavaScript module. If the module above is saved as `src/Data/URI.purs`, then the foreign JavaScript module should be saved as
 `src/Data/URI.js`:
 
 ```javascript
@@ -297,12 +297,12 @@ We also need to write a foreign Javascript module. If the module above is saved 
 exports.encodeURIComponent = encodeURIComponent;
 ```
 
-Pulp will find `.js` files in the `src` directory, and provide them to the compiler as foreign Javascript modules.
+Pulp will find `.js` files in the `src` directory, and provide them to the compiler as foreign JavaScript modules.
 
-Javascript functions and values are exported from foreign Javascript modules by assigning them to the `exports` object just like a regular CommonJS module. The `purs` compiler treats this module like a regular CommonJS module, and simply adds it as a dependency to the compiled
+JavaScript functions and values are exported from foreign JavaScript modules by assigning them to the `exports` object just like a regular CommonJS module. The `purs` compiler treats this module like a regular CommonJS module, and simply adds it as a dependency to the compiled
 PureScript module. However, when bundling code for the browser with `psc-bundle` or `pulp build -O --to`, it is very important to follow the
 pattern above, assigning exports to the `exports` object using a property assignment. This is because `psc-bundle` recognizes this format,
-allowing unused Javascript exports to be removed from bundled code.
+allowing unused JavaScript exports to be removed from bundled code.
 
 With these two pieces in place, we can now use the `encodeURIComponent` function from PureScript like any function written in PureScript.
 For example, if this declaration is saved as a module and loaded into PSCi, we can reproduce the calculation above:
@@ -319,7 +319,7 @@ This approach works well for simple JavaScript values, but is of limited use for
 
 ## Wrapping JavaScript Values
 
-We might want to wrap Javascript values and functions for a number of reasons:
+We might want to wrap JavaScript values and functions for a number of reasons:
 
 - A function takes multiple arguments, but we want to call it like a curried function.
 - We might want to use the `Effect` monad to keep track of any JavaScript side-effects.
@@ -341,7 +341,7 @@ To keep things simple, we can throw an exception in the case of an empty array. 
 foreign import unsafeHead :: forall a. Array a -> a
 ```
 
-In our foreign Javascript module, we can define `unsafeHead` as follows:
+In our foreign JavaScript module, we can define `unsafeHead` as follows:
 
 ```javascript
 exports.unsafeHead = function(arr) {
@@ -391,7 +391,7 @@ The most basic function we need will tell us whether a value is defined or not:
 foreign import isUndefined :: forall a. Undefined a -> Boolean
 ```
 
-This is easily defined in our foreign Javascript module as follows:
+This is easily defined in our foreign JavaScript module as follows:
 
 ```javascript
 exports.isUndefined = function(value) {
@@ -509,7 +509,7 @@ The effect is defined using a foreign type declaration:
 foreign import alert :: String -> Effect Unit
 ```
 
-The foreign Javascript module is straightforward, defining the `alert` function by assigning it to the `exports` variable:
+The foreign JavaScript module is straightforward, defining the `alert` function by assigning it to the `exports` variable:
 
 ```javascript
 "use strict";
@@ -707,7 +707,7 @@ There are three possibilities for the result of `FormData`:
 
 Try out the code, by running `pulp build -O --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to see what's going on in the console.
 
-_Note_: You may need to serve the HTML and Javascript files from a HTTP server locally in order to avoid certain browser-specific issues.
+_Note_: You may need to serve the HTML and JavaScript files from a HTTP server locally in order to avoid certain browser-specific issues.
 
  ## Exercises
 
