@@ -12,8 +12,7 @@ Here are the tools we will be using to set up our PureScript development environ
 
 - [`purs`](http://purescript.org) - The PureScript compiler itself.
 - [`npm`](http://npmjs.org) - The Node Package Manager, which will allow us to install the rest of our development tools.
-- [psc-package](https://github.com/purescript/psc-package) - A command-line tool that automates many of the tasks associated with managing PureScript dependencies.
-- [Pulp](https://github.com/purescript-contrib/pulp) - A command-line tool that automates many of the tasks associated with managing PureScript projects.
+- [`spago`](https://github.com/spacchetti/spago) - A command-line tool that automates many of the tasks associated with managing PureScript projects.
 
 The rest of the chapter will guide you through installing and configuring these tools.
 
@@ -36,33 +35,33 @@ Other options for installing the PureScript compiler include:
 
 If you do not have a working installation of [NodeJS](http://nodejs.org/), you should install it. This should also install the `npm` package manager on your system. Make sure you have `npm` installed and available on your path.
 
-You will also need to install the Pulp command-line tool, and the psc-package package manager using `npm`, as follows:
+Spago is a PureScript build tool and package manager. You will need to install it using `npm`, as follows:
 
 ```text
-$ npm install -g pulp psc-package 
+$ npm install -g spago
 ```
 
-This will place the `pulp` and `psc-package` command-line tools on your path. At this point, you will have all the tools needed to create your first PureScript project.
+This will place the `spago` command-line tools on your path. At this point, you will have all the necessary tools to create your first PureScript project.
 
 ## Hello, PureScript!
 
-Let's start out simple. We'll use Pulp to compile and run a simple Hello World! program.
+Let's start out simple. We'll use Spago to compile and run a simple Hello World! program.
 
-Begin by creating a project in an empty directory, using the `pulp --psc-package init` command:
+Begin by creating a project in an empty directory and use the `spago init` command to initialize the project:
 
 ```text
 $ mkdir my-project
 $ cd my-project
-$ pulp --psc-package init
-
-* Generating project skeleton in ~/my-project
+$ spago init
+Initializing a sample project or migrating an existing one..
 
 $ ls
-
-psc-package.json	src		test
+packages.dhall	spago.dhall	src		test
 ```
 
-Pulp has created two directories, `src` and `test`, and a `psc-package.json` configuration file for us. The `src` directory will contain our source files, and the `test` directory will contain our tests. We will use the `test` directory later in the book.
+Spago has created a number of directories and configuration files. The `src` directory will contain our source files and the `test` directory will contain any tests we write. The `spago.dhall` file contains the project configuration.
+
+<!-- XXX packages.dhall -->
 
 Modify the `src/Main.purs` file to contain the following content:
 
@@ -83,10 +82,9 @@ This small sample illustrates a few key ideas:
 Let's build and run this code using the following command:
 
 ```text
-$ pulp run
-
-* Building project in ~/my-project
-* Build successful.
+$ spago run
+...
+Build succeeded.
 Hello, World!
 ```
 
@@ -94,39 +92,24 @@ Congratulations! You just compiled and executed your first PureScript program.
 
 ## Compiling for the Browser
 
-Pulp can be used to turn our PureScript code into JavaScript suitable for use in the web browser, by using the `pulp browserify` command:
+Spago can be used to turn our PureScript code into JavaScript suitable for use in the web browser by using the `spago bundle-app` command:
 
 ```text
-$ pulp browserify
-
-* Browserifying project in ~/my-project
-* Building project in ~/my-project
-* Build successful.
-* Browserifying...
+$ spago bundle-app
+...
+Build succeeded.
+Bundle succeeded and output file to index.js
 ```
 
-Following this, you should see a large amount of JavaScript code printed to the console. This is the output of the [Browserify](http://browserify.org/) tool, applied to a standard PureScript library called the _Prelude_, as well as the code in the `src` directory. This JavaScript code can be saved to a file, and included in an HTML document. If you try this, you should see the words "Hello, World!" printed to your browser's console.
+All the code in the `src` directory, a standard PureScript library known as the _Prelude_ and any project dependencies have been compiled to JavaScript. The resulting code is bundled as `index.js` and has also had any unused code removed, a process known as dead-code-elimination. This `index.js` file can now be included in an HTML document. If you try this, you should see the words "Hello, World!" printed to your browser's console.
 
-## Removing Unused Code
-
-Pulp provides an alternative command, `pulp build`, which can be used with the `-O` option to apply _dead code elimination_, which removes unnecessary JavaScript from the output. The result is much smaller:
-
-```text
-$ pulp build -O --to output.js
-
-* Building project in ~/my-project
-* Build successful.
-* Bundling JavaScript...
-* Bundled.
-```
-
-Again, the generated code can be used in an HTML document. If you open `output.js`, you should see a few compiled modules which look like this:
+If you open `index.js`, you should see a few compiled modules which look like this:
 
 ```javascript
-// Generated by purs bundle 0.12.0
+// Generated by purs bundle 0.13.3
 var PS = {};
 (function(exports) {
-    "use strict";
+  "use strict";
 
   exports.log = function (s) {
     return function () {
@@ -135,29 +118,30 @@ var PS = {};
     };
   };
 })(PS["Effect.Console"] = PS["Effect.Console"] || {});
-(function(exports) {
-  // Generated by purs version 0.12.0
+(function($PS) {
+  // Generated by purs version 0.13.3
   "use strict";
-  var $foreign = PS["Effect.Console"];
-  var Data_Show = PS["Data.Show"];
-  var Data_Unit = PS["Data.Unit"];
-  var Effect = PS["Effect"];
+  $PS["Effect.Console"] = $PS["Effect.Console"] || {};
+  var exports = $PS["Effect.Console"];
+  var $foreign = $PS["Effect.Console"];
   exports["log"] = $foreign.log;
-})(PS["Effect.Console"] = PS["Effect.Console"] || {});
-(function(exports) {
-  // Generated by purs version 0.12.0
+})(PS);
+(function($PS) {
+  // Generated by purs version 0.13.3
   "use strict";
-  var Effect_Console = PS["Effect.Console"];                 
+  $PS["Main"] = $PS["Main"] || {};
+  var exports = $PS["Main"];
+  var Effect_Console = $PS["Effect.Console"];
   var main = Effect_Console.log("Hello, World!");
   exports["main"] = main;
-})(PS["Main"] = PS["Main"] || {});
+})(PS);
 PS["Main"].main();
 ```
 
 This illustrates a few points about the way the PureScript compiler generates JavaScript code:
 
 - Every module gets turned into an object, created by a wrapper function, which contains the module's exported members.
-- PureScript tries to preserve the names of variables wherever possible
+- PureScript tries to preserve the names of variables wherever possible.
 - Function applications in PureScript get turned into function applications in JavaScript.
 - The main method is run after all modules have been defined and is generated as a simple method call with no arguments.
 - PureScript code does not rely on any runtime libraries. All of the code that is generated by the compiler originated in a PureScript module somewhere which your code depended on.
@@ -166,28 +150,27 @@ These points are important since they mean that PureScript generates simple, und
 
 ## Compiling CommonJS Modules
 
-Pulp can also be used to generate CommonJS modules from PureScript code. This can be useful when using NodeJS, or just when developing a larger project which uses CommonJS modules to break code into smaller components.
+Spago can also be used to generate CommonJS modules from PureScript code. This can be useful when using NodeJS, or just when developing a larger project which uses CommonJS modules to break code into smaller components.
 
-To build CommonJS modules, use the `pulp build` command (without the `-O` option):
+To build CommonJS modules, use the `spago build` command:
 
 ```text
-$ pulp build
-
-* Building project in ~/my-project
-* Build successful.
+$ spago build
+...
+Build succeeded.
 ```
 
 The generated modules will be placed in the `output` directory by default. Each PureScript module will be compiled to its own CommonJS module, in its own subdirectory.
 
-## Tracking Dependencies with psc-package 
+## Tracking Dependencies
 
 To write the `diagonal` function (the goal of this chapter), we will need to be able to compute square roots. The `purescript-math` package contains type definitions for functions defined on the JavaScript `Math` object, so let's install it:
 
 ```text
-$ psc-package install math
+$ spago install math
 ```
 
-The `purescript-math` library sources should now be available in the `.psc-package/psc-0.12.0/math` subdirectory, and will be included when you compile your project. Note that we did not include `purescript-` from the full package name `purescript-math`. By default, Pulp uses [Bower](https://bower.io/) for dependency management, and for some nuanced reason Bower necessitated the prefix `purescript-` in front of PureScript library names. The PureScript community is slowly moving away from Bower in favor of `psc-package` and the `purescript-` prefix has been dropped. If you forget to drop the prefix, `psc-package` will give you a helpful reminder. 
+The `purescript-math` library sources should now be available in the `.spago/math/{version}/` subdirectory, and will be included when you compile your project.
 
 ## Computing Diagonals
 
@@ -219,13 +202,12 @@ Let's also modify the `main` function to use the new `diagonal` function:
 main = logShow (diagonal 3.0 4.0)
 ```
 
-Now compile and run the project again, using `pulp run`:
+Now compile and run the project again, using `spago run`:
 
 ```text
-$ pulp run
-
-* Building project in ~/my-project
-* Build successful.
+$ spago run
+...
+Build succeeded.
 5.0
 ```
 
@@ -233,10 +215,10 @@ $ pulp run
 
 The PureScript compiler also ships with an interactive REPL called PSCi. This can be very useful for testing your code and experimenting with new ideas. Let's use PSCi to test the `diagonal` function.
 
-Pulp can load source modules into PSCi automatically, via the `pulp repl` command:
+Spago can load source modules into PSCi automatically, via the `spago repl` command:
 
 ```text
-$ pulp repl
+$ spago repl
 >
 ```
 
@@ -257,7 +239,7 @@ The following commands are available:
     :paste       paste        Enter multiple lines, terminated by ^D
 ```
 
-By pressing the Tab key, you should be able to see a list of all functions available in your own code, as well as any Bower dependencies and the Prelude modules.
+By pressing the Tab key, you should be able to see a list of all functions available in your own code, as well as any project dependencies and the Prelude modules.
 
 Start by importing the `Prelude` module:
 
@@ -307,14 +289,14 @@ Array Int
 
 Try out the interactive mode now. If you get stuck at any point, simply use the Reset command `:reset` to unload any modules which may be compiled in memory.
 
- ## Exercises
+## Exercises
 
  1. (Easy) Use the `pi` constant, which is defined in the `Math` module, to write a function `circleArea` which computes the area of a circle with a given radius. Test your function using PSCi (_Hint_: don't forget to import `pi` by modifying the `import Math` statement).
- 1. (Medium) Use `psc-package install` to install the `purescript-globals` package as a dependency. Test out its functions in PSCi (_Hint_: you can use the `:browse` command in PSCi to browse the contents of a module).
+ 1. (Medium) Use `spago install` to install the `purescript-globals` package as a dependency. Test out its functions in PSCi (_Hint_: you can use the `:browse` command in PSCi to browse the contents of a module).
 
 ## Conclusion
 
-In this chapter, we set up a simple PureScript project using the Pulp tool.
+In this chapter, we set up a simple PureScript project using the Spago tool.
 
 We also wrote our first PureScript function and a JavaScript program which could be compiled and executed either in the browser or in NodeJS.
 
