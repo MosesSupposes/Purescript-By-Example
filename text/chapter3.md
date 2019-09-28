@@ -25,17 +25,16 @@ import Data.Maybe (Maybe)
 Here, we import several modules:
 
 - The `Control.Plus` module, which defines the `empty` value.
-- The `Data.List` module, which is provided by the `purescript-lists` package which can be installed using psc-package. It contains a few functions which we will need for working with linked lists.
+- The `Data.List` module, which is provided by the `purescript-lists` package which can be installed using Spago. It contains a few functions which we will need for working with linked lists.
 - The `Data.Maybe` module, which defines data types and functions for working with optional values.
 
 Notice that the imports for these modules are listed explicitly in parentheses. This is generally a good practice, as it helps to avoid conflicting imports.
 
-Assuming you have cloned the book's source code repository, the project for this chapter can be built using psc-package, with the following commands:
+Assuming you have cloned the book's source code repository, the project for this chapter can be built using Spago, with the following commands:
 
 ```text
 $ cd chapter3
-$ psc-package install 
-$ psc-package build
+$ spago build
 ```
 
 ## Simple Types
@@ -43,7 +42,7 @@ $ psc-package build
 PureScript defines three built-in types which correspond to JavaScript's primitive types: numbers, strings and booleans. These are defined in the `Prim` module, which is implicitly imported by every module. They are called `Number`, `String`, and `Boolean`, respectively, and you can see them in PSCi by using the `:type` command to print the types of some simple values:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > :type 1.0
 Number
@@ -331,13 +330,13 @@ The PSCi interactive mode allows for rapid prototyping with immediate feedback, 
 First, build the code you've written:
 
 ```text
-$ pulp build
+$ spago build
 ```
 
 Next, load PSCi, and use the `import` command to import your new module:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Data.AddressBook
 ```
@@ -387,7 +386,7 @@ We don't modify the existing `AddressBook` directly. Instead, we return a new `A
 To implement `insertEntry`, we can use the `Cons` function from `Data.List`. To see its type, open PSCi and use the `:type` command:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Data.List
 > :type Cons
@@ -489,7 +488,7 @@ We can first filter the address book, keeping only those entries with the correc
 With this high-level specification of our approach, we can calculate the type of our function. First open PSCi, and find the types of the `filter` and `head` functions:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Data.List
 > :type filter
@@ -627,6 +626,5 @@ In this chapter, we covered several new functional programming concepts:
 - Structuring code neatly using `where` expressions.
 - How to avoid null values by using the `Maybe` type.
 - Using techniques like eta conversion and function composition to refactor code into a clear specification.
-
 
 In the following chapters, we'll build on these ideas.
