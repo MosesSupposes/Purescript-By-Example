@@ -3,7 +3,7 @@ module Test.Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Console (log)
+import Effect.Class.Console (log)
 import Data.Picture (Point(..), Shape(..), Picture, bounds, showBounds)
 
 circle :: Shape
