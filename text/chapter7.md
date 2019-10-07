@@ -12,7 +12,7 @@ The example code for this chapter will be a continuation of the address book exa
 
 The source code for this chapter is defined in the files `src/Data/AddressBook.purs` and `src/Data/AddressBook/Validation.purs`.
 
-The project has a number of psc-package dependencies, many of which we have seen before. There are two new dependencies:
+The project has a number of dependencies, many of which we have seen before. There are two new dependencies:
 
 - `purescript-control`, which defines functions for abstracting control flow using type classes like `Applicative`.
 - `purescript-validation`, which defines a functor for _applicative validation_, the subject of this chapter.
