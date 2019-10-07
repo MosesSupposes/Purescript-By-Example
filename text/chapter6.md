@@ -10,7 +10,7 @@ We will also see a collection of standard type classes from PureScript's Prelude
 
 ## Project Setup
 
-The source code for this chapter is defined in the file `src/Data/Hashable.purs`. 
+The source code for this chapter is defined in the file `src/Data/Hashable.purs`.
 
 The project has the following dependencies:
 
