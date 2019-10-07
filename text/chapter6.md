@@ -188,11 +188,11 @@ class Semigroup a where
   append :: a -> a -> a
 ```
 
-Strings form a semigroup under regular string concatenation, and so do arrays. Several other standard instances are provided by the `purescript-monoid` package.
+Strings form a semigroup under regular string concatenation, and so do arrays. Several other standard instances are provided by the `purescript-prelude` package.
 
 The `<>` concatenation operator, which we have already seen, is provided as an alias for `append`.
 
-The `Monoid` type class (provided by the `purescript-monoid` package) extends the `Semigroup` type class with the concept of an empty value, called `mempty`:
+The `Monoid` type class (provided by the `purescript-prelude` package) extends the `Semigroup` type class with the concept of an empty value, called `mempty`:
 
 ```haskell
 class Semigroup m <= Monoid m where
@@ -214,7 +214,7 @@ A `Monoid` type class instance for a type describes how to _accumulate_ a result
 [1,2,3,4,5,6]
 ```
 
-The `purescript-monoid` package provides many examples of monoids and semigroups, which we will use in the rest of the book.
+The `purescript-prelude` package provides many examples of monoids and semigroups, which we will use in the rest of the book.
 
 ### Foldable
 
