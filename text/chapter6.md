@@ -204,6 +204,7 @@ Again, strings and arrays are simple examples of monoids.
 A `Monoid` type class instance for a type describes how to _accumulate_ a result with that type, by starting with an "empty" value, and combining new results. For example, we can write a function which concatenates an array of values in some monoid by using a fold. In PSCi:
 
 ```haskell
+> import Prelude
 > import Data.Monoid
 > import Data.Foldable
 
