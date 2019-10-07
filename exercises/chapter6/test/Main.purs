@@ -3,7 +3,7 @@ module Test.Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Console (logShow)
+import Effect.Class.Console (logShow)
 import Data.Hashable (hash, hashEqual)
 
 main :: Effect Unit
