@@ -311,7 +311,7 @@ This tells us that the value `false` is not matched by any pattern. In general, 
 
 If we also omit the type signature above:
 
-```purescript
+```haskell
 partialFunction true = true
 ```
 
@@ -327,7 +327,7 @@ We will see more types which involve the `=>` symbol later on in the book (they 
 
 The compiler will also generate a warning in certain cases when it can detect that cases are _redundant_ (that is, a case only matches values which would have been matched by a prior case):
 
-```purescript
+```haskell
 redundantCase :: Boolean -> Boolean
 redundantCase true = true
 redundantCase false = false
@@ -337,14 +337,12 @@ redundantCase false = false
 In this case, the last case is correctly identified as redundant:
 
 ```text
-Redundant cases have been detected.
-The definition has the following redundant cases:
+A case expression contains unreachable cases:
 
   false
 ```
 
-_Note_: PSCi does not show warnings, so to reproduce this example, you will need to
-save this function as a file and compile it using `spago build`.
+_Note_: PSCi does not show warnings, so to reproduce this example, you will need to save this function as a file and compile it using `spago build`.
 
 ## Algebraic Data Types
 
@@ -352,7 +350,7 @@ This section will introduce a feature of the PureScript type system called _Alge
 
 However, we'll first consider a motivating example, which will provide the basis of a solution to this chapter's problem of implementing a simple vector graphics library.
 
-Suppose we wanted to define a type to represent some simple shape types: lines, rectangles, circles, text, etc. In an object oriented language, we would probably define an interface or abstract class `Shape`, and one concrete subclass for each type of shape that we wanted to be able to work with.
+Suppose we wanted to define a type to represent some simple shapes: lines, rectangles, circles, text, etc. In an object oriented language, we would probably define an interface or abstract class `Shape`, and one concrete subclass for each type of shape that we wanted to be able to work with.
 
 However, this approach has one major drawback: to work with `Shape`s abstractly, it is necessary to identify all of the operations one might wish to perform, and to define them on the `Shape` interface. It becomes difficult to add new operations without breaking modularity.
 
@@ -387,7 +385,7 @@ This declaration defines `Shape` as a sum of different constructors, and for eac
 
 An algebraic data type is introduced using the `data` keyword, followed by the name of the new type and any type arguments. The type's constructors are defined after the equals symbol, and are separated by pipe characters (`|`).
 
-Let's see another example from PureScript's standard libraries. We saw the `Maybe` type, which is used to to define optional values, earlier in the book. Here is it's definition from the `purescript-maybe` package:
+Let's see another example from PureScript's standard libraries. We saw the `Maybe` type, which is used to to define optional values, earlier in the book. Here is its definition from the `purescript-maybe` package:
 
 ```haskell
 data Maybe a = Nothing | Just a
@@ -554,7 +552,7 @@ The accumulating function `combine` is defined in a `where` block. `combine` tak
 
  ## Exercises
 
- 1. (Medium) Extend the vector graphics library with a new operation `area` which computes the area of a `Shape`. For the purposes of this exercise, the area of a piece of text is assumed to be zero.
+ 1. (Medium) Extend the vector graphics library with a new operation `area` which computes the area of a `Shape`. For the purpose of this exercise, the area of a piece of text is assumed to be zero.
  1. (Difficult) Extend the `Shape` type with a new data constructor `Clipped`, which clips another `Picture` to a rectangle. Extend the `shapeBounds` function to compute the bounds of a clipped picture. Note that this makes `Shape` into a recursive data type.
 
 ## Conclusion
