@@ -8,7 +8,7 @@ The goal of this chapter is to explain why monads are a useful abstraction, and 
 
 ## Project Setup
 
-The project adds the following psc-package dependencies:
+The project adds the following dependencies:
 
 - `purescript-effect`, which defines the `Effect` monad, the subject of the second half of the chapter.
 - `purescript-aff`, an asynchronous effect monad.
@@ -405,7 +405,7 @@ Values with side-effects have different types from pure values. As such, it is n
 
 The only way in which side-effects managed by the `Effect` monad will be presented is to run a computation of type `Effect a` from JavaScript.
 
-The Pulp build tool (and other tools) provide a shortcut, by generating additional JavaScript to invoke the `main` computation when the application starts. `main` is required to be a computation in the `Effect` monad.
+The Spago build tool (and other tools) provide a shortcut, by generating additional JavaScript to invoke the `main` computation when the application starts. `main` is required to be a computation in the `Effect` monad.
 
 ## The Effect Monad
 
@@ -429,10 +429,10 @@ main = do
 
 ```
 
-If this file is saved as `src/Main.purs`, then it can be compiled and run using Pulp:
+If this file is saved as `src/Main.purs`, then it can be compiled and run using Spago:
 
 ```text
-$ pulp run
+$ spago run
 ```
 
 Running this command, you will see a randomly chosen number between `0` and `1` printed to the console.
