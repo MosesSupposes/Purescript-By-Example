@@ -12,7 +12,7 @@ We will also see a collection of standard type classes from PureScript's Prelude
 
 The source code for this chapter is defined in the file `src/Data/Hashable.purs`. 
 
-The project has the following psc-package dependencies:
+The project has the following dependencies:
 
 - `purescript-maybe`, which defines the `Maybe` data type, which represents optional values.
 - `purescript-tuples`, which defines the `Tuple` data type, which represents pairs of values.
@@ -20,7 +20,7 @@ The project has the following psc-package dependencies:
 - `purescript-strings`, which defines functions which operate on strings.
 - `purescript-functions`, which defines some helper functions for defining PureScript functions.
 
-The module `Data.Hashable` imports several modules provided by these psc-package packages.
+The module `Data.Hashable` imports several modules provided by these packages.
 
 ## Show Me!
 
