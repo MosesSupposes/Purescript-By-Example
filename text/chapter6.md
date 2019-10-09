@@ -419,7 +419,7 @@ When the program is compiled, the correct type class instance for `Show` is chos
 
     Write an `Ord` instance for `Extended a` which reuses the `Ord` instance for `a`.
  1. (Difficult) Write a `Foldable` instance for `NonEmpty`. _Hint_: reuse the `Foldable` instance for arrays.
- 1. (Difficult) Given an type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
+ 1. (Difficult) Given a type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
 
      ```haskell
      data OneMore f a = OneMore a (f a)
