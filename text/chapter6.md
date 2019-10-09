@@ -370,7 +370,7 @@ instance showT2 :: Show T where
 This module will not compile. The overlapping instances rule will be enforced, resulting in an error:
 
 ```text
-Overlapping instances found for Data.Show.Show T
+Overlapping type class instances found for Data.Show.Show T
 ```
 
 The overlapping instances rule is enforced so that automatic selection of type class instances is a predictable process. If we allowed two type class instances for a type to exist, then either could be chosen depending on the order of module imports, and that could lead to unpredictable behavior of the program at runtime, which is undesirable.
