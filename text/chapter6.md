@@ -714,7 +714,7 @@ The source code for this chapter includes several other examples of `Hashable` i
  ## Exercises
 
  1. (Easy) Use PSCi to test the hash functions for each of the defined instances.
- 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubBy` function in `Data.Array` should make this task much simpler.
+ 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubByEq` function in `Data.Array` should make this task much simpler.
  1. (Medium) Write a `Hashable` instance for the following newtype which satisfies the type class law:
 
      ```haskell
