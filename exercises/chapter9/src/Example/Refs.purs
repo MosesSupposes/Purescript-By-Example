@@ -17,7 +17,7 @@ import Partial.Unsafe (unsafePartial)
 
 render :: Context2D -> Int -> Effect Unit
 render ctx count = void do
-  _ <- setFillStyle ctx "#FFFFFF" 
+  _ <- setFillStyle ctx "#FFFFFF"
 
   _ <- fillPath ctx $ rect ctx
     { x: 0.0
@@ -26,16 +26,16 @@ render ctx count = void do
     , height: 600.0
     }
 
-  _ <- setFillStyle ctx "#00FF00" 
+  _ <- setFillStyle ctx "#00FF00"
 
   withContext ctx do
     let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
     let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
 
     _ <- translate ctx { translateX: 300.0, translateY:  300.0 }
-    _ <- rotate ctx (toNumber count * Math.pi / 18.0) 
+    _ <- rotate ctx (toNumber count * Math.pi / 18.0)
     _ <- scale ctx { scaleX: scaleX, scaleY: scaleY }
-    _ <- translate ctx { translateX: -100.0, translateY: -100.0 } 
+    _ <- translate ctx { translateX: -100.0, translateY: -100.0 }
 
     fillPath ctx $ rect ctx
       { x: 0.0
@@ -51,10 +51,10 @@ main = void $ unsafePartial do
 
   clickCount <- Ref.new 0
 
-  render ctx 0 
+  render ctx 0
 
   node <- querySelector "#canvas"
   for_ node $ addEventListener "click" $ void do
     logShow "Mouse clicked!"
     count <- Ref.modify (\count -> count + 1) clickCount
-    render ctx count 
+    render ctx count

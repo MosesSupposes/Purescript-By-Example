@@ -17,8 +17,8 @@ main = void $ unsafePartial do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
 
-  _ <- setFillStyle ctx "#FF0000" 
-  _ <- setStrokeStyle ctx "#000000" 
+  _ <- setFillStyle ctx "#FF0000"
+  _ <- setStrokeStyle ctx "#000000"
 
   for_ (1 .. 100) \_ -> do
     x <- random

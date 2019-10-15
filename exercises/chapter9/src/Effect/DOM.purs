@@ -2,7 +2,7 @@ module Effect.DOM where
 
 import Prelude
 
-import Effect (Effect) 
+import Effect (Effect)
 import Data.Function.Uncurried (Fn3, runFn3)
 import Data.Maybe (Maybe(..))
 
