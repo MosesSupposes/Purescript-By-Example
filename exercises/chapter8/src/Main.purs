@@ -34,19 +34,19 @@ type RedditPost = { title :: String, selftext :: Maybe String, id :: String }
 
 textInput :: DOM.Document -> Effect DOM.Element
 textInput document = do
-  element     <- DOM.createElement "input" document 
+  element     <- DOM.createElement "input" document
   DOM.setAttribute "type" "text" element
-  pure element 
- 
+  pure element
+
 label :: String -> DOM.Document -> Effect DOM.Element
 label text document = do
   elem <- DOM.createElement "label" document
   DOM.setTextContent text (DOM.toNode elem)
-  pure elem 
+  pure elem
 
 button :: String -> (Event.Event -> Effect Unit) -> DOM.Document -> Effect DOM.Element
 button text onClick document = do
-  elem      <- DOM.createElement "button" document 
+  elem      <- DOM.createElement "button" document
   _         <- DOM.setTextContent text (DOM.toNode elem)
   let target = DOM.toEventTarget elem
   listener  <- Event.eventListener onClick
@@ -54,7 +54,7 @@ button text onClick document = do
   pure elem
 
 section :: DOM.Document -> Effect DOM.Element
-section document = DOM.createElement "section" document 
+section document = DOM.createElement "section" document
 
 div :: DOM.Document -> Effect DOM.Element
 div = DOM.createElement "div"
@@ -77,7 +77,7 @@ link href text document = do
 
 post :: RedditPost -> DOM.Document -> Effect DOM.Element
 post redditPost document = do
-  container <- div document 
+  container <- div document
   a         <- link ("https://www.reddit.com/r/purescript/comments/" <> redditPost.id) redditPost.title document
   paragraph <- p document
   let text  = fromMaybe "" redditPost.selftext
@@ -90,21 +90,21 @@ post redditPost document = do
 posts :: Array RedditPost -> DOM.Document -> Effect DOM.Element
 posts redditPosts document = do
   list <- ul document
-  DOM.setId "posts" list 
+  DOM.setId "posts" list
   let listNode = DOM.toNode list
   foreachE redditPosts \redditPost -> do
     listItem <- li document
     item <- post redditPost document
     DOM.appendChild (DOM.toNode item) (DOM.toNode listItem) # void
     DOM.appendChild (DOM.toNode listItem) listNode # void
-  pure list 
+  pure list
 
 liftEither :: forall a b. String -> Either a b -> Aff b
 liftEither errorMessage (Left err) = throwError (error errorMessage)
 liftEither _ (Right val) = pure val
 
 liftMaybe :: forall a. String -> Maybe a -> Aff a
-liftMaybe errorMessage = maybe (throwError (error errorMessage)) pure 
+liftMaybe errorMessage = maybe (throwError (error errorMessage)) pure
 
 controls :: DOM.Document -> Effect DOM.Element
 controls document = do
@@ -118,76 +118,74 @@ controls document = do
   DOM.appendChild (DOM.toNode input) containerNode # void
   DOM.appendChild (DOM.toNode goButton) containerNode # void
   pure container
-    
+
     where
 
       onClick :: Event.Event -> Effect Unit
       onClick event = launchAff_ do
-        either <- try doAjax 
-        case either of 
+        either <- try doAjax
+        case either of
           Right _ -> Console.log "Ajax complete!" # liftEffect
           Left error -> liftEffect $ Console.error ("Error performing ajax request to reddit: " <> (show error))
-      
+
         where
           doAjax :: Aff Unit
           doAjax = do
-            input         <- DOM.getElementById "subreddit" (DOM.toNonElementParentNode document) 
+            input         <- DOM.getElementById "subreddit" (DOM.toNonElementParentNode document)
                               # liftEffect
                               >>= liftMaybe "Couldn't find subreddit text field"
-            value         <- traverse HTMLInput.value (HTMLInput.fromElement input) 
+            value         <- traverse HTMLInput.value (HTMLInput.fromElement input)
                               # liftEffect  >>= liftMaybe "Subreddit Element is not an input field"
             neVal         <- NonEmpty.fromString value # liftMaybe "Subreddit is empty"
             redditPosts   <- fetchPosts $ NonEmpty.toString neVal
-            postsSection  <- DOM.getElementById "posts" (DOM.toNonElementParentNode document) 
+            postsSection  <- DOM.getElementById "posts" (DOM.toNonElementParentNode document)
                               # liftEffect
                               >>= liftMaybe "Couldn't find the 'posts' section"
             let postsSectionNode = DOM.toNode postsSection
-            parent        <- DOM.parentNode (DOM.toNode postsSection) 
-                              # liftEffect 
+            parent        <- DOM.parentNode (DOM.toNode postsSection)
+                              # liftEffect
                               >>= liftMaybe "Couldn't find the parent of the 'posts' section"
             newPostsElem  <- posts redditPosts document # liftEffect
             DOM.removeChild postsSectionNode parent # liftEffect # void
             DOM.appendChild (DOM.toNode newPostsElem) parent # liftEffect # void
 
-            
+
       fetchPosts :: String -> Aff (Array RedditPost)
       fetchPosts subreddit = do
         let url = "https://www.reddit.com/r/" <> subreddit <> "/new.json"
-        json <- Affjax.get ResponseFormat.json url <#> _.body >>= 
+        json <- Affjax.get ResponseFormat.json url <#> _.body >>=
                   liftEither "Request to reddit failed to decode"
         liftMaybe "Couldn't properly decode json" (spy "maybeChildren" $  maybeChildren (spy "original" json))
-     
+
         where
-              
+
            maybeChildren :: Json -> Maybe (Array RedditPost)
-           maybeChildren json = 
+           maybeChildren json =
              JSON.toObject (spy "maybeJson" json) >>=
                Object.lookup "data" >>= JSON.toObject >>=
                Object.lookup "children" >>= JSON.toArray >>=
                traverse childToRecord
 
-           childToRecord :: Json -> Maybe RedditPost 
+           childToRecord :: Json -> Maybe RedditPost
            childToRecord json = do
              obj           <- JSON.toObject (spy "json" json)
              dataObj       <- Object.lookup "data" obj >>= JSON.toObject
              title         <- Object.lookup "title" dataObj >>= JSON.toString
-             let selftext  =  Object.lookup "selftext" dataObj >>= JSON.toString 
+             let selftext  =  Object.lookup "selftext" dataObj >>= JSON.toString
              id            <- Object.lookup "id" dataObj >>= JSON.toString
              pure { title, selftext, id }
-                
+
 main :: Effect Unit
 main = do
   window        <- HTML.window
   htmlDocument  <- HTML.document window
   let document  =  HTML.toDocument htmlDocument
   maybeBody     <- HTML.body htmlDocument
-  case maybeBody of 
-    Nothing   -> Console.error "no body element found!" 
+  case maybeBody of
+    Nothing   -> Console.error "no body element found!"
     Just body -> do
-      ctrls <- controls document 
+      ctrls <- controls document
       let bodyNode = HTML.toNode body
       DOM.appendChild (DOM.toNode ctrls) bodyNode # void
       postsList <- posts [] document
-      DOM.appendChild (DOM.toNode postsList) bodyNode # void 
-
-
+      DOM.appendChild (DOM.toNode postsList) bodyNode # void
