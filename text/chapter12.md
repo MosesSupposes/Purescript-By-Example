@@ -6,7 +6,7 @@ In this chapter, we will see how the tools we have seen so far - namely monad tr
 
 ## Project Setup
 
-The source code for this chapter can be compiled and run using `pulp run`. It is also necessary to install the `request` module using NPM:
+The source code for this chapter can be compiled and run using `spago run`. It is also necessary to install the `request` module using NPM:
 
 ```text
 npm install
