@@ -21,7 +21,10 @@ The `Example/Rectangle.purs` file contains a simple introductory example, which 
 
 The `main` action starts, like in the other modules, by using the `getCanvasElementById` action to get a reference to the canvas object, and the `getContext2D` action to access the 2D rendering context for the canvas:
 
+The `void` function takes a functor and replace its value with `Unit`. In the example it is used to make `main` to conform with its signature.
+
 ```haskell
+main :: Effect Unit
 main = void $ unsafePartial do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
