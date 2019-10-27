@@ -16,7 +16,7 @@ The `Data.Path` module contains a model of a virtual filesystem. You do not need
 
 The `FileOperations` module contains functions which use the `Data.Path` API. Solutions to the exercises can be completed in this file.
 
-The project has the following psc-package dependencies:
+The project has the following dependencies:
 
 - `purescript-maybe`, which defines the `Maybe` type constructor
 - `purescript-arrays`, which defines functions for working with arrays
@@ -92,7 +92,7 @@ When we cover _type classes_ later in the book we will see that the `map` functi
 Let's try out the `map` function in PSCi:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Prelude
 > map (\n -> n + 1) [1, 2, 3, 4, 5]
@@ -581,7 +581,7 @@ isDirectory :: Path -> Boolean
 We can try out the API in PSCi:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Data.Path
 

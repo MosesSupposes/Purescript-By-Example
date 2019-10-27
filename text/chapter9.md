@@ -6,12 +6,12 @@ This chapter will be an extended example focussing on the `purescript-canvas` pa
 
 ## Project Setup
 
-This module's project introduces the following new Bower dependencies:
+This module's project introduces the following new dependencies:
 
 - `purescript-canvas`, which gives types to methods from the HTML5 Canvas API
 - `purescript-refs`, which provides a side-effect for using _global mutable references_
 
-The source code for the chapter is broken up into a set of modules, each of which defines a `main` method. Different sections of this chapter are implemented in different files, and the `Main` module can be changed by modifying the Pulp build command to run the appropriate file's `main` method at each point.
+The source code for the chapter is broken up into a set of modules, each of which defines a `main` method. Different sections of this chapter are implemented in different files, and the `Main` module can be changed by modifying the Spago build command to run the appropriate file's `main` method at each point.
 
 The HTML file `html/index.html` contains a single `canvas` element which will be used in each example, and a `script` element to load the compiled PureScript code. To test the code for each section, open the HTML file in your browser.
 
@@ -70,7 +70,7 @@ Build the rectangle example, providing `Example.Rectangle` as the name of the ma
 
 ```text
 $ mkdir dist/
-$ pulp build -O --main Example.Rectangle --to dist/Main.js
+$ spago bundle-app --main Example.Rectangle --to dist/Main.js
 ```
 
 Now, open the `html/index.html` file and verify that this code renders a blue rectangle in the center of the canvas.
@@ -166,7 +166,7 @@ The result of this code snippet is to fill an isosceles triangle.
 Build the example by specifying `Example.Shapes` as the main module:
 
 ```text
-$ pulp build -O --main Example.Shapes --to dist/Main.js
+$ spago bundle-app --main Example.Shapes --to dist/Main.js
 ```
 
 and open `html/index.html` again to see the result. You should see the three different types of shapes rendered to the canvas.
@@ -242,7 +242,7 @@ Next, for each circle, the code creates an `Arc` based on these parameters and f
 Build this example by specifying the `Example.Random` module as the main module:
 
 ```text
-$ pulp build -O --main Example.Random --to dist/Main.js
+$ spago bundle-app --main Example.Random --to dist/Main.js
 ```
 
 and view the result by opening `html/index.html`.
@@ -399,7 +399,7 @@ This action uses `withContext` to preserve the original transformation, and then
 Build the example:
 
 ```text
-$ pulp build -O --main Example.Refs --to dist/Main.js
+$ spago bundle-app --main Example.Refs --to dist/Main.js
 ```
 
 and open the `html/index.html` file. If you click the canvas repeatedly, you should see a green rectangle rotating around the center of the canvas.
@@ -616,7 +616,7 @@ strokePath ctx $ lsystem initial productions interpret 5 initialState
 Compile the L-system example using
 
 ```text
-$ pulp build -O --main Example.LSystem --to dist/Main.js
+$ spago bundle-app --main Example.LSystem --to dist/Main.js
 ```
 
 and open `html/index.html`. You should see the Koch curve rendered to the canvas.

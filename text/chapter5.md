@@ -14,7 +14,7 @@ The goal of the chapter will be to write a library to describe and manipulate si
 
 The source code for this chapter is defined in the file `src/Data/Picture.purs`. 
 
-The project uses some psc-package packages which we have already seen, and adds the following new dependencies:
+The project uses some packages which we have already seen, and adds the following new dependencies:
 
 - `purescript-globals`, which provides access to some common JavaScript values and functions.
 - `purescript-math`, which provides access to the JavaScript `Math` module.
@@ -344,7 +344,7 @@ The definition has the following redundant cases:
 ```
 
 _Note_: PSCi does not show warnings, so to reproduce this example, you will need to
-save this function as a file and compile it using `pulp build`.
+save this function as a file and compile it using `spago build`.
 
 ## Algebraic Data Types
 
@@ -505,11 +505,11 @@ showPicture :: Picture -> Array String
 showPicture = map showShape
 ```
 
-Let's try it out. Compile your module with `pulp build` and open PSCi with `pulp repl`:
+Let's try it out. Compile your module with `spago build` and open PSCi with `spago repl`:
 
 ```text
-$ pulp build
-$ pulp repl
+$ spago build
+$ spago repl
 
 > import Data.Picture
 

@@ -4,13 +4,13 @@
 
 In this chapter, we will see a particularly elegant application of type classes to the problem of testing. Instead of testing our code by telling the compiler _how_ to test, we simply assert _what_ properties our code should have. Test cases can be generated randomly from this specification, using type classes to hide the boilerplate code of random data generation. This is called _generative testing_ (or _property-based testing_), a technique made popular by the [QuickCheck](http://www.haskell.org/haskellwiki/Introduction_to_QuickCheck1) library in Haskell.
 
-The `purescript-quickcheck` package is a port of Haskell's QuickCheck library to PureScript, and for the most part, it preserves the types and syntax of the original library. We will see how to use `purescript-quickcheck` to test a simple library, using Pulp to integrate our test suite into our development process.
+The `purescript-quickcheck` package is a port of Haskell's QuickCheck library to PureScript, and for the most part, it preserves the types and syntax of the original library. We will see how to use `purescript-quickcheck` to test a simple library, using Spago to integrate our test suite into our development process.
 
 ## Project Setup
 
-This chapter's project adds `purescript-quickcheck` as a Bower dependency.
+This chapter's project adds `purescript-quickcheck` as a dependency.
 
-In a Pulp project, test sources should be placed in the `test` directory, and the main module for the test suite should be named `Test.Main`. The test suite can be run using the `pulp test` command.
+In a Spago project, test sources should be placed in the `test` directory, and the main module for the test suite should be named `Test.Main`. The test suite can be run using the `spago test` command.
 
 ## Writing Properties
 
@@ -54,14 +54,14 @@ isSubarrayOf :: forall a. Eq a => Array a -> Array a -> Boolean
 When we run this code, `purescript-quickcheck` will attempt to disprove the properties we claimed, by generating random inputs `xs` and `ys`, and passing them to our functions. If our function returns `false` for any inputs, the property will be incorrect, and the library will raise an error. Fortunately, the library is unable to disprove our properties after generating 100 random test cases:
 
 ```text
-$ pulp test
+$ spago test
 
-* Build successful. Running tests...
-
+Installation complete.
+Build succeeded.
 100/100 test(s) passed.
 100/100 test(s) passed.
-
-* Tests OK.
+...
+Tests succeeded.
 ```
 
 If we deliberately introduce a bug into the `merge` function (for example, by changing the less-than check for a greater-than check), then an exception is thrown at runtime after the first failed test case:
@@ -404,7 +404,7 @@ Success : Success : ...
 
 In this chapter, we met the `purescript-quickcheck` package, which can be used to write tests in a declarative way using the paradigm of _generative testing_. In particular:
 
-- We saw how to automate QuickCheck tests using `pulp test`.
+- We saw how to automate QuickCheck tests using `spago test`.
 - We saw how to write properties as functions, and how to use the `<?>` operator to improve error messages.
 - We saw how the `Arbitrary` and `Coarbitrary` type classes enable generation of boilerplate testing code, and how they allow us to test higher-order properties.
 - We saw how to implement custom `Arbitrary` and `Coarbitrary` instances for our own data types.

@@ -58,6 +58,6 @@ main = void $ unsafePartial do
     initialState :: State
     initialState = { x: 120.0, y: 200.0, theta: 0.0 }
 
-  _ <- setStrokeStyle ctx "#000000" 
+  _ <- setStrokeStyle ctx "#000000"
 
   strokePath ctx $ lsystem initial productions interpret 5 initialState

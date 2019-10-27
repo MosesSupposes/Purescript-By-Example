@@ -60,9 +60,9 @@ var Test = require('Test');
 Test.gcd(15)(20);
 ```
 
-Here, I am assuming that the code was compiled with `pulp build`, which compiles PureScript modules to CommonJS modules. For that reason, I was able to reference the `gcd` function on the `Test` object, after importing the `Test` module using `require`.
+Here, I am assuming that the code was compiled with `spago build`, which compiles PureScript modules to CommonJS modules. For that reason, I was able to reference the `gcd` function on the `Test` object, after importing the `Test` module using `require`.
 
-You might also like to bundle JavaScript code for the browser, using `pulp build -O --to file.js`. In that case, you would access the `Test` module from the global PureScript namespace, which defaults to `PS`:
+You might also like to bundle JavaScript code for the browser, using `spago bundle-app --to file.js`. In that case, you would access the `Test` module from the global PureScript namespace, which defaults to `PS`:
 
 ```javascript
 var Test = PS.Test;
@@ -262,7 +262,7 @@ shout(require('Prelude').showNumber)(42);
      ```
 
      What can you say about the expressions which have these types?
- 1. (Medium) Try using the functions defined in the `purescript-arrays` package, calling them from JavaScript, by compiling the library using `pulp build` and importing modules using the `require` function in NodeJS. _Hint_: you may need to configure the output path so that the generated CommonJS modules are available on the NodeJS module path.
+ 1. (Medium) Try using the functions defined in the `purescript-arrays` package, calling them from JavaScript, by compiling the library using `spago build` and importing modules using the `require` function in NodeJS. _Hint_: you may need to configure the output path so that the generated CommonJS modules are available on the NodeJS module path.
 
 ## Using JavaScript Code From PureScript
 
@@ -297,10 +297,10 @@ We also need to write a foreign JavaScript module. If the module above is saved 
 exports.encodeURIComponent = encodeURIComponent;
 ```
 
-Pulp will find `.js` files in the `src` directory, and provide them to the compiler as foreign JavaScript modules.
+Spago will find `.js` files in the `src` directory, and provide them to the compiler as foreign JavaScript modules.
 
 JavaScript functions and values are exported from foreign JavaScript modules by assigning them to the `exports` object just like a regular CommonJS module. The `purs` compiler treats this module like a regular CommonJS module, and simply adds it as a dependency to the compiled
-PureScript module. However, when bundling code for the browser with `psc-bundle` or `pulp build -O --to`, it is very important to follow the
+PureScript module. However, when bundling code for the browser with `psc-bundle` or `spago bundle-app --to`, it is very important to follow the
 pattern above, assigning exports to the `exports` object using a property assignment. This is because `psc-bundle` recognizes this format,
 allowing unused JavaScript exports to be removed from bundled code.
 
@@ -308,7 +308,7 @@ With these two pieces in place, we can now use the `encodeURIComponent` function
 For example, if this declaration is saved as a module and loaded into PSCi, we can reproduce the calculation above:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Data.URI
 > encodeURIComponent "Hello World"
@@ -497,7 +497,7 @@ Expressions of type `Effect a` can be invoked from JavaScript like regular JavaS
 require('Main').main();
 ```
 
-When using `pulp build -O --to` or `pulp run`, this call to `main` is generated automatically, whenever the `Main` module is defined.
+When using `spago bundle-app --to` or `spago run`, this call to `main` is generated automatically, whenever the `Main` module is defined.
 
 ## Defining New Effects
 
@@ -705,7 +705,7 @@ There are three possibilities for the result of `FormData`:
 - If the outer constructor is `Right`, but the inner constructor is `Nothing`, then `getItem` also returned `Nothing` which means that the key did not exist in local storage. In this case, the application continues quietly.
 - Finally, a value matching the pattern `Right (Just _)` indicates a successfully parsed JSON document. In this case, the application updates the form fields with the appropriate values.
 
-Try out the code, by running `pulp build -O --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to see what's going on in the console.
+Try out the code, by running `spago bundle-app --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to see what's going on in the console.
 
 _Note_: You may need to serve the HTML and JavaScript files from a HTTP server locally in order to avoid certain browser-specific issues.
 

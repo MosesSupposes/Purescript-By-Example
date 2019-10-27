@@ -16,7 +16,7 @@ Our running example will be a domain-specific language for creating HTML documen
 
 ## Project Setup
 
-The project accompanying this chapter adds one new Bower dependency - the `purescript-free` library, which defines the _free monad_, one of the tools which we will be using.
+The project accompanying this chapter adds one new dependency - the `purescript-free` library, which defines the _free monad_, one of the tools which we will be using.
 
 We will test this chapter's project in PSCi.
 
@@ -52,7 +52,7 @@ render :: Element -> String
 which renders HTML elements as HTML strings. We can try out this version of the library by constructing values of the appropriate types explicitly in PSCi:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Prelude
 > import Data.DOM.Simple
@@ -234,7 +234,7 @@ module Data.DOM.Smart
 If we try this new module in PSCi, we can already see massive improvements in the conciseness of the user code:
 
 ```text
-$ pulp repl
+$ spago repl
 
 > import Prelude
 > import Data.DOM.Smart

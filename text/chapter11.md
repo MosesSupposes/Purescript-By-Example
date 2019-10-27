@@ -6,10 +6,9 @@ The goal of this chapter will be to learn about _monad transformers_, which prov
 
 ## Project Setup
 
-This module's project introduces the following new Bower dependencies:
+This module's project introduces the following new dependencies:
 
-- `purescript-maps`, which provides a data type for immutable maps
-- `purescript-sets`, which provides a data type for immutable sets
+- `purescript-ordered-collections`, which provides data typs for immutable maps and sets
 - `purescript-transformers`, which provides implementations of standard monad transformers
 - `purescript-node-readline`, which provides FFI bindings to the [`readline`](http://nodejs.org/api/readline.html) interface provided by NodeJS
 - `purescript-yargs`, which provides an applicative interface to the [`yargs`](https://www.npmjs.org/package/yargs) command line argument processing library
@@ -22,7 +21,7 @@ npm install
 
 ## How To Play The Game
 
-To run the project, use `pulp run`
+To run the project, use `spago run`
 
 By default you will see a usage message:
 
@@ -40,7 +39,7 @@ The player name is required
 Provide the player name using the `-p` option:
 
 ```text
-pulp run -- -p Phil
+spago run -- -p Phil
 >
 ```
 
@@ -51,7 +50,7 @@ The game is played on a two-dimensional grid, and the player moves by issuing co
 For reference, here is a complete walkthrough of the game:
 
 ```text
-$ pulp run -- -p Phil
+$ spago run -- -p Phil
 
 > look
 You are at (0, 0)
