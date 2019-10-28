@@ -548,7 +548,7 @@ Writing `reverse` in terms of `foldl` will be left as an exercise for the reader
 
  1. (Easy) Use `foldl` to test whether an array of boolean values are all true.
  2. (Medium) Characterize those arrays `xs` for which the function `foldl (==) false xs` returns true.
- 3. (Medium) Rewrite the `fib` function in tail recursive form using an accumulator parameter:
+ 3. (Medium) Rewrite the `fib` function in tail recursive form using an accumulator parameter.
  4. (Medium) Write `reverse` in terms of `foldl`.
 
 ## A Virtual Filesystem

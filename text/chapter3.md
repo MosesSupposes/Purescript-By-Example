@@ -80,7 +80,7 @@ Array Int
 Array Boolean
 
 > :type [1, false]
-Could not match type Int with Boolean.
+Could not match type Int with type Boolean.
 ```
 
 The error in the last example is an error from the type checker, which unsuccessfully attempted to _unify_ (i.e. make equal) the types of the two elements.

@@ -10,7 +10,7 @@ We will also see a collection of standard type classes from PureScript's Prelude
 
 ## Project Setup
 
-The source code for this chapter is defined in the file `src/Data/Hashable.purs`. 
+The source code for this chapter is defined in the file `src/Data/Hashable.purs`.
 
 The project has the following dependencies:
 
@@ -188,11 +188,11 @@ class Semigroup a where
   append :: a -> a -> a
 ```
 
-Strings form a semigroup under regular string concatenation, and so do arrays. Several other standard instances are provided by the `purescript-monoid` package.
+Strings form a semigroup under regular string concatenation, and so do arrays. Several other standard instances are provided by the `purescript-prelude` package.
 
 The `<>` concatenation operator, which we have already seen, is provided as an alias for `append`.
 
-The `Monoid` type class (provided by the `purescript-monoid` package) extends the `Semigroup` type class with the concept of an empty value, called `mempty`:
+The `Monoid` type class (provided by the `purescript-prelude` package) extends the `Semigroup` type class with the concept of an empty value, called `mempty`:
 
 ```haskell
 class Semigroup m <= Monoid m where
@@ -204,6 +204,7 @@ Again, strings and arrays are simple examples of monoids.
 A `Monoid` type class instance for a type describes how to _accumulate_ a result with that type, by starting with an "empty" value, and combining new results. For example, we can write a function which concatenates an array of values in some monoid by using a fold. In PSCi:
 
 ```haskell
+> import Prelude
 > import Data.Monoid
 > import Data.Foldable
 
@@ -214,7 +215,7 @@ A `Monoid` type class instance for a type describes how to _accumulate_ a result
 [1,2,3,4,5,6]
 ```
 
-The `purescript-monoid` package provides many examples of monoids and semigroups, which we will use in the rest of the book.
+The `purescript-prelude` package provides many examples of monoids and semigroups, which we will use in the rest of the book.
 
 ### Foldable
 
@@ -369,7 +370,7 @@ instance showT2 :: Show T where
 This module will not compile. The overlapping instances rule will be enforced, resulting in an error:
 
 ```text
-Overlapping instances found for Data.Show.Show T
+Overlapping type class instances found for Data.Show.Show T
 ```
 
 The overlapping instances rule is enforced so that automatic selection of type class instances is a predictable process. If we allowed two type class instances for a type to exist, then either could be chosen depending on the order of module imports, and that could lead to unpredictable behavior of the program at runtime, which is undesirable.
@@ -418,7 +419,7 @@ When the program is compiled, the correct type class instance for `Show` is chos
 
     Write an `Ord` instance for `Extended a` which reuses the `Ord` instance for `a`.
  1. (Difficult) Write a `Foldable` instance for `NonEmpty`. _Hint_: reuse the `Foldable` instance for arrays.
- 1. (Difficult) Given an type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
+ 1. (Difficult) Given a type constructor `f` which defines an ordered container (and so has a `Foldable` instance), we can create a new container type which includes an extra element at the front:
 
      ```haskell
      data OneMore f a = OneMore a (f a)
@@ -713,7 +714,7 @@ The source code for this chapter includes several other examples of `Hashable` i
  ## Exercises
 
  1. (Easy) Use PSCi to test the hash functions for each of the defined instances.
- 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubBy` function in `Data.Array` should make this task much simpler.
+ 1. (Medium) Use the `hashEqual` function to write a function which tests if an array has any duplicate elements, using hash-equality as an approximation to value equality. Remember to check for value equality using `==` if a duplicate pair is found. _Hint_: the `nubByEq` function in `Data.Array` should make this task much simpler.
  1. (Medium) Write a `Hashable` instance for the following newtype which satisfies the type class law:
 
      ```haskell

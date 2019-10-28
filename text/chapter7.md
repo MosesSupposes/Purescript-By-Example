@@ -224,7 +224,7 @@ Here is a simple example function defined in PSCi, which joins three names to fo
 Freeman, Phillip A
 ```
 
-Now suppose that this function forms the implementation of a (very simple!) web service with the three arguments provided as query parameters. We want to make sure that the user provided each of the three parameters, so we might use the `Maybe` type to indicate the presence or otherwise of a parameter. We can lift `fullName` over `Maybe` to create an implementation of the web service which checks for missing parameters:
+Now suppose that this function forms the implementation of a (very simple!) web service with the three arguments provided as query parameters. We want to make sure that the user provided each of the three parameters, so we might use the `Maybe` type to indicate the presence or otherwise absence of a parameter. We can lift `fullName` over `Maybe` to create an implementation of the web service which checks for missing parameters:
 
 ```text
 > import Data.Maybe
