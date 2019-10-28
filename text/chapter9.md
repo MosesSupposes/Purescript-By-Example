@@ -21,7 +21,10 @@ The `Example/Rectangle.purs` file contains a simple introductory example, which 
 
 The `main` action starts, like in the other modules, by using the `getCanvasElementById` action to get a reference to the canvas object, and the `getContext2D` action to access the 2D rendering context for the canvas:
 
+The `void` function takes a functor and replace its value with `Unit`. In the example it is used to make `main` to conform with its signature.
+
 ```haskell
+main :: Effect Unit
 main = void $ unsafePartial do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
@@ -353,7 +356,7 @@ The `Effect.Ref` module provides a type constructor for global mutable reference
 Type -> Type
 ```
 
-A value of type `Ref a` is a mutable reference cell containing a value of type `a`, much like an `STRef h a`, which we saw in the previous chapter. The difference is that, while the `ST` effect can be removed by using `runST`, the `Ref` effect does not provide a handler. Where `ST` is used to track safe, local mutation, `Ref` is used to track global mutation. As such, it should be used sparingly.
+A value of type `Ref a` is a mutable reference cell containing a value of type `a`, used to track global mutation. As such, it should be used sparingly.
 
 The `Example/Refs.purs` file contains an example which uses a `Ref` to track mouse clicks on the `canvas` element.
 
