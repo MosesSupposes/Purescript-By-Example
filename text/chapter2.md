@@ -230,13 +230,17 @@ The following commands are available:
 
     :?                        Show this help menu
     :quit                     Quit PSCi
-    :reset                    Reset
-    :browse      <module>     Browse <module>
+    :reload                   Reload all imported modules while discarding bindings
+    :clear                    Discard all imported modules and declared bindings
+    :browse      <module>     See all functions in <module>
     :type        <expr>       Show the type of <expr>
     :kind        <type>       Show the kind of <type>
-    :show        import       Show imported modules
-    :show        loaded       Show loaded modules
+    :show        import       Show all imported modules
+    :show        loaded       Show all loaded modules
+    :show        print        Show the repl's current printing function
     :paste       paste        Enter multiple lines, terminated by ^D
+    :complete    <prefix>     Show completions for <prefix> as if pressing tab
+    :print       <fn>         Set the repl's printing function to <fn> (which must be fully qualified)
 ```
 
 By pressing the Tab key, you should be able to see a list of all functions available in your own code, as well as any project dependencies and the Prelude modules.
@@ -287,7 +291,7 @@ Boolean
 Array Int
 ```
 
-Try out the interactive mode now. If you get stuck at any point, simply use the Reset command `:reset` to unload any modules which may be compiled in memory.
+Try out the interactive mode now. If you get stuck at any point, simply use the Clear command `:clear` to unload any modules which may be compiled in memory.
 
 ## Exercises
 
