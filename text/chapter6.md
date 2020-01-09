@@ -640,6 +640,9 @@ The first property looks a lot like a law for a type class, whereas the second p
 ```haskell
 newtype HashCode = HashCode Int
 
+instance hashCodeEq :: Eq HashCode where
+    eq (HashCode a) (HashCode b) = a == b
+
 hashCode :: Int -> HashCode
 hashCode h = HashCode (h `mod` 65535)
 
