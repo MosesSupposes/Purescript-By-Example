@@ -440,10 +440,10 @@ and so on. Plotting a piecewise-linear path corresponding to this set of instruc
 
 Let's translate this into the language of types and functions.
 
-We can represent our choice of alphabet by a choice of type. For our example, we can choose the following type:
+We can represent our alphabet of letters with the following ADT:
 
 ```haskell
-data Alphabet = L | R | F
+data Letter = L | R | F
 ```
 
 This data type defines one data constructor for each letter in our alphabet.
@@ -451,16 +451,16 @@ This data type defines one data constructor for each letter in our alphabet.
 How can we represent the initial sequence of letters? Well, that's just an array of letters from our alphabet, which we will call a `Sentence`:
 
 ```haskell
-type Sentence = Array Alphabet
+type Sentence = Array Letter
 
 initial :: Sentence
 initial = [F, R, R, F, R, R, F, R, R]
 ```
 
-Our production rules can be represented as a function from `Alphabet` to `Sentence` as follows:
+Our production rules can be represented as a function from `Letter` to `Sentence` as follows:
 
 ```haskell
-productions :: Alphabet -> Sentence
+productions :: Letter -> Sentence
 productions L = [L]
 productions R = [R]
 productions F = [F, L, F, R, R, F, L, F]
@@ -474,8 +474,8 @@ Here is a first approximation to the type of `lsystem`:
 
 ```haskell
 Sentence
--> (Alphabet -> Sentence)
--> (Alphabet -> Effect Unit)
+-> (Letter -> Sentence)
+-> (Letter -> Effect Unit)
 -> Int
 -> Effect Unit
 ```
@@ -486,7 +486,7 @@ The third argument represents a function which takes a letter of the alphabet an
 
 The final argument is a number representing the number of iterations of the production rules we would like to perform.
 
-The first observation is that the `lsystem` function should work for only one type of `Alphabet`, but for any type, so we should generalize our type accordingly. Let's replace `Alphabet` and `Sentence` with `a` and `Array a` for some quantified type variable `a`:
+The first observation is that the `lsystem` function should work for only one type of `Letter`, but for any type, so we should generalize our type accordingly. Let's replace `Letter` and `Sentence` with `a` and `Array a` for some quantified type variable `a`:
 
 ```haskell
 forall a. Array a
@@ -583,13 +583,13 @@ We can understand this type as saying that our interpretation function is free t
 
 This function is a good example of the power of separating data from implementation. The advantage of this approach is that we gain the freedom to interpret our data in multiple different ways. We might even factor `lsystem` into two smaller functions: the first would build the sentence using repeated application of `concatMap`, and the second would interpret the sentence using `foldM`. This is also left as an exercise for the reader.
 
-Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Alphabet` and `s` to be `State`, and for the monad `m` we can choose `Effect`. This gives us the following type:
+Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Letter` and `s` to be `State`, and for the monad `m` we can choose `Effect`. This gives us the following type:
 
 ```haskell
-interpret :: State -> Alphabet -> Effect State
+interpret :: State -> Letter -> Effect State
 ```
 
-To implement this function, we need to handle the three data constructors of the `Alphabet` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
+To implement this function, we need to handle the three data constructors of the `Letter` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
 
 ```haskell
 interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
@@ -629,12 +629,12 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
  1. (Easy) Try changing the various numerical constants in the code, to understand their effect on the rendered system.
  1. (Medium) Break the `lsystem` function into two smaller functions. The first should build the final sentence using repeated application of `concatMap`, and the second should use `foldM` to interpret the result.
  1. (Medium) Add a drop shadow to the filled shape, by using the `setShadowOffsetX`, `setShadowOffsetY`, `setShadowBlur` and `setShadowColor` actions. _Hint_: use PSCi to find the types of these functions.
- 1. (Medium) The angle of the corners is currently a constant (`tau/6`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
+ 1. (Medium) The angle of the corners is currently a constant (`tau/6`). Instead, it can be moved into the `Letter` data type, which allows it to be changed by the production rules:
 
      ```haskell
      type Angle = Number
 
-     data Alphabet = L Angle | R Angle | F
+     data Letter = L Angle | R Angle | F
      ```
 
      How can this new information be used in the production rules to create interesting shapes?
@@ -656,7 +656,7 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
      Now, notice the symmetry between `L` and `M` in the production rules. The two "move forward" instructions can be differentiated using a `Boolean` value using the following alphabet type:
 
      ```haskell
-     data Alphabet = L | R | F Boolean
+     data Letter = L | R | F Boolean
      ```
 
      Implement this L-system again using this representation of the alphabet.

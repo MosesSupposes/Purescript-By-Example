@@ -21,9 +21,9 @@ lsystem init prod interpret n state = go init n
   go s 0 = foldM interpret state s
   go s m = go (concatMap prod s) (m - 1)
 
-data Alphabet = L | R | F
+data Letter = L | R | F
 
-type Sentence = Array Alphabet
+type Sentence = Array Letter
 
 type State =
   { x :: Number
@@ -40,12 +40,12 @@ main = void $ unsafePartial do
     initial :: Sentence
     initial = [F, R, R, F, R, R, F, R, R]
 
-    productions :: Alphabet -> Sentence
+    productions :: Letter -> Sentence
     productions L = [L]
     productions R = [R]
     productions F = [F, L, F, R, R, F, L, F]
 
-    interpret :: State -> Alphabet -> Effect State
+    interpret :: State -> Letter -> Effect State
     interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
     interpret state R = pure $ state { theta = state.theta + Math.tau / 6.0 }
     interpret state F = do
