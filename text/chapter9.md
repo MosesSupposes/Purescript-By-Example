@@ -44,10 +44,10 @@ getContext2D :: CanvasElement -> Effect Context2D
 
 The graphics context `ctx` manages the state of the canvas, and provides methods to render primitive shapes, set styles and colors, and apply transformations.
 
-We continue by setting the fill style to solid blue, by using the `setFillStyle` action:
+We continue by setting the fill style to solid blue using the `setFillStyle` action. The longer hex notation of `#0000FF` may also be used for blue, but shorthand notation is easier for simple colors:
 
 ```haskell
-  setFillStyle ctx "#0000FF" 
+  setFillStyle ctx "#00F"
 ```
 
 Note that the `setFillStyle` action takes the graphics context as an argument. This is a common pattern in the `Graphics.Canvas` module.
@@ -72,7 +72,6 @@ fillPath :: forall a. Context2D -> Effect a -> Effect a
 Build the rectangle example, providing `Example.Rectangle` as the name of the main module:
 
 ```text
-$ mkdir dist/
 $ spago bundle-app --main Example.Rectangle --to dist/Main.js
 ```
 
@@ -149,7 +148,7 @@ The `translate` function can be used with both the `Rectangle` and `Arc` records
 The third type of path rendered in the `Shapes` example is a piecewise-linear path. Here is the corresponding code:
 
 ```haskell
-  setFillStyle "#FF0000" ctx
+  setFillStyle "#F00" ctx
 
   fillPath ctx $ do
     moveTo ctx 300.0 260.0
@@ -210,8 +209,8 @@ The `Example/Random.purs` file contains an example which uses the `Effect` monad
 The `main` action obtains a reference to the graphics context as before, and then sets the stroke and fill styles:
 
 ```haskell
-  setFillStyle ctx "#FF0000" 
-  setStrokeStyle ctx "#000000" 
+  setFillStyle ctx "#F00"
+  setStrokeStyle ctx "#000"
 ```
 
 Next, the code uses the `for_` function to loop over the integers between `0` and `100`:
@@ -288,9 +287,9 @@ In fact, the effect of each of these functions is to _post-multiply_ the transfo
 
 ```haskell
 transformations ctx = do
-  translate ctx { translateX: 10.0, translateY: 10.0 } 
-  scale ctx { scaleX: 2.0, scaleY: 2.0 } 
-  rotate ctx (Math.pi / 2.0) 
+  translate ctx { translateX: 10.0, translateY: 10.0 }
+  scale ctx { scaleX: 2.0, scaleY: 2.0 }
+  rotate ctx (Math.pi / 2.0)
 
   renderScene
 ```
@@ -331,7 +330,7 @@ In the interest of abstracting over common use cases using higher-order function
 withContext
   :: Context2D
   -> Effect a
-  -> Effect a          
+  -> Effect a
 ```
 
 We could rewrite the `rotated` function above using `withContext` as follows:
@@ -379,10 +378,10 @@ In the `render` function, the click count is used to determine the transformatio
       let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
       let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
 
-      translate ctx { translateX: 300.0, translateY:  300.0 } 
+      translate ctx { translateX: 300.0, translateY:  300.0 }
       rotate ctx (toNumber count * Math.pi / 18.0)
-      scale ctx { scaleX: scaleX, scaleY: scaleY } 
-      translate ctx { translateX: -100.0, translateY: -100.0 } 
+      scale ctx { scaleX: scaleX, scaleY: scaleY }
+      translate ctx { translateX: -100.0, translateY: -100.0 }
 
       fillPath ctx $ rect ctx
         { x: 0.0
@@ -538,7 +537,7 @@ Now let's try to implement the `lsystem` function. We will find that its definit
 It seems reasonable that `lsystem` should recurse on its fourth argument (of type `Int`). On each step of the recursion, the current sentence will change, having been updated by using the production rules. With that in mind, let's begin by introducing names for the function arguments, and delegating to a helper function:
 
 ```haskell
-lsystem :: forall a s 
+lsystem :: forall a s
          . Array a
         -> (a -> Array a)
         -> (s -> a -> Effect s)
@@ -634,10 +633,10 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
 
      ```haskell
      type Angle = Number
-     
+
      data Alphabet = L Angle | R Angle | F
      ```
-     
+
      How can this new information be used in the production rules to create interesting shapes?
  1. (Difficult) An L-system is given by an alphabet with four letters: `L` (turn left through 60 degrees), `R` (turn right through 60 degrees), `F` (move forward) and `M` (also move forward).
 

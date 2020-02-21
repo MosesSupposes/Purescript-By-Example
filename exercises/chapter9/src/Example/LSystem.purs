@@ -51,13 +51,13 @@ main = void $ unsafePartial do
     interpret state F = do
       let x = state.x + Math.cos state.theta * 1.5
           y = state.y + Math.sin state.theta * 1.5
-      _ <- moveTo ctx state.x state.y
-      _ <- lineTo ctx x y
+      moveTo ctx state.x state.y
+      lineTo ctx x y
       pure { x, y, theta: state.theta }
 
     initialState :: State
     initialState = { x: 120.0, y: 200.0, theta: 0.0 }
 
-  _ <- setStrokeStyle ctx "#000000"
+  setStrokeStyle ctx "#000"
 
   strokePath ctx $ lsystem initial productions interpret 5 initialState

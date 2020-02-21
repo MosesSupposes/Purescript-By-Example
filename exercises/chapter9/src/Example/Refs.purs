@@ -17,25 +17,25 @@ import Partial.Unsafe (unsafePartial)
 
 render :: Context2D -> Int -> Effect Unit
 render ctx count = void do
-  _ <- setFillStyle ctx "#FFFFFF"
+  setFillStyle ctx "#FFF"
 
-  _ <- fillPath ctx $ rect ctx
+  fillPath ctx $ rect ctx
     { x: 0.0
     , y: 0.0
     , width: 600.0
     , height: 600.0
     }
 
-  _ <- setFillStyle ctx "#00FF00"
+  setFillStyle ctx "#0F0"
 
   withContext ctx do
     let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
     let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
 
-    _ <- translate ctx { translateX: 300.0, translateY:  300.0 }
-    _ <- rotate ctx (toNumber count * Math.pi / 18.0)
-    _ <- scale ctx { scaleX: scaleX, scaleY: scaleY }
-    _ <- translate ctx { translateX: -100.0, translateY: -100.0 }
+    translate ctx { translateX: 300.0, translateY:  300.0 }
+    rotate ctx (toNumber count * Math.pi / 18.0)
+    scale ctx { scaleX: scaleX, scaleY: scaleY }
+    translate ctx { translateX: -100.0, translateY: -100.0 }
 
     fillPath ctx $ rect ctx
       { x: 0.0

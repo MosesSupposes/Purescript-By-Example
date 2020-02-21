@@ -13,7 +13,7 @@ main = void $ unsafePartial do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
 
-  _ <- setFillStyle ctx "#0000FF"
+  setFillStyle ctx "#00F"
 
   fillPath ctx $ rect ctx
     { x: 250.0
