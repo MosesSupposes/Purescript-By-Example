@@ -46,8 +46,8 @@ main = void $ unsafePartial do
     productions F = [F, L, F, R, R, F, L, F]
 
     interpret :: State -> Alphabet -> Effect State
-    interpret state L = pure $ state { theta = state.theta - Math.pi / 3.0 }
-    interpret state R = pure $ state { theta = state.theta + Math.pi / 3.0 }
+    interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
+    interpret state R = pure $ state { theta = state.theta + Math.tau / 6.0 }
     interpret state F = do
       let x = state.x + Math.cos state.theta * 1.5
           y = state.y + Math.sin state.theta * 1.5

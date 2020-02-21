@@ -29,11 +29,11 @@ render ctx count = void do
   setFillStyle ctx "#0F0"
 
   withContext ctx do
-    let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
-    let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
+    let scaleX = Math.sin (toNumber count * Math.tau / 8.0) + 1.5
+    let scaleY = Math.sin (toNumber count * Math.tau / 12.0) + 1.5
 
     translate ctx { translateX: 300.0, translateY:  300.0 }
-    rotate ctx (toNumber count * Math.pi / 18.0)
+    rotate ctx (toNumber count * Math.tau / 36.0)
     scale ctx { scaleX: scaleX, scaleY: scaleY }
     translate ctx { translateX: -100.0, translateY: -100.0 }
 

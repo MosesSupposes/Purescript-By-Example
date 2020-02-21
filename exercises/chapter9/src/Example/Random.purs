@@ -30,7 +30,7 @@ main = void $ unsafePartial do
          , y     : y * 600.0
          , radius: r * 50.0
          , start : 0.0
-         , end   : Math.pi * 2.0
+         , end   : Math.tau
          }
 
     fillPath ctx path

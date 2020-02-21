@@ -41,8 +41,8 @@ main = void $ unsafePartial do
     { x: 300.0
     , y: 300.0
     , radius: 50.0
-    , start: Math.pi * 5.0 / 8.0
-    , end: Math.pi * 2.0
+    , start: 0.0
+    , end: Math.tau * 2.0 / 3.0
     }
 
   setFillStyle ctx "#F00"

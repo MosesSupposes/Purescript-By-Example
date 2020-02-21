@@ -110,15 +110,15 @@ type Arc =
 
 Here, the `x` and `y` properties represent the center point, `r` is the radius, and `start` and `end` represent the endpoints of the arc in radians.
 
-For example, this code fills an arc segment centered at `(300, 300)` with radius `50`:
+For example, this code fills an arc segment centered at `(300, 300)` with radius `50`. The arc completes 2/3rds of a rotation. Note that the unit circle is flipped vertically, since the y-axis increases towards the bottom of the canvas:
 
 ```haskell
   fillPath ctx $ arc ctx
     { x      : 300.0
     , y      : 300.0
     , radius : 50.0
-    , start  : Math.pi * 5.0 / 8.0
-    , end    : Math.pi * 2.0
+    , start  : 0.0
+    , end    : Math.tau * 2.0 / 3.0
     }
 ```
 
@@ -235,7 +235,7 @@ Next, for each circle, the code creates an `Arc` based on these parameters and f
          , y     : y * 600.0
          , radius: r * 50.0
          , start : 0.0
-         , end   : Math.pi * 2.0
+         , end   : Math.tau
          }
     fillPath ctx path
     strokePath ctx path
@@ -289,7 +289,7 @@ In fact, the effect of each of these functions is to _post-multiply_ the transfo
 transformations ctx = do
   translate ctx { translateX: 10.0, translateY: 10.0 }
   scale ctx { scaleX: 2.0, scaleY: 2.0 }
-  rotate ctx (Math.pi / 2.0)
+  rotate ctx (Math.tau / 4.0)
 
   renderScene
 ```
@@ -319,7 +319,7 @@ This allows us to save the current state, apply some styles and transformations,
 ```haskell
 rotated ctx render = do
   save ctx
-  rotate Math.pi ctx
+  rotate (Math.tau / 3.0) ctx
   render
   restore ctx
 ```
@@ -338,7 +338,7 @@ We could rewrite the `rotated` function above using `withContext` as follows:
 ```haskell
 rotated ctx render =
   withContext ctx do
-    rotate Math.pi ctx
+    rotate (Math.tau / 3.0) ctx
     render
 ```
 
@@ -375,11 +375,11 @@ In the `render` function, the click count is used to determine the transformatio
 
 ```haskell
     withContext ctx do
-      let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
-      let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
+      let scaleX = Math.sin (toNumber count * Math.tau / 8.0) + 1.5
+      let scaleY = Math.sin (toNumber count * Math.tau / 12.0) + 1.5
 
       translate ctx { translateX: 300.0, translateY:  300.0 }
-      rotate ctx (toNumber count * Math.pi / 18.0)
+      rotate ctx (toNumber count * Math.tau / 36.0)
       scale ctx { scaleX: scaleX, scaleY: scaleY }
       translate ctx { translateX: -100.0, translateY: -100.0 }
 
@@ -592,8 +592,8 @@ interpret :: State -> Alphabet -> Effect State
 To implement this function, we need to handle the three data constructors of the `Alphabet` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
 
 ```haskell
-interpret state L = pure $ state { theta = state.theta - Math.pi / 3 }
-interpret state R = pure $ state { theta = state.theta + Math.pi / 3 }
+interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
+interpret state R = pure $ state { theta = state.theta + Math.tau / 6.0 }
 ```
 
 To interpret the letter `F` (move forward), we can calculate the new position of the path, render a line segment, and update the state, as follows:
@@ -629,7 +629,7 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
  1. (Easy) Try changing the various numerical constants in the code, to understand their effect on the rendered system.
  1. (Medium) Break the `lsystem` function into two smaller functions. The first should build the final sentence using repeated application of `concatMap`, and the second should use `foldM` to interpret the result.
  1. (Medium) Add a drop shadow to the filled shape, by using the `setShadowOffsetX`, `setShadowOffsetY`, `setShadowBlur` and `setShadowColor` actions. _Hint_: use PSCi to find the types of these functions.
- 1. (Medium) The angle of the corners is currently a constant (`pi/3`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
+ 1. (Medium) The angle of the corners is currently a constant (`tau/6`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
 
      ```haskell
      type Angle = Number
