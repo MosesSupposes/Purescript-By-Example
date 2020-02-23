@@ -19,10 +19,7 @@ Towards the end of this chapter, we will revisit our recurring address book exam
 
 The source code for this module is a continuation of the source code from chapters 3, 7 and 8. As such, the source tree includes the appropriate source files from those chapters.
 
-This chapter adds two new dependencies:
-
-1. The `purescript-foreign` library, which provides a data type and functions for working with _untyped data_.
-2. The `purescript-foreign-generic` library, which adds support for _datatype generic programming_ to the `purescript-foreign` library.
+This chapter intruduces the `purescript-foreign-generic` library as a dependency. This library adds support for _datatype generic programming_ to the `purescript-foreign` library. The `purescript-foreign` library is a sub-dependency and provides a data type and functions for working with _untyped data_.
 
 _Note_: to avoid browser-specific issues with local storage when the webpage is served from a local file, it might be necessary to run this chapter's project over HTTP.
 
@@ -193,14 +190,14 @@ Consider this polymorphic type, for example:
 forall a. a -> a
 ```
 
-What sort of functions have this type? Well, there is certainly one function with this type - namely, the identity function `id`, defined in the `Prelude`:
+What sort of functions have this type? Well, there is certainly one function with this type - namely, the `identity` function, defined in the `Prelude`:
 
 ```haskell
 id :: forall a. a -> a
 id a = a
 ```
 
-In fact, the `id` function is the _only_ (total) function with this type! This certainly seems to be the case (try writing an expression with this type which is not observably equivalent to `id`), but how can we be sure? We can be sure by considering the runtime representation of the type.
+In fact, the `identity` function is the _only_ (total) function with this type! This certainly seems to be the case (try writing an expression with this type which is not observably equivalent to `identity`), but how can we be sure? We can be sure by considering the runtime representation of the type.
 
 What is the runtime representation of a quantified type `forall a. t`? Well, any expression with the runtime representation for this type must have the correct runtime representation for the type `t` for any choice of type `a`. In our example above, a function of type `forall a. a -> a` must have the correct runtime representation for the types `String -> String`, `Number -> Number`, `Array Boolean -> Array Boolean`, and so on. It must take strings to strings, numbers to numbers, etc.
 
@@ -218,7 +215,7 @@ function invalid(a) {
 
 Certainly, this function takes strings to strings, numbers to numbers, etc. but it does not meet the additional condition, since it inspects the (runtime) type of its argument, so this function would not be a valid inhabitant of the type `forall a. a -> a`.
 
-Without being able to inspect the runtime type of our function argument, our only option is to return the argument unchanged, and so `id` is indeed the only inhabitant of the type `forall a. a -> a`.
+Without being able to inspect the runtime type of our function argument, our only option is to return the argument unchanged, and so `identity` is indeed the only inhabitant of the type `forall a. a -> a`.
 
 A full discussion of _parametric polymorphism_ and _parametricity_ is beyond the scope of this book. Note however, that since PureScript's types are _erased_ at runtime, a polymorphic function in PureScript _cannot_ inspect the runtime representation of its arguments (without using the FFI), and so this representation of polymorphic data is appropriate.
 
@@ -427,25 +424,39 @@ We can create a function of two arguments by using the `mkFn2` function, as foll
 ```haskell
 import Data.Function.Uncurried
 
-add :: Fn2 Int Int Int
-add = mkFn2 \n m -> m + n 
+uncurriedAdd :: Fn2 Int Int Int
+uncurriedAdd = mkFn2 \n m -> m + n
 ```
 
 and we can apply a function of two arguments by using the `runFn2` function:
 
 ```haskell
-> runFn2 add 2 10
-12
-
-> runFn2 add 3 10
+> runFn2 uncurriedAdd 3 10
 13
 ```
 
 The key here is that the compiler _inlines_ the `mkFn2` and `runFn2` functions whenever they are fully applied. The result is that the generated code is very compact:
 
 ```javascript
-var add = function (n, m) {
+var uncurriedAdd = function (n, m) {
     return m + n | 0;
+};
+```
+
+For contrast, here is a traditional curried function:
+
+```haskell
+curriedAdd :: Int -> Int -> Int
+curriedAdd n m = m + n
+```
+
+and the resulting generated code, which is less compact due to the nested functions:
+
+```javascript
+var curriedAdd = function (n) {
+    return function (m) {
+        return m + n | 0;
+    };
 };
 ```
 
@@ -517,7 +528,6 @@ The foreign JavaScript module is straightforward, defining the `alert` function 
 exports.alert = function(msg) {
     return function() {
         window.alert(msg);
-        return {};
     };
 };
 
@@ -554,7 +564,7 @@ The type of `getItem` is more interesting. It takes a key, and attempts to retri
 
 In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
 
-The code for this chapter demonstrates how a record can be serialized to JSON and stored in / retrieved from local storage. 
+The code for this chapter demonstrates how a record can be serialized to JSON and stored in / retrieved from local storage.
 
 The `Main` module defines a type for the saved form data:
 
@@ -638,7 +648,7 @@ Real-world JSON documents contain null and undefined values, so we need to be ab
 (Right Nothing)
 ```
 
-The type `Maybe Int` represents values which are either integers, or null. What if we wanted to parse more interesting values, like arrays of integers, where each element might be `null`? `decodeJSON` handles such cases as well: 
+The type `Maybe Int` represents values which are either integers, or null. What if we wanted to parse more interesting values, like arrays of integers, where each element might be `null`? `decodeJSON` handles such cases as well:
 
 ```text
 > runExcept (decodeJSON "[1,2,null]" :: F (Array (Maybe Int)))
@@ -719,7 +729,7 @@ _Note_: You may need to serve the HTML and JavaScript files from a HTTP server l
      data Tree a = Leaf a | Branch (Tree a) (Tree a)
      ```
 
-     Derive `Encode` and `Decode` instances for this type using `purescript-foreign-generic`, and verify that encoded values can correctly be decoded in PSCi.
+     Derive `Encode` and `Decode` instances for this type using `purescript-foreign-generic`, and verify that encoded values can correctly be decoded in PSCi. Hint: This requires a [Generic Instance](https://github.com/paf31/24-days-of-purescript-2016/blob/master/11.markdown#deriving-generic-instances), also see previous section on "Instance Dependencies", and finally, search the web for "eta-expansion" if you encounter recursion issues during testing.
  1. (Difficult) The following `data` type should be represented directly in JSON as either an integer or a string:
 
      ```haskell
