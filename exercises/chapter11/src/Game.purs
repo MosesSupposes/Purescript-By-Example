@@ -1,19 +1,20 @@
 module Game where
 
 import Prelude
-import Data.List as L
-import Data.Map as M
-import Data.Set as S
+
 import Control.Monad.RWS (RWS)
-import Control.Monad.Reader.Class (ask)
-import Control.Monad.State.Class (get, modify, put)
-import Control.Monad.Writer.Class (tell)
+import Control.Monad.Reader (ask)
+import Control.Monad.State (get, modify_, put)
+import Control.Monad.Writer (tell)
 import Data.Coords (Coords(..), prettyPrintCoords, coords)
 import Data.Foldable (for_)
 import Data.GameEnvironment (GameEnvironment(..))
 import Data.GameItem (GameItem(..), readItem)
 import Data.GameState (GameState(..))
+import Data.List as L
+import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Set as S
 
 type Log = L.List String
 
@@ -42,7 +43,7 @@ pickUp item = do
     _ -> tell (L.singleton "I don't see that item here.")
 
 move :: Int -> Int -> Game Unit
-move dx dy = modify (\(GameState state) -> GameState (state { player = updateCoords state.player }))
+move dx dy = modify_ (\(GameState state) -> GameState (state { player = updateCoords state.player }))
   where
   updateCoords :: Coords -> Coords
   updateCoords (Coords p) = coords (p.x + dx) (p.y + dy)

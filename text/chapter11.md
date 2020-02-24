@@ -39,7 +39,7 @@ The player name is required
 Provide the player name using the `-p` option:
 
 ```text
-spago run -- -p Phil
+spago run -a "-p Phil"
 >
 ```
 
@@ -50,7 +50,7 @@ The game is played on a two-dimensional grid, and the player moves by issuing co
 For reference, here is a complete walkthrough of the game:
 
 ```text
-$ spago run -- -p Phil
+$ spago run -a "-p Phil"
 
 > look
 You are at (0, 0)
@@ -85,19 +85,21 @@ The game is very simple, but the aim of the chapter is to use the `purescript-tr
 
 We will start by looking at some of the monads provided by the `purescript-transformers` package.
 
-The first example is the `State` monad, which provides a way to model _mutable state_ in pure code. We have already seen two approaches to mutable state provided by the `Eff` monad, namely the `REF` and `ST` effects. `State` provides a third alternative, but it is not implemented using the `Eff` monad.
+The first example is the `State` monad, which provides a way to model _mutable state_ in pure code. We have already seen an approach to mutable state provided by the `Effect` monad. `State` provides an alternative.
 
 The `State` type constructor takes two type parameters: the type `s` of the state, and the return type `a`. Even though we speak of the "`State` monad", the instance of the `Monad` type class is actually provided for the `State s` type constructor, for any type `s`.
 
 The `Control.Monad.State` module provides the following API:
 
 ```haskell
-get    :: forall s.             State s s
-put    :: forall s. s        -> State s Unit
-modify :: forall s. (s -> s) -> State s Unit
+get     :: forall s.             State s s
+gets    :: forall s. (s -> a) -> State s a
+put     :: forall s. s        -> State s Unit
+modify  :: forall s. (s -> s) -> State s s
+modify_ :: forall s. (s -> s) -> State s Unit
 ```
 
-This looks very similar to the API provided by the `REF` and `ST` effects. However, notice that we do not pass a mutable reference cell such as a `Ref` or `STRef` to the actions. The difference between `State` and the solutions provided by the `Eff` monad is that the `State` monad only supports a single piece of state which is implicit - the state is implemented as a function argument hidden by the `State` monad's data constructor, so there is no explicit reference to pass around.
+Note that these API signatures are presented in a simplified form using the `State` type constructor for now. The actual API involves `MonadState` which we'll cover in the later "Type Classes" section of this chapter, so don't worry if you see different signatures in your IDE tooltips or on Pursuit.
 
 Let's see an example. One use of the `State` monad might be to add the values in an array of numbers to the current state. We could do that by choosing `Number` as the state type `s`, and using `traverse_` to traverse the array, with a call to `modify` for each array element:
 
@@ -106,7 +108,7 @@ import Data.Foldable (traverse_)
 import Control.Monad.State
 import Control.Monad.State.Class
 
-sumArray :: Array Number -> State Number Unit
+sumArray :: Array Int -> State Int Unit
 sumArray = traverse_ \n -> modify \sum -> sum + n
 ```
 
@@ -137,7 +139,7 @@ Given the `sumArray` function above, we could use `execState` in PSCi to sum the
  1. (Easy) What is the result of replacing `execState` with `runState` or `evalState` in our example above?
  1. (Medium) A string of parentheses is _balanced_ if it is obtained by either concatenating zero-or-more shorter balanced
      strings, or by wrapping a shorter balanced string in a pair of parentheses.
-     
+
      Use the `State` monad and the `traverse_` function to write a function
 
      ```haskell
@@ -150,18 +152,18 @@ Given the `sumArray` function above, we could use `execState` in PSCi to sum the
      ```text
      > testParens ""
      true
-     
+
      > testParens "(()(())())"
      true
-     
+
      > testParens ")"
      false
-     
+
      > testParens "(()()"
      false
      ```
 
-     _Hint_: you may like to use the `toCharArray` function from the `Data.String` module to turn the input string into an array of characters.
+     _Hint_: you may like to use the `toCharArray` function from the `Data.String.CodeUnits` module to turn the input string into an array of characters.
 
 ## The Reader Monad
 
@@ -220,11 +222,11 @@ runReader :: forall r a. Reader r a -> r -> a
 
  In these exercises, we will use the `Reader` monad to build a small library for rendering documents with indentation. The "global configuration" will be a number indicating the current indentation level:
 
-    ```haskell
-    type Level = Int
-    
-    type Doc = Reader Level String
-    ```
+```haskell
+type Level = Int
+
+type Doc = Reader Level String
+```
 
  1. (Easy) Write a function `line` which renders a function at the current indentation level. Your function should have the following type:
 
@@ -232,7 +234,7 @@ runReader :: forall r a. Reader r a -> r -> a
      line :: String -> Doc
      ```
 
-     _Hint_: use the `ask` function to read the current indentation level.
+     _Hint_: use the `ask` function to read the current indentation level. The `power` function from `Data.Monoid` may be helpful too.
  1. (Easy) Use the `local` function to write a function
 
      ```haskell
@@ -356,7 +358,7 @@ Each of the three monads above: `State`, `Reader` and `Writer`, are also example
 
 What is a monad transformer? Well, as we have seen, a monad augments PureScript code with some type of side effect, which can be interpreted in PureScript by using the appropriate handler (`runState`, `runReader`, `runWriter`, etc.) This is fine if we only need to use _one_ side-effect. However, it is often useful to use more than one side-effect at once. For example, we might want to use `Reader` together with `Maybe` to express _optional results_ in the context of some global configuration. Or we might want the mutable state provided by the `State` monad together with the pure error tracking capability of the `Either` monad. This is the problem solved by _monad transformers_.
 
-Note that we have already seen that the `Eff` monad provides a partial solution to this problem, since native effects can be interleaved using the approach of _extensible effects_. Monad transformers provide another solution, and each approach has its own benefits and limitations.
+Note that we have already seen that the `Effect` monad provides a partial solution to this problem. Monad transformers provide another solution, and each approach has its own benefits and limitations.
 
 A monad transformer is a type constructor which is parameterized not only by a type, but by another type constructor. It takes one monad and turns it into another monad, adding its own variety of side-effects.
 
@@ -493,7 +495,7 @@ Note that only those log messages which were written before the error was thrown
 
 As we have seen, monad transformers can be used to build new monads on top of existing monads. For some monad transformer `t1` and some monad `m`, the application `t1 m` is also a monad. That means that we can apply a _second_ monad transformer `t2` to the result `t1 m` to construct a third monad `t2 (t1 m)`. In this way, we can construct a _stack_ of monad transformers, which combine the side-effects provided by their constituent monads.
 
-In practice, the underlying monad `m` is either the `Eff` monad, if native side-effects are required, or the `Identity` monad, defined in the `Data.Identity` module. The `Identity` monad adds no new side-effects, so transforming the `Identity` monad only provides the effects of the monad transformer. In fact, the `State`, `Reader` and `Writer` monads are implemented by transforming the `Identity` monad with `StateT`, `ReaderT` and `WriterT` respectively.
+In practice, the underlying monad `m` is either the `Effect` monad, if native side-effects are required, or the `Identity` monad, defined in the `Data.Identity` module. The `Identity` monad adds no new side-effects, so transforming the `Identity` monad only provides the effects of the monad transformer. In fact, the `State`, `Reader` and `Writer` monads are implemented by transforming the `Identity` monad with `StateT`, `ReaderT` and `WriterT` respectively.
 
 Let's see an example in which three side effects are combined. We will use the `StateT`, `WriterT` and `ExceptT` effects, with the `Identity` monad on the bottom of the stack. This monad transformer stack will provide the side effects of mutable state, accumulating a log, and pure errors.
 
@@ -509,7 +511,7 @@ type Parser = StateT String (WriterT Log (ExceptT Errors Identity))
 split :: Parser String
 split = do
   s <- get
-  lift $ tell ["The state is " <> show s]
+  lift $ tell ["The state is " <> s]
   case s of
     "" -> lift $ lift $ throwError ["Empty string"]
     _ -> do
@@ -519,10 +521,10 @@ split = do
 
 If we test this computation in PSCi, we see that the state is appended to the log for every invocation of `split`.
 
-Note that we have to remove the side-effects in the order in which they appear in the monad transformer stack: first we use `runStateT` to remove the `StateT` type constructor, then `runWriterT`, then `runExceptT`. Finally, we run the computation in the `Identity` monad by using `runIdentity`.
+Note that we have to remove the side-effects in the order in which they appear in the monad transformer stack: first we use `runStateT` to remove the `StateT` type constructor, then `runWriterT`, then `runExceptT`. Finally, we run the computation in the `Identity` monad by using `unwrap`.
 
 ```text
-> runParser p s = runIdentity $ runExceptT $ runWriterT $ runStateT p s
+> runParser p s = unwrap $ runExceptT $ runWriterT $ runStateT p s
 
 > runParser split "test"
 (Right (Tuple (Tuple "t" "est") ["The state is test"]))
@@ -623,20 +625,21 @@ class (Applicative f, Plus f) <= Alternative f
 
 `Alternative` provides two new combinators: the `empty` value, which provides a prototype for a failing computation, and the `alt` function (and its alias, `<|>`) which provides the ability to fall back to an _alternative_ computation in the case of an error.
 
-The `Data.List` module provides two useful functions for working with type constructors in the `Alternative` type class:
+The `Data.Array` module provides two useful functions for working with type constructors in the `Alternative` type class:
 
 ```haskell
-many :: forall f a. Alternative f => Lazy (f (List a)) => f a -> f (List a)
-some :: forall f a. Alternative f => Lazy (f (List a)) => f a -> f (List a)
+many :: forall f a. Alternative f => Lazy (f (Array a)) => f a -> f (Array a)
+some :: forall f a. Alternative f => Lazy (f (Array a)) => f a -> f (Array a)
 ```
+
+There is also an equivalent `many` and `some` for `Data.List`
 
 The `many` combinator uses the `Alternative` type class to repeatedly run a computation _zero-or-more_ times. The `some` combinator is similar, but requires at least the first computation to succeed.
 
 In the case of our `Parser` monad transformer stack, there is an instance of `Alternative` induced by the `ExceptT` component, which supports failure by composing errors in different branches using a `Monoid` instance (this is why we chose `Array String` for our `Errors` type). This means that we can use the `many` and `some` functions to run a parser multiple times:
 
 ```text
-> import Split
-> import Control.Alternative
+> import Data.Array (many)
 
 > runParser (many split) "test"
 (Right (Tuple (Tuple ["t", "e", "s", "t"] "")
@@ -648,8 +651,6 @@ In the case of our `Parser` monad transformer stack, there is an instance of `Al
 ```
 
 Here, the input string `"test"` has been repeatedly split to return an array of four single-character strings, the leftover state is empty, and the log shows that we applied the `split` combinator four times.
-
-Other examples of `Alternative` type constructors are `Maybe` and `Array`.
 
 ## Monad Comprehensions
 
@@ -807,7 +808,7 @@ type Game = RWS GameEnvironment Log GameState
 
 ## Implementing Game Logic
 
-Our game is going to be built from simple actions defined in the `Game` monad, by reusing the actions from the `Reader`, `Writer` and `State` monads. At the top level of our application, we will run the pure computations in the `Game` monad, and use the `Eff` monad to turn the results into observable side-effects, such as printing text to the console.
+Our game is going to be built from simple actions defined in the `Game` monad, by reusing the actions from the `Reader`, `Writer` and `State` monads. At the top level of our application, we will run the pure computations in the `Game` monad, and use the `Effect` monad to turn the results into observable side-effects, such as printing text to the console.
 
 One of the simplest actions in our game is the `has` action. This action tests whether the player's inventory contains a particular game item. It is defined as follows:
 
@@ -905,64 +906,52 @@ runRWS :: forall r w s a. RWS r w s a -> r -> s -> RWSResult s a w
 The front-end of our application is defined by a function `runGame`, with the following type signature:
 
 ```haskell
-runGame
-  :: forall eff
-   . GameEnvironment
-  -> Eff ( exception :: EXCEPTION
-         , readline :: RL.READLINE
-         , console :: CONSOLE
-         | eff
-         ) Unit
+runGame :: GameEnvironment -> Effect Unit
 ```
 
-The `CONSOLE` effect indicates that this function interacts with the user via the console (using the `purescript-node-readline` and `purescript-console` packages). `runGame` takes the game configuration as a function argument.
+This function interacts with the user via the console (using the `purescript-node-readline` and `purescript-console` packages). `runGame` takes the game configuration as a function argument.
 
-The `purescript-node-readline` package provides the `LineHandler` type, which represents actions in the `Eff` monad which handle user input from the terminal. Here is the corresponding API:
+The `purescript-node-readline` package provides the `LineHandler` type, which represents actions in the `Effect` monad which handle user input from the terminal. Here is the corresponding API:
 
 ```haskell
-type LineHandler eff a = String -> Eff eff a
+type LineHandler a = String -> Effect a
 
-setLineHandler
-  :: forall eff a
+foreign import setLineHandler
+  :: forall a
    . Interface
-  -> LineHandler (readline :: READLINE | eff) a
-  -> Eff (readline :: READLINE | eff) Unit
+  -> LineHandler a
+  -> Effect Unit
 ```
 
 The `Interface` type represents a handle for the console, and is passed as an argument to the functions which interact with it. An `Interface` can be created using the `createConsoleInterface` function:
 
 ```haskell
+import Node.ReadLine as RL
+
 runGame env = do
-  interface <- createConsoleInterface noCompletion
+  interface <- RL.createConsoleInterface RL.noCompletion
 ```
 
 The first step is to set the prompt at the console. We pass the `interface` handle, and provide the prompt string and indentation level:
 
 ```haskell
-  setPrompt "> " 2 interface
+  RL.setPrompt "> " 2 interface
 ```
 
 In our case, we are interested in implementing the line handler function. Our line handler is defined using a helper function in a `let` declaration, as follows:
 
 ```haskell
-lineHandler
-  :: GameState
-  -> String
-  -> Eff ( exception :: EXCEPTION
-         , console :: CONSOLE
-         , readline :: RL.READLINE
-         | eff
-         ) Unit
+lineHandler :: GameState -> String -> Effect Unit
 lineHandler currentState input = do
-  case runRWS (game (split " " input)) env currentState of
+  case runRWS (game (split (wrap " ") input)) env currentState of
     RWSResult state _ written -> do
       for_ written log
-      setLineHandler interface $ lineHandler state
-  prompt interface
+      RL.setLineHandler interface $ lineHandler state
+  RL.prompt interface
   pure unit
 ```
 
-The let binding is closed over both the game configuration, named `env`, and the console handle, named `interface`.
+The `let` binding is closed over both the game configuration, named `env`, and the console handle, named `interface`.
 
 Our handler takes an additional first argument, the game state. This is required since we need to pass the game state to `runRWS` to run the game's logic.
 
@@ -973,8 +962,8 @@ Having run the game logic, which is a pure computation, we need to print any log
 The `runGame` function finally attaches the initial line handler to the console interface, and displays the initial prompt:
 
 ```haskell
-  setLineHandler interface $ lineHandler initialGameState
-  prompt interface
+  RL.setLineHandler interface $ lineHandler initialGameState
+  RL.prompt interface
 ```
 
  ## Exercises
@@ -991,10 +980,7 @@ The final piece of the application is responsible for parsing command line optio
 `purescript-yargs` is an example of _applicative command line option parsing_. Recall that an applicative functor allows us to lift functions of arbitrary arity over a type constructor representing some type of side-effect. In the case of the `purescript-yargs` package, the functor we are interested in is the `Y` functor, which adds the side-effect of reading from command line options. It provides the following handler:
 
 ```haskell
-runY :: forall a eff.
-          YargsSetup ->
-          Y (Eff (exception :: EXCEPTION, console :: CONSOLE | eff) a) ->
-             Eff (exception :: EXCEPTION, console :: CONSOLE | eff) a
+runY :: forall a. YargsSetup -> Y (Effect a) -> Effect a
 ```
 
 This is best illustrated by example. The application's `main` function is defined using `runY` as follows:
@@ -1031,9 +1017,9 @@ Notice how we were able to use the notation afforded by the applicative operator
 
 ## Conclusion
 
-This chapter was a practical demonstration of the techniques we've learned so far, using monad transformers to build a pure specification of our game, and the `Eff` monad to build a front-end using the console.
+This chapter was a practical demonstration of the techniques we've learned so far, using monad transformers to build a pure specification of our game, and the `Effect` monad to build a front-end using the console.
 
-Because we separated our implementation from the user interface, it would be possible to create other front-ends for our game. For example, we could use the `Eff` monad to render the game in the browser using the Canvas API or the DOM.
+Because we separated our implementation from the user interface, it would be possible to create other front-ends for our game. For example, we could use the `Effect` monad to render the game in the browser using the Canvas API or the DOM.
 
 We have seen how monad transformers allow us to write safe code in an imperative style, where effects are tracked by the type system. In addition, type classes provide a powerful way to abstract over the actions provided by a monad, enabling code reuse. We were able to use standard abstractions like `Alternative` and `MonadPlus` to build useful monads by combining standard monad transformers.
 
