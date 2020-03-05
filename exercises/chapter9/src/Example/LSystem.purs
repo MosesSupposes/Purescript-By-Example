@@ -21,9 +21,9 @@ lsystem init prod interpret n state = go init n
   go s 0 = foldM interpret state s
   go s m = go (concatMap prod s) (m - 1)
 
-data Alphabet = L | R | F
+data Letter = L | R | F
 
-type Sentence = Array Alphabet
+type Sentence = Array Letter
 
 type State =
   { x :: Number
@@ -40,24 +40,24 @@ main = void $ unsafePartial do
     initial :: Sentence
     initial = [F, R, R, F, R, R, F, R, R]
 
-    productions :: Alphabet -> Sentence
+    productions :: Letter -> Sentence
     productions L = [L]
     productions R = [R]
     productions F = [F, L, F, R, R, F, L, F]
 
-    interpret :: State -> Alphabet -> Effect State
-    interpret state L = pure $ state { theta = state.theta - Math.pi / 3.0 }
-    interpret state R = pure $ state { theta = state.theta + Math.pi / 3.0 }
+    interpret :: State -> Letter -> Effect State
+    interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
+    interpret state R = pure $ state { theta = state.theta + Math.tau / 6.0 }
     interpret state F = do
       let x = state.x + Math.cos state.theta * 1.5
           y = state.y + Math.sin state.theta * 1.5
-      _ <- moveTo ctx state.x state.y
-      _ <- lineTo ctx x y
+      moveTo ctx state.x state.y
+      lineTo ctx x y
       pure { x, y, theta: state.theta }
 
     initialState :: State
     initialState = { x: 120.0, y: 200.0, theta: 0.0 }
 
-  _ <- setStrokeStyle ctx "#000000"
+  setStrokeStyle ctx "#000"
 
   strokePath ctx $ lsystem initial productions interpret 5 initialState

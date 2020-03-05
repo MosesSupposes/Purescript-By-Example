@@ -44,10 +44,10 @@ getContext2D :: CanvasElement -> Effect Context2D
 
 The graphics context `ctx` manages the state of the canvas, and provides methods to render primitive shapes, set styles and colors, and apply transformations.
 
-We continue by setting the fill style to solid blue, by using the `setFillStyle` action:
+We continue by setting the fill style to solid blue using the `setFillStyle` action. The longer hex notation of `#0000FF` may also be used for blue, but shorthand notation is easier for simple colors:
 
 ```haskell
-  setFillStyle ctx "#0000FF" 
+  setFillStyle ctx "#00F"
 ```
 
 Note that the `setFillStyle` action takes the graphics context as an argument. This is a common pattern in the `Graphics.Canvas` module.
@@ -72,7 +72,6 @@ fillPath :: forall a. Context2D -> Effect a -> Effect a
 Build the rectangle example, providing `Example.Rectangle` as the name of the main module:
 
 ```text
-$ mkdir dist/
 $ spago bundle-app --main Example.Rectangle --to dist/Main.js
 ```
 
@@ -111,15 +110,15 @@ type Arc =
 
 Here, the `x` and `y` properties represent the center point, `r` is the radius, and `start` and `end` represent the endpoints of the arc in radians.
 
-For example, this code fills an arc segment centered at `(300, 300)` with radius `50`:
+For example, this code fills an arc segment centered at `(300, 300)` with radius `50`. The arc completes 2/3rds of a rotation. Note that the unit circle is flipped vertically, since the y-axis increases towards the bottom of the canvas:
 
 ```haskell
   fillPath ctx $ arc ctx
     { x      : 300.0
     , y      : 300.0
     , radius : 50.0
-    , start  : Math.pi * 5.0 / 8.0
-    , end    : Math.pi * 2.0
+    , start  : 0.0
+    , end    : Math.tau * 2.0 / 3.0
     }
 ```
 
@@ -149,7 +148,7 @@ The `translate` function can be used with both the `Rectangle` and `Arc` records
 The third type of path rendered in the `Shapes` example is a piecewise-linear path. Here is the corresponding code:
 
 ```haskell
-  setFillStyle "#FF0000" ctx
+  setFillStyle "#F00" ctx
 
   fillPath ctx $ do
     moveTo ctx 300.0 260.0
@@ -210,8 +209,8 @@ The `Example/Random.purs` file contains an example which uses the `Effect` monad
 The `main` action obtains a reference to the graphics context as before, and then sets the stroke and fill styles:
 
 ```haskell
-  setFillStyle ctx "#FF0000" 
-  setStrokeStyle ctx "#000000" 
+  setFillStyle ctx "#F00"
+  setStrokeStyle ctx "#000"
 ```
 
 Next, the code uses the `for_` function to loop over the integers between `0` and `100`:
@@ -236,7 +235,7 @@ Next, for each circle, the code creates an `Arc` based on these parameters and f
          , y     : y * 600.0
          , radius: r * 50.0
          , start : 0.0
-         , end   : Math.pi * 2.0
+         , end   : Math.tau
          }
     fillPath ctx path
     strokePath ctx path
@@ -288,9 +287,9 @@ In fact, the effect of each of these functions is to _post-multiply_ the transfo
 
 ```haskell
 transformations ctx = do
-  translate ctx { translateX: 10.0, translateY: 10.0 } 
-  scale ctx { scaleX: 2.0, scaleY: 2.0 } 
-  rotate ctx (Math.pi / 2.0) 
+  translate ctx { translateX: 10.0, translateY: 10.0 }
+  scale ctx { scaleX: 2.0, scaleY: 2.0 }
+  rotate ctx (Math.tau / 4.0)
 
   renderScene
 ```
@@ -320,7 +319,7 @@ This allows us to save the current state, apply some styles and transformations,
 ```haskell
 rotated ctx render = do
   save ctx
-  rotate Math.pi ctx
+  rotate (Math.tau / 3.0) ctx
   render
   restore ctx
 ```
@@ -331,7 +330,7 @@ In the interest of abstracting over common use cases using higher-order function
 withContext
   :: Context2D
   -> Effect a
-  -> Effect a          
+  -> Effect a
 ```
 
 We could rewrite the `rotated` function above using `withContext` as follows:
@@ -339,7 +338,7 @@ We could rewrite the `rotated` function above using `withContext` as follows:
 ```haskell
 rotated ctx render =
   withContext ctx do
-    rotate Math.pi ctx
+    rotate (Math.tau / 3.0) ctx
     render
 ```
 
@@ -376,13 +375,13 @@ In the `render` function, the click count is used to determine the transformatio
 
 ```haskell
     withContext ctx do
-      let scaleX = Math.sin (toNumber count * Math.pi / 4.0) + 1.5
-      let scaleY = Math.sin (toNumber count * Math.pi / 6.0) + 1.5
+      let scaleX = Math.sin (toNumber count * Math.tau / 8.0) + 1.5
+      let scaleY = Math.sin (toNumber count * Math.tau / 12.0) + 1.5
 
-      translate ctx { translateX: 300.0, translateY:  300.0 } 
-      rotate ctx (toNumber count * Math.pi / 18.0)
-      scale ctx { scaleX: scaleX, scaleY: scaleY } 
-      translate ctx { translateX: -100.0, translateY: -100.0 } 
+      translate ctx { translateX: 300.0, translateY:  300.0 }
+      rotate ctx (toNumber count * Math.tau / 36.0)
+      scale ctx { scaleX: scaleX, scaleY: scaleY }
+      translate ctx { translateX: -100.0, translateY: -100.0 }
 
       fillPath ctx $ rect ctx
         { x: 0.0
@@ -441,10 +440,10 @@ and so on. Plotting a piecewise-linear path corresponding to this set of instruc
 
 Let's translate this into the language of types and functions.
 
-We can represent our choice of alphabet by a choice of type. For our example, we can choose the following type:
+We can represent our alphabet of letters with the following ADT:
 
 ```haskell
-data Alphabet = L | R | F
+data Letter = L | R | F
 ```
 
 This data type defines one data constructor for each letter in our alphabet.
@@ -452,16 +451,16 @@ This data type defines one data constructor for each letter in our alphabet.
 How can we represent the initial sequence of letters? Well, that's just an array of letters from our alphabet, which we will call a `Sentence`:
 
 ```haskell
-type Sentence = Array Alphabet
+type Sentence = Array Letter
 
 initial :: Sentence
 initial = [F, R, R, F, R, R, F, R, R]
 ```
 
-Our production rules can be represented as a function from `Alphabet` to `Sentence` as follows:
+Our production rules can be represented as a function from `Letter` to `Sentence` as follows:
 
 ```haskell
-productions :: Alphabet -> Sentence
+productions :: Letter -> Sentence
 productions L = [L]
 productions R = [R]
 productions F = [F, L, F, R, R, F, L, F]
@@ -475,8 +474,8 @@ Here is a first approximation to the type of `lsystem`:
 
 ```haskell
 Sentence
--> (Alphabet -> Sentence)
--> (Alphabet -> Effect Unit)
+-> (Letter -> Sentence)
+-> (Letter -> Effect Unit)
 -> Int
 -> Effect Unit
 ```
@@ -487,7 +486,7 @@ The third argument represents a function which takes a letter of the alphabet an
 
 The final argument is a number representing the number of iterations of the production rules we would like to perform.
 
-The first observation is that the `lsystem` function should work for only one type of `Alphabet`, but for any type, so we should generalize our type accordingly. Let's replace `Alphabet` and `Sentence` with `a` and `Array a` for some quantified type variable `a`:
+The first observation is that the `lsystem` function should work for only one type of `Letter`, but for any type, so we should generalize our type accordingly. Let's replace `Letter` and `Sentence` with `a` and `Array a` for some quantified type variable `a`:
 
 ```haskell
 forall a. Array a
@@ -538,7 +537,7 @@ Now let's try to implement the `lsystem` function. We will find that its definit
 It seems reasonable that `lsystem` should recurse on its fourth argument (of type `Int`). On each step of the recursion, the current sentence will change, having been updated by using the production rules. With that in mind, let's begin by introducing names for the function arguments, and delegating to a helper function:
 
 ```haskell
-lsystem :: forall a s 
+lsystem :: forall a s
          . Array a
         -> (a -> Array a)
         -> (s -> a -> Effect s)
@@ -584,17 +583,17 @@ We can understand this type as saying that our interpretation function is free t
 
 This function is a good example of the power of separating data from implementation. The advantage of this approach is that we gain the freedom to interpret our data in multiple different ways. We might even factor `lsystem` into two smaller functions: the first would build the sentence using repeated application of `concatMap`, and the second would interpret the sentence using `foldM`. This is also left as an exercise for the reader.
 
-Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Alphabet` and `s` to be `State`, and for the monad `m` we can choose `Effect`. This gives us the following type:
+Let's complete our example by implementing its interpretation function. The type of `lsystem` tells us that its type signature must be `s -> a -> m s` for some types `a` and `s` and a type constructor `m`. We know that we want `a` to be `Letter` and `s` to be `State`, and for the monad `m` we can choose `Effect`. This gives us the following type:
 
 ```haskell
-interpret :: State -> Alphabet -> Effect State
+interpret :: State -> Letter -> Effect State
 ```
 
-To implement this function, we need to handle the three data constructors of the `Alphabet` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
+To implement this function, we need to handle the three data constructors of the `Letter` type. To interpret the letters `L` (move left) and `R` (move right), we simply have to update the state to change the angle `theta` appropriately:
 
 ```haskell
-interpret state L = pure $ state { theta = state.theta - Math.pi / 3 }
-interpret state R = pure $ state { theta = state.theta + Math.pi / 3 }
+interpret state L = pure $ state { theta = state.theta - Math.tau / 6.0 }
+interpret state R = pure $ state { theta = state.theta + Math.tau / 6.0 }
 ```
 
 To interpret the letter `F` (move forward), we can calculate the new position of the path, render a line segment, and update the state, as follows:
@@ -630,14 +629,14 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
  1. (Easy) Try changing the various numerical constants in the code, to understand their effect on the rendered system.
  1. (Medium) Break the `lsystem` function into two smaller functions. The first should build the final sentence using repeated application of `concatMap`, and the second should use `foldM` to interpret the result.
  1. (Medium) Add a drop shadow to the filled shape, by using the `setShadowOffsetX`, `setShadowOffsetY`, `setShadowBlur` and `setShadowColor` actions. _Hint_: use PSCi to find the types of these functions.
- 1. (Medium) The angle of the corners is currently a constant (`pi/3`). Instead, it can be moved into the `Alphabet` data type, which allows it to be changed by the production rules:
+ 1. (Medium) The angle of the corners is currently a constant (`tau/6`). Instead, it can be moved into the `Letter` data type, which allows it to be changed by the production rules:
 
      ```haskell
      type Angle = Number
-     
-     data Alphabet = L Angle | R Angle | F
+
+     data Letter = L Angle | R Angle | F
      ```
-     
+
      How can this new information be used in the production rules to create interesting shapes?
  1. (Difficult) An L-system is given by an alphabet with four letters: `L` (turn left through 60 degrees), `R` (turn right through 60 degrees), `F` (move forward) and `M` (also move forward).
 
@@ -657,7 +656,7 @@ and open `html/index.html`. You should see the Koch curve rendered to the canvas
      Now, notice the symmetry between `L` and `M` in the production rules. The two "move forward" instructions can be differentiated using a `Boolean` value using the following alphabet type:
 
      ```haskell
-     data Alphabet = L | R | F Boolean
+     data Letter = L | R | F Boolean
      ```
 
      Implement this L-system again using this representation of the alphabet.
