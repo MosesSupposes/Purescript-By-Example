@@ -508,19 +508,19 @@ length arr =
 This implementation is not tail recursive, so the generated JavaScript will cause a stack overflow when executed on a large input array. However, we can make it tail recursive, by introducing a second function argument to accumulate the result instead:
 
 ```haskell
-length' :: forall a. Array a -> Int
-length' arr = length arr 0
+lengthTailRec :: forall a. Array a -> Int
+lengthTailRec arr = length' arr 0
   where
-    length :: forall a. Array a -> Int -> Int
-    length arr acc =
-      if null arr
+    length' :: Array a -> Int -> Int
+    length' arr' acc =
+      if null arr'
         then 0
-        else length (fromMaybe [] $ tail arr) acc + 1
+        else length' (fromMaybe [] $ tail arr') acc + 1
 ```
 
-In this case, we delegate to the helper function `length`, which is tail recursive - its only recursive call is in the last case, and is in tail position. This means that the generated code will be a _while loop_, and will not blow the stack for large inputs.
+In this case, we delegate to the helper function `length'`, which is tail recursive - its only recursive call is in the last case, and is in tail position. This means that the generated code will be a _while loop_, and will not blow the stack for large inputs.
 
-To understand the implementation of `length'`, note that the helper function `length` essentially uses the accumulator parameter to maintain an additional piece of state - the partial result. It starts out at 0, and grows by adding 1 for every element in the input array.
+To understand the implementation of `lengthTailRec`, note that the helper function `length'` essentially uses the accumulator parameter to maintain an additional piece of state - the partial result. It starts out at 0, and grows by adding 1 for every element in the input array.
 
 Note also that while we might think of the accumulator as "state", there is no direct mutation going on.
 
