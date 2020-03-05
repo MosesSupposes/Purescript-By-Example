@@ -460,7 +460,7 @@ validatePersonAdo :: Person -> Either String Person
 validatePersonAdo (Person o) = ado
   f <- nonEmpty o.firstName *> pure o.firstName
   l <- nonEmpty o.lastName *> pure o.firstName
-  in person f l o.homeAddress o.phones
+  in person f l o.address o.phones
 ```
 
 In the first two lines, we use the `nonEmpty` function to validate a non-empty string. `nonEmpty` returns an error (indicated with the `Left` constructor) if its input is empty, or a successful empty value (`unit`) using the `Right` constructor otherwise. We use the sequencing operator `*>` to indicate that we want to perform two validations, returning the result from the validator on the right. In this case, the validator on the right simply uses `pure` to return the input unchanged.
@@ -616,7 +616,7 @@ validatePersonAdo (Person o) = ado
                   pure o.firstName)
   lastName    <- (nonEmpty "Last Name"  o.lastName  *> 
                   pure o.lastName)
-  address     <- validateAddress o.homeAddress
+  address     <- validateAddress o.address
   numbers     <- (arrayNonEmpty "Phone Numbers" o.phones *> 
                   traverse validatePhoneNumber o.phones)
   in person firstName lastName address numbers
