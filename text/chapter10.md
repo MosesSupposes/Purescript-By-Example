@@ -242,10 +242,10 @@ var shout = function (dict) {
 
 Notice that `shout` is compiled to a (curried) function of two arguments, not one. The first argument `dict` is the type class dictionary for the `Show` constraint. `dict` contains the implementation of the `show` function for the type `a`.
 
-We can call this function from JavaScript by passing an explicit type class dictionary from the Prelude as the first parameter:
+We can call this function from JavaScript by passing an explicit type class dictionary from `Data.Show` as the first parameter:
 
 ```javascript
-shout(require('Prelude').showNumber)(42);
+shout(require('Data.Show').showNumber)(42);
 ```
 
  ## Exercises
