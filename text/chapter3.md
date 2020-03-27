@@ -446,7 +446,7 @@ AddressBook
 Note though that the parentheses here are unnecessary - the following is equivalent:
 
 ```text
-> :type insertEntry example emptyBook
+> :type insertEntry entry emptyBook
 AddressBook
 ```
 
