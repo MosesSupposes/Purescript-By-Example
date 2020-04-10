@@ -573,7 +573,7 @@ ls :: Path -> Array Path
 
 filename :: Path -> String
 
-size :: Path -> Maybe Number
+size :: Path -> Maybe Int
 
 isDirectory :: Path -> Boolean
 ```
