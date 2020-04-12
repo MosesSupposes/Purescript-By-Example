@@ -134,6 +134,12 @@ This book aims to provide an introduction to the PureScript language for beginne
 If you get stuck at any point, there are a number of resources available online for learning PureScript:
 
 - The `#purescript` and `#purescript-beginners` FP Slack channels are a great place to chat about issues you may be having. [Use this link](https://fpchat-invite.herokuapp.com/) to gain access the Slack chatrooms.
+- [PureScript: Jordan's Reference](https://github.com/jordanmartinez/purescript-jordans-reference) is an in-depth learning resource. A few things need to be said about this "reference" resource in comparison to this book:
+    - Whereas this book is still being updated, the "reference" repo is up-to-date.
+    - Whereas this book focuses on helping new learners get productive quickly, the "reference" repo helps learners develop very strong conceptual foundations, so that learns can more easily understand advanced concepts later.
+    - Whereas this book has exercises, the "reference" repo does not currently have exercises.
+    - The "reference" repo isn't SEO-friendly. Google searches will not find its content. You will need to use GitHub's search tool to find things in the repo.
+    - If you are not able to understand a concept after reading through this book's content on that topic, consider reading through the "reference" repo's corresponding explanation.
 - The [PureScript website](https://www.purescript.org) contains links to several learning resources, including code samples, videos and other resources for beginners.
 - The [PureScript documentation repository](https://github.com/purescript/documentation) collects articles and examples on a wide variety of topics, written by PureScript developers and users.
 - [Try PureScript!](https://try.purescript.org) is a website which allows users to compile PureScript code in the web browser, and contains several simple examples of code.
