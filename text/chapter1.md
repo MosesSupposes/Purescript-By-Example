@@ -140,10 +140,10 @@ If you get stuck at any point, there are a number of resources available online 
     - Whereas this book has exercises, the "reference" repo does not currently have exercises.
     - The "reference" repo isn't SEO-friendly. Google searches will not find its content. You will need to use GitHub's search tool to find things in the repo.
     - If you are not able to understand a concept after reading through this book's content on that topic, consider reading through the "reference" repo's corresponding explanation.
-- The [PureScript website](https://www.purescript.org) contains links to several learning resources, including code samples, videos and other resources for beginners.
-- The [PureScript documentation repository](https://github.com/purescript/documentation) collects articles and examples on a wide variety of topics, written by PureScript developers and users.
-- [Try PureScript!](https://try.purescript.org) is a website which allows users to compile PureScript code in the web browser, and contains several simple examples of code.
 - [Pursuit](https://pursuit.purescript.org) is a searchable database of PureScript types and functions.
+- The [PureScript documentation repository](https://github.com/purescript/documentation) collects articles and examples on a wide variety of topics, written by PureScript developers and users.
+- The [PureScript website](https://www.purescript.org) contains links to several learning resources, including code samples, videos and other resources for beginners.
+- [Try PureScript!](https://try.purescript.org) is a website which allows users to compile PureScript code in the web browser, and contains several simple examples of code.
 
 If you prefer to learn by reading examples, the `purescript`, `purescript-node` and `purescript-contrib` GitHub organizations contain plenty of examples of PureScript code.
 
