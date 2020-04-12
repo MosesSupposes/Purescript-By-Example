@@ -140,7 +140,7 @@ If you get stuck at any point, there are a number of resources available online 
     - Whereas this book has exercises, the "reference" repo does not currently have exercises.
     - The "reference" repo isn't SEO-friendly. Google searches will not find its content. You will need to use GitHub's search tool to find things in the repo.
     - If you are not able to understand a concept after reading through this book's content on that topic, consider reading through the "reference" repo's corresponding explanation.
-- [Pursuit](https://pursuit.purescript.org) is a searchable database of PureScript types and functions.
+- [Pursuit](https://pursuit.purescript.org) is a searchable database of PureScript types and functions. Read Pursuit's help page to [learn what kinds of searches you can do](https://pursuit.purescript.org/help/users).
 - The [PureScript documentation repository](https://github.com/purescript/documentation) collects articles and examples on a wide variety of topics, written by PureScript developers and users.
 - The [PureScript website](https://www.purescript.org) contains links to several learning resources, including code samples, videos and other resources for beginners.
 - **Note:** this resource is currently being updated to the latest `v0.13.x` PureScript release. We do not advise using it until it has been updated. [Try PureScript!](https://try.purescript.org) is a website which allows users to compile `v0.11.x` PureScript code in the web browser, and contains several simple examples of code.
