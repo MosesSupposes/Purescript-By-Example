@@ -159,7 +159,7 @@ I maintain [a blog](https://blog.functorial.com), and can be [reached on Twitter
 
 ## Acknowledgements
 
-I would like to thank the many contributors who helped PureScript to reach its current state. Without the huge collective effort which has been made on the compiler, tools, libraries, documentation and tests, the project would certainly have failed.  
+I would like to thank the many contributors who helped PureScript to reach its current state. Without the huge collective effort which has been made on the compiler, tools, libraries, documentation and tests, the project would certainly have failed.
 
 The PureScript logo which appears on the cover of this book was created by Gareth Hughes, and is gratefully reused here under the terms of the [Creative Commons Attribution 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
