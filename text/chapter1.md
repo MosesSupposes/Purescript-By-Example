@@ -133,7 +133,7 @@ This book aims to provide an introduction to the PureScript language for beginne
 
 If you get stuck at any point, there are a number of resources available online for learning PureScript:
 
-- The PureScript IRC channel is a great place to chat about issues you may be having. Point your IRC client at irc.freenode.net, and connect to the #purescript channel.
+- The `#purescript` and `#purescript-beginners` FP Slack channels are a great place to chat about issues you may be having. [Use this link](https://fpchat-invite.herokuapp.com/) to gain access the Slack chatrooms.
 - The [PureScript website](https://www.purescript.org) contains links to several learning resources, including code samples, videos and other resources for beginners.
 - The [PureScript documentation repository](https://github.com/purescript/documentation) collects articles and examples on a wide variety of topics, written by PureScript developers and users.
 - [Try PureScript!](https://try.purescript.org) is a website which allows users to compile PureScript code in the web browser, and contains several simple examples of code.
