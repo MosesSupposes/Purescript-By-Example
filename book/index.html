@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Purescript Book</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://www.purescript.org/img/favicon_clear-16.png"
+      sizes="16x16"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://www.purescript.org/img/favicon_clear-32.png"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://www.purescript.org/img/favicon_clear-256.png"
+      sizes="256x256"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baskervville&family=Open+Sans&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/0.6.0/modern-normalize.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/haskell.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/scroll-watcher@1.4.0/dist/scroll-watcher.min.js"></script>
+
+    <style>
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Baskervville", serif;
+      }
+
+      p {
+        font-family: "Open Sans", sans-serif;
+      }
+
+      .markdown-body {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 15px;
+        }
+      }
+
+      header {
+        height: 100px;
+        background-size: contain;
+        background-color: #1d222d;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-image: url(https://www.purescript.org/img/logo.svg);
+      }
+
+      #loading {
+        animation: blinkingText 1s infinite;
+      }
+      @keyframes blinkingText {
+        0% {
+          color: #212529;
+        }
+        10% {
+          color: #343a40;
+        }
+        30% {
+          color: #495057;
+        }
+        40% {
+          color: #868e96;
+        }
+        50% {
+          color: #adb5bd;
+        }
+        60% {
+          color: #ced4da;
+        }
+        70% {
+          color: #dee2e6;
+        }
+        80% {
+          color: #e9ecef;
+        }
+        90% {
+          color: #f1f3f5;
+        }
+        100% {
+          color: #f8f9fa;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header></header>
+    <main class="markdown-body">
+      <div id="loading">Loading...</div>
+    </main>
+
+    <script>
+      (async () => {
+        const markdownConverter = new markdownit({
+          highlight: function (str, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+              try {
+                return hljs.highlight(lang, str).value;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+
+            return ""; // use external default escaping
+          },
+        });
+
+        const markdownBody = document.querySelector(".markdown-body");
+
+        const bookChapters = Array.from(
+          { length: 14 },
+          (_, index) => `chapter${++index}.md`
+        );
+
+        const bookChaptersLinks = bookChapters.map(
+          (path) =>
+            `https://raw.githubusercontent.com/purescript-contrib/purescript-book/master/text/${path}`
+        );
+
+        const requestHeaders = new Headers();
+        requestHeaders.append("pragma", "no-cache");
+        requestHeaders.append("cache-control", "no-cache");
+
+        const promises = bookChaptersLinks.map(
+          async (page) =>
+            await fetch(page, { requestHeaders, cache: "reload" })
+              .then((r) => r.text())
+              .catch((e) => console.error(e))
+        );
+
+        const chaptersMarkdown = await Promise.all(promises);
+
+        markdownBody.innerHTML = chaptersMarkdown.reduce((html, chapter) => {
+          // TODO: Do we need to sanitize?
+          return html + markdownConverter.render(chapter);
+        }, "");
+
+        // Restore Scroll Position
+        const previousScrollY = window.localStorage.getItem("bookScrollY") || 0;
+        window.scroll({
+          top: previousScrollY,
+          behavior: "smooth",
+        });
+
+        // Save Scroll Position
+        const scroll = new ScrollWatcher();
+        scroll.on("scrolling", (event) => {
+          window.localStorage.setItem("bookScrollY", event.scrollY);
+        });
+      })();
+    </script>
+  </body>
+</html>
