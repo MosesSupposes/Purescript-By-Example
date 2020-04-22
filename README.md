@@ -10,6 +10,8 @@ This book is being continuously updated as the language evolves, so please repor
 
 - Chapter 12
 
+Unit tests are also being added for the exercises in each chapter. See [#79](https://github.com/purescript-contrib/purescript-book/issues/79) for the latest status on tests.
+
 ## About the Book
 
 PureScript is a small strongly, statically typed programming language with expressive types, written in and inspired by Haskell, and compiling to Javascript.
