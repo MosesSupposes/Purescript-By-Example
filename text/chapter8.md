@@ -47,7 +47,7 @@ We can see that this function works in PSCi:
 > countThrows 10
 [[4,6],[5,5],[6,4]]
 
-> countThrows 12  
+> countThrows 12
 [[6,6]]
 ```
 
@@ -186,7 +186,7 @@ c1 = do
 
 is equivalent to this code:
 
-```haskell  
+```haskell
 c2 = do
   x <- m1
   y <- m2
@@ -203,7 +203,7 @@ The associativity law tells us that it is safe to simplify nested do notation bl
 
 _Note_ that by the definition of how do notation gets desugared into calls to `bind`, both of `c1` and `c2` are also equivalent to this code:
 
-```haskell  
+```haskell
 c3 = do
   x <- m1
   do
@@ -272,7 +272,7 @@ safeDivide _ 0 = Nothing
 safeDivide a b = Just (a / b)
 ```
 
-Then we can use `foldM` to express iterated safe division:  
+Then we can use `foldM` to express iterated safe division:
 
 ```text
 > import Data.List
@@ -359,9 +359,9 @@ In the last chapter, we saw that the `Applicative` type class can be used to exp
      ```haskell
      lift2 f (pure a) (pure b) = pure (f a b)
      ```
-     
+
      where the `Applicative` instance uses the `ap` function defined above. Recall that `lift2` was defined as follows:
-    
+
      ```haskell
      lift2 :: forall f a b c. Applicative f => (a -> b -> c) -> f a -> f b -> f c
      lift2 f a b = f <$> a <*> b
@@ -409,7 +409,7 @@ The Spago build tool (and other tools) provide a shortcut, by generating additio
 
 ## The Effect Monad
 
-The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient JavaScript. 
+The goal of the `Effect` monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient JavaScript.
 
 Here is an example. It uses the `random` package, which defines functions for generating random numbers:
 
@@ -439,26 +439,254 @@ Running this command, you will see a randomly chosen number between `0` and `1` 
 
 This program uses do notation to combine two native effects provided by the JavaScript runtime: random number generation and console IO.
 
-As mentioned previously, the `Effect` monad is of central importance to PureScript. The reason why it's central is because it is the conventional way to interoperate with PureScript's `Foreign Function Interface`, which provides the mechanism to execute a program and perform side effects. While it's desireable to avoid using the `Foreign Function Interface`, it's fairly critical to understand how it works and how to use it, so I recommend reading that chapter before doing any serious PureScript work. That said, the `Effect` monad is fairly simple. It has a few helper functions, but aside from that it doesn't do much except encapsulate side effects. 
+As mentioned previously, the `Effect` monad is of central importance to PureScript. The reason why it's central is because it is the conventional way to interoperate with PureScript's `Foreign Function Interface`, which provides the mechanism to execute a program and perform side effects. While it's desireable to avoid using the `Foreign Function Interface`, it's fairly critical to understand how it works and how to use it, so I recommend reading that chapter before doing any serious PureScript work. That said, the `Effect` monad is fairly simple. It has a few helper functions, but aside from that it doesn't do much except encapsulate side effects.
+
+## Exceptions
+
+Let's examine a function from the `node-fs` package that involves two _native_ side effects: reading mutable state, and exceptions:
+
+```haskell
+readTextFile :: Encoding → String → Effect String
+```
+
+If we attempt to read a file that does not exist:
+
+```haskell
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync (readTextFile)
+
+main :: Effect Unit
+main = do
+  lines <- readTextFile UTF8 "iDoNotExist.md"
+  log lines
+```
+
+We encounter the following exception:
+```
+    throw err;
+    ^
+Error: ENOENT: no such file or directory, open 'iDoNotExist.md'
+...
+  errno: -2,
+  syscall: 'open',
+  code: 'ENOENT',
+  path: 'iDoNotExist.md'
+```
+
+To manage this exception gracefully, we can wrap the potentially problematic code in `try` to handle either outcome:
+
+```haskell
+main :: Effect Unit
+main = do
+  result <- try $ readTextFile UTF8 "iDoNotExist.md"
+  case result of
+    Right lines -> log $ "Contents: \n" <> lines
+    Left error -> log $ "Couldn't open file. Error was: " <> message error
+```
+
+`try` runs an `Effect` and returns eventual exceptions as a `Left` value. If the computation succeeds, the result gets wrapped in a `Right`:
+
+```haskell
+try :: forall a. Effect a -> Effect (Either Error a)
+```
+
+We can also generate our own exceptions. Here is an alternative implementation of `Data.List.head` which throws an exception if the list is empty, rather than returing a `Maybe` value of `Nothing`.
+
+```
+exceptionHead :: List Int -> Effect Int
+exceptionHead l = case l of
+  x : _ -> pure x
+  Nil -> throwException $ error "empty list"
+```
+
+That was a somewhat impractical example, as it is usually better to avoid generating exceptions in PureScript code instead and use non-native effects such as `Either` and `Maybe` to manage errors and missing values.
+
+## Mutable State
+
+There is another effect defined in the core libraries: the `ST` effect.
+
+The `ST` effect is used to manipulate mutable state. As pure functional programmers, we know that shared mutable state can be problematic. However, the `ST` effect uses the type system to restrict sharing in such a way that only safe _local_ mutation is allowed.
+
+The `ST` effect is defined in the `Control.Monad.ST` module. To see how it works, we need to look at the types of its actions:
+
+```haskell
+new :: forall a r. a -> ST r (STRef r a)
+
+read :: forall a r. STRef r a -> ST r a
+
+write :: forall a r. a -> STRef r a -> ST r a
+
+modify :: forall r a. (a -> a) -> STRef r a -> ST r a
+```
+
+`new` is used to create a new mutable reference cell of type `STRef r a`, which can be read using the `read` action, and modified using the `write` and `modify` actions. The type `a` is the type of the value stored in the cell, and the type `r` is used to indicate a _memory region_ (or _heap_) in the type system.
+
+Here is an example. Suppose we want to simulate the movement of a particle falling under gravity by iterating a simple update function over a large number of small time steps.
+
+We can do this by creating a mutable reference cell to hold the position and velocity of the particle, and then using a `for` loop to update the value stored in that cell:
+
+```haskell
+import Prelude
+
+import Control.Monad.ST.Ref (modify, new, read)
+import Control.Monad.ST (ST, for, run)
+
+simulate :: forall r. Number -> Number -> Int -> ST r Number
+simulate x0 v0 time = do
+  ref <- new { x: x0, v: v0 }
+  for 0 (time * 1000) \_ ->
+    modify
+      ( \o ->
+          { v: o.v - 9.81 * 0.001
+          , x: o.x + o.v * 0.001
+          }
+      )
+      ref
+  final <- read ref
+  pure final.x
+```
+
+At the end of the computation, we read the final value of the reference cell, and return the position of the particle.
+
+Note that even though this function uses mutable state, it is still a pure function, so long as the reference cell `ref` is not allowed to be used by other parts of the program. We will see that this is exactly what the `ST` effect disallows.
+
+To run a computation with the `ST` effect, we have to use the `run` function:
+
+```haskell
+run :: forall a. (forall r. ST r a) -> a
+```
+
+The thing to notice here is that the region type `r` is quantified _inside the parentheses_ on the left of the function arrow. That means that whatever action we pass to `run` has to work with _any region_ `r` whatsoever.
+
+However, once a reference cell has been created by `new`, its region type is already fixed, so it would be a type error to try to use the reference cell outside the code delimited by `run`.  This is what allows `run` to safely remove the `ST` effect, and turn `simulate` into a pure function!
+
+```haskell
+simulate' :: Number -> Number -> Int -> Number
+simulate' x0 v0 time = run (simulate x0 v0 time)
+```
+
+You can even try running this function in PSCi:
+
+```text
+> import Main
+
+> simulate' 100.0 0.0 0
+100.00
+
+> simulate' 100.0 0.0 1
+95.10
+
+> simulate' 100.0 0.0 2
+80.39
+
+> simulate' 100.0 0.0 3
+55.87
+
+> simulate' 100.0 0.0 4
+21.54
+```
+
+In fact, if we inline the definition of `simulate` at the call to `run`, as follows:
+
+```haskell
+simulate :: Number -> Number -> Int -> Number
+simulate x0 v0 time =
+  run do
+    ref <- new { x: x0, v: v0 }
+    for 0 (time * 1000) \_ ->
+      modify
+        ( \o ->
+            { v: o.v - 9.81 * 0.001
+            , x: o.x + o.v * 0.001
+            }
+        )
+        ref
+    final <- read ref
+    pure final.x
+```
+
+then the compiler will notice that the reference cell is not allowed to escape its scope, and can safely turn `ref` into a `var`. Here is the generated JavaScript for `simulate` inlined with `run`:
+
+```javascript
+var simulate = function (x0) {
+  return function (v0) {
+    return function (time) {
+      return (function __do() {
+
+        var ref = { value: { x: x0, v: v0 } };
+
+        Control_Monad_ST_Internal["for"](0)(time * 1000 | 0)(function (v) {
+          return Control_Monad_ST_Internal.modify(function (o) {
+            return {
+              v: o.v - 9.81 * 1.0e-3,
+              x: o.x + o.v * 1.0e-3
+            };
+          })(ref);
+        })();
+
+        return ref.value.x;
+
+      })();
+    };
+  };
+};
+```
+
+Note that this resulting JavaScript is not as optimal as it could be. See [this issue](https://github.com/purescript/purescript-st/issues/33) for more details. The above snippet should be updated once that issue is resolved.
+
+For comparison, this is the generated JavaScript of the non-inlined form:
+
+```js
+var simulate = function (x0) {
+  return function (v0) {
+    return function (time) {
+      return function __do() {
+
+        var ref = Control_Monad_ST_Internal["new"]({ x: x0, v: v0 })();
+
+        Control_Monad_ST_Internal["for"](0)(time * 1000 | 0)(function (v) {
+          return Control_Monad_ST_Internal.modify(function (o) {
+            return {
+              v: o.v - 9.81 * 1.0e-3,
+              x: o.x + o.v * 1.0e-3
+            };
+          })(ref);
+        })();
+
+        var $$final = Control_Monad_ST_Internal.read(ref)();
+        return $$final.x;
+      };
+    };
+  };
+};
+```
+
+The `ST` effect is a good way to generate short JavaScript when working with locally-scoped mutable state, especially when used together with actions like `for`, `foreach`, and `while` which generate efficient loops.
+
+## Exercises
+
+1. (Medium) Rewrite the `safeDivide` function to throw an exception using `throwException` if the denominator is zero.
+1. (Skip) There is no exercise for `ST` yet. Feel free to propose one.
+
 
 ## The Aff Monad
 
-The `Aff` monad is an asynchronous effect monad and threading model for PureScipt. 
+The `Aff` monad is an asynchronous effect monad and threading model for PureScipt.
 
-Asynchrony is typically achieved in JavaScript with callbacks, for example: 
+Asynchrony is typically achieved in JavaScript with callbacks, for example:
 
 ```javascript
 function asyncFunction(onSuccess, onError){ ... }
 ```
 
-The same thing can be modeled with the `Effect` monad: 
+The same thing can be modeled with the `Effect` monad:
 
 ```haskell
-asyncFunction :: forall success error. (success -> Effect Unit) -> (error -> Effect Unit) -> Effect Unit 
+asyncFunction :: forall success error. (success -> Effect Unit) -> (error -> Effect Unit) -> Effect Unit
 asyncFunction onSuccess onError = ...
 ```
 
-But as is true in JavaScript, this can quickly get out of hand and result in "callback hell". 
+But as is true in JavaScript, this can quickly get out of hand and result in "callback hell".
 
 The `Aff` monad solves this problem similar to how `Promise` solves it in JavaScript, and there is a great library called `aff-promise` that provides interop with JavaScript `Promise`.
 
@@ -481,7 +709,7 @@ printRandomStyle1a :: Aff Unit
 printRandomStyle1a = liftEffect doRandom
   where
     doRandom :: Effect Unit
-    doRandom = do 
+    doRandom = do
       n <- random
       logShow n
 
@@ -510,11 +738,11 @@ main = launchAff_  do
 
 ```
 
-`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statement more clear by moving the *boilerplate* out of the way to the right. 
+`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statement more clear by moving the *boilerplate* out of the way to the right.
 
 # launchAff_ vs launchAff
 
-`Aff` has two similar functions for converting from an `Aff` to an `Effect`: 
+`Aff` has two similar functions for converting from an `Aff` to an `Effect`:
 
 ```haskell
 launchAff_ :: forall a. Aff a -> Effect Unit
@@ -523,11 +751,11 @@ launchAff_ :: forall a. Aff a -> Effect Unit
 launchAff :: forall a. Aff a -> Effect (Fiber a)
 ```
 
-`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchronous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`. 
+`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchronous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`.
 
 # MonadError
 
-`Aff` has an instance of `MonadError`, a type class for clean error handling. `MonadError` is covered in more detail in the *Monadic Adventures* chapter, so below is just a motivating example. 
+`Aff` has an instance of `MonadError`, a type class for clean error handling. `MonadError` is covered in more detail in the *Monadic Adventures* chapter, so below is just a motivating example.
 
 Imagine you wished to write a `quickCheckout` function by combining several preexisting functions. Without utilizing `MonadError` the code might look like the following:
 
@@ -575,7 +803,7 @@ quickCheckout item userInfo = do
 
 ```
 
-All of the data types and functions (aside from `quickCheckout`) are stubs, and meant to be ignored aside from their types. Note that `quickCheckout` is pretty ugly and the error checking is deeply nested. This is because there is a monad (`Either`) inside of a monad (`Aff`). Monads don't nicely compose so, we've got to step down into each `Aff` and check each `Either`. It's a bit annoying. This is where `MonadError` can help. 
+All of the data types and functions (aside from `quickCheckout`) are stubs, and meant to be ignored aside from their types. Note that `quickCheckout` is pretty ugly and the error checking is deeply nested. This is because there is a monad (`Either`) inside of a monad (`Aff`). Monads don't nicely compose so, we've got to step down into each `Aff` and check each `Either`. It's a bit annoying. This is where `MonadError` can help.
 
 Take a look at the alternate implementation below.
 
@@ -633,7 +861,7 @@ main = launchAff_ do
 
 ```
 
-Note here that `quickCheckout` is much cleaner and the intent of the code is much clearer. This is made possible by the `rethrow` function, which uses `throwError` from `MonadError` to *eliminate* the `Either` type. Your next question might be, "but what happens to the error?". Notice in the `main` function, `try` is called on the result of `quickCheckout`. `try` will catch the error thrown by `throwError` - if one is thrown - and wrap the result in an `Either`, so you can handle it from there. If one doesn't use `try` as is done in the `main` function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of `MonadError` it's a good idea to call `try` on an `Aff` before converting it into an `Effect`.  
+Note here that `quickCheckout` is much cleaner and the intent of the code is much clearer. This is made possible by the `rethrow` function, which uses `throwError` from `MonadError` to *eliminate* the `Either` type. Your next question might be, "but what happens to the error?". Notice in the `main` function, `try` is called on the result of `quickCheckout`. `try` will catch the error thrown by `throwError` - if one is thrown - and wrap the result in an `Either`, so you can handle it from there. If one doesn't use `try` as is done in the `main` function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of `MonadError` it's a good idea to call `try` on an `Aff` before converting it into an `Effect`.
 
 
 
