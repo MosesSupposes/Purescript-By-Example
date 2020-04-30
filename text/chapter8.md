@@ -1,18 +1,18 @@
-# The Effect and Aff Monads
+# The Effect Monad
 
 ## Chapter Goals
 
 In the last chapter, we introduced applicative functors, an abstraction which we used to deal with _side-effects_: optional values, error messages and validation. This chapter will introduce another abstraction for dealing with side-effects in a more expressive way: _monads_.
 
-The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_. We will also learn how to do computations with _asynchronous side-effects_.
+The goal of this chapter is to explain why monads are a useful abstraction, and their connection with _do notation_.
 
 ## Project Setup
 
 The project adds the following dependencies:
 
-- `effect`, which defines the `Effect` monad, the subject of the second half of the chapter.
-- `aff`, an asynchronous effect monad.
-- `random`, a monadic random number generator.
+- `effect` - defines the `Effect` monad, the subject of the second half of the chapter. This dependency is often listed in every starter project (it's been a dependency of every chapter so far), so you'll rarely have to explicitly install it.
+- `random` - a monadic random number generator.
+- `react-basic-hooks` - a web framework that we will use for our Address Book app.
 
 ## Monads and Do Notation
 
@@ -632,7 +632,7 @@ var simulate = function (x0) {
 };
 ```
 
-Note that this resulting JavaScript is not as optimal as it could be. See [this issue](https://github.com/purescript/purescript-st/issues/33) for more details. The above snippet should be updated once that issue is resolved.
+Note that this resulting JavaScript is not as optimal as it could be. See [this issue](https://github.com/purescript-contrib/purescript-book/issues/121) for more details. The above snippet should be updated once that issue is resolved.
 
 For comparison, this is the generated JavaScript of the non-inlined form:
 
@@ -666,202 +666,393 @@ The `ST` effect is a good way to generate short JavaScript when working with loc
 ## Exercises
 
 1. (Medium) Rewrite the `safeDivide` function to throw an exception using `throwException` if the denominator is zero.
-1. (Skip) There is no exercise for `ST` yet. Feel free to propose one.
+1. (Skip) There is no exercise for `ST` yet. Feel free to propose one. See [this issue](https://github.com/purescript-contrib/purescript-book/issues/120) for more details.
 
+## DOM Effects
 
-## The Aff Monad
+In the final sections of this chapter, we will apply what we have learned about effects in the `Effect` monad to the problem of working with the DOM.
 
-The `Aff` monad is an asynchronous effect monad and threading model for PureScipt.
+There are a number of PureScript packages for working directly with the DOM, or with open-source DOM libraries. For example:
 
-Asynchrony is typically achieved in JavaScript with callbacks, for example:
+- [`web-dom`](https://github.com/purescript-web/purescript-web-dom) provides type definitions and low level interface implementations for the W3C DOM spec.
+- [`web-html`](https://github.com/purescript-web/purescript-web-html) provides type definitions and low level interface implementations for the W3C HTML5 spec.
+- [`jquery`](https://github.com/paf31/purescript-jquery) is a set of bindings to the [jQuery](http://jquery.org) library.
 
-```javascript
-function asyncFunction(onSuccess, onError){ ... }
+There are also PureScript libraries which build abstractions on top of these libraries, such as
+
+- [`thermite`](https://github.com/paf31/purescript-thermite), which builds on [`react`](https://github.com/purescript-contrib/purescript-react)
+- [`react-basic-hooks`](https://github.com/spicydonuts/purescript-react-basic-hooks), which builds on [`react-basic`](https://github.com/lumihq/purescript-react-basic)
+- [`halogen`](https://github.com/purescript-halogen/purescript-halogen) which provides a type-safe set of abstractions on top of a custom virtual DOM library.
+
+In this chapter, we will use the `react-basic-hooks` library to add a user interface to our address book application, but the interested reader is encouraged to explore alternative approaches.
+
+## An Address Book User Interface
+
+Using the `react-basic-hooks` library, we will define our application as a React _component_. React components describe HTML elements in code as pure data structures, which are then efficiently rendered to the DOM. In addition, components can respond to events like button clicks. The `react-basic-hooks` library uses the `Effect` monad to describe how to handle these events.
+
+A full tutorial for the React library is well beyond the scope of this chapter, but the reader is encouraged to consult its documentation where needed. For our purposes, React will provide a practical example of the `Effect` monad.
+
+We are going to build a form which will allow a user to add a new entry into our address book. The form will contain text boxes for the various fields (first name, last name, city, state, etc.), and an area in which validation errors will be displayed. As the user types text into the text boxes, the validation errors will be updated.
+
+To keep things simple, the form will have a fixed shape: the different phone number types (home, cell, work, other) will be expanded into separate text boxes.
+
+You can launch the web app from the `exercises/chapter8` directory with the following commands:
+```
+$ npm install
+$ npx spago build
+$ npx parcel src/index.html --open
 ```
 
-The same thing can be modeled with the `Effect` monad:
+If development tools such as `spago` and `parcel` are installed globally, then the `npx` prefix may be omitted. You have likely already installed `spago` globally with `npm i -g spago`, and the same can be done for `parcel`.
 
-```haskell
-asyncFunction :: forall success error. (success -> Effect Unit) -> (error -> Effect Unit) -> Effect Unit
-asyncFunction onSuccess onError = ...
+`parcel` should launch a browser window with our "Address Book" app. If you keep the `parcel` terminal open, and rebuild with `spago` in another terminal, the page should automatically refresh with your latest edits. You can also configure automatic rebuilds (and therefore automatic page refresh) on file-save if you're using an [editor](https://github.com/purescript/documentation/blob/master/ecosystem/Editor-and-tool-support.md#editors) that supports [`purs ide`](https://github.com/purescript/purescript/tree/master/psc-ide) or are running [`pscid`](https://github.com/kRITZCREEK/pscid).
+
+In this Address Book app, you should be able to enter some values into the form fields and see the validation errors printed onto the page.
+
+Let's explore how it works.
+
+The `src/index.html` file is minimal:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Address Book</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="./index.js"></script>
+  </body>
+</html>
 ```
 
-But as is true in JavaScript, this can quickly get out of hand and result in "callback hell".
+The `<script` line includes the JavaScript entry point, `index.js`, which contains this single line:
+```js
+require("../output/Main/index.js").main();
+```
 
-The `Aff` monad solves this problem similar to how `Promise` solves it in JavaScript, and there is a great library called `aff-promise` that provides interop with JavaScript `Promise`.
+It calls our generated JavaScript equivalent of the `main` function of `module Main` (`src/main.purs`). Recall that `spago build` puts all generated JavaScript in the `output` directory.
 
-## Effect to Aff and Aff to Effect
-
-Any synchronous `Effect` can by lifted into an asynchronous `Aff` with `liftEffect`. Similarly, any `Aff` can be converted to an `Effect Unit` with `launchAff_`. Below is the code that prints a random number in terms of `Aff`, written in a few different styles:
+The `main` function uses the DOM and HTML APIs to render our address book component within the `container` element we defined in `index.html`:
 
 ```haskell
-module Main where
-
-import Prelude
-
-import Effect (Effect)
-import Effect.Aff (Aff, launchAff_)
-import Effect.Class (liftEffect)
-import Effect.Console (logShow)
-import Effect.Random (random)
-
-printRandomStyle1a :: Aff Unit
-printRandomStyle1a = liftEffect doRandom
-  where
-    doRandom :: Effect Unit
-    doRandom = do
-      n <- random
-      logShow n
-
-printRandomStyle1b :: Aff Unit
-printRandomStyle1b = liftEffect $ do
-  n <- random
-  logShow n
-
-printRandomStyle2 :: Aff Unit
-printRandomStyle2 = do
-  n <- liftEffect random
-  liftEffect $ logShow n
-
-printRandomStyle3 :: Aff Unit
-printRandomStyle3 = do
-  n <- random # liftEffect
-  (logShow n) # liftEffect
-
-
 main :: Effect Unit
-main = launchAff_  do
-  printRandomStyle1a
-  printRandomStyle1b
-  printRandomStyle2
-  printRandomStyle3
-
+main = do
+  log "Rendering address book component"
+  -- Get window object
+  w <- window
+  -- Get window's HTML document
+  doc <- document w
+  -- Get "container" element in HTML
+  ctr <- getElementById "container" $ toNonElementParentNode doc
+  case ctr of
+    Nothing -> throw "Container element not found."
+    Just c -> do
+      -- Create AddressBook react component
+      addressBookApp <- mkAddressBookApp
+      let
+        -- Create JSX node from react component. Pass-in empty props
+        app = element addressBookApp {}
+      -- Render AddressBook JSX node in DOM "container" element
+      D.render app c
 ```
 
-`printRandomStyle1a` and `printRandomStyle1b` are nearly the same, but the types more explicit in `printRandomStyle1a` to add additional clarity. In both, the `do` block results in something with type `Effect Unit` and is lifted to `Aff` outside of the `do` block. In `printRandomStyle2`, both `random` and `logShow` are lifted to `Aff` inside the `do` block, which results in an `Aff`. Often while writing PureScript, you'll encounter cases where `Aff` and `Effect` need to be mixed, so style 2 is the more common case. Finally in `printRandomStyle3`, the `liftEffect` function has been moved to the right with `#`, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statement more clear by moving the *boilerplate* out of the way to the right.
+Note that these three lines:
+```haskell
+w <- window
+doc <- document w
+ctr <- getElementById "container" $ toNonElementParentNode doc
+```
 
-# launchAff_ vs launchAff
+Can be consolidated to:
+```haskell
+doc <- document =<< window
+ctr <- getElementById "container" $ toNonElementParentNode doc
+```
 
-`Aff` has two similar functions for converting from an `Aff` to an `Effect`:
+Or consolidated even further to:
+```haskell
+ctr <- getElementById "container" =<< (map toNonElementParentNode $ document =<< window)
+```
+
+It is a matter of personal preference whether the intermediate `w` and `doc` variables aid in readability.
+
+
+Let's dig into our AddressBook `component`. We'll start with a simplified component, and then build up to the actual code in `Main.purs`.
+
+Take a look at this minimal component. Feel free to substitute the full component with this one to see it run:
+```haskell
+mkAddressBookApp :: Effect (ReactComponent {})
+mkAddressBookApp =
+  component
+    "AddressBookApp"
+    (\props -> pure $ D.text "Hi! I'm an address book")
+```
+
+`component` has this intimidating signature:
+```haskell
+component :: forall hooks props.
+  Lacks "children" props =>
+  Lacks "key" props =>
+  Lacks "ref" props =>
+  String ->
+  (Record props -> Render Unit hooks JSX) ->
+  Effect (ReactComponent (Record props))
+```
+
+The important points to note are the arguments after all the type class constraints. It takes a `String` (an arbritrary component name), a function that describes how to convert `props` into rendered `JSX`, and returns our `ReactComponent` wrapped in an `Effect`.
+
+The props-to-JSX function is simply:
+```haskell
+\props -> pure $ D.text "Hi! I'm an address book"
+```
+
+`props` are ignored, `D.text` returns `JSX`, and `pure` lifts to rendered JSX. Now `component` has everything it needs to produce the `ReactComponent`.
+
+Next we'll examine some of the additional complexities of the full Address Book component.
+
+These are the first few lines of our full component:
+```haskell
+mkAddressBookApp :: Effect (ReactComponent {})
+mkAddressBookApp = do
+  component "AddressBookApp" \props -> R.do
+    let
+      Person p@{ homeAddress: Address a } = examplePerson
+    Tuple firstName setFirstName <- useState p.firstName
+    Tuple lastName setLastName <- useState p.lastName
+```
+
+Recall from Chapter 5 that the `@` symbol describes "Named Patterns". This allows use to more conveniently access the `examplePerson`'s inner records of `Person` and `Address` as `p` and `a`:
+```hs
+Person p@{ homeAddress: Address a } = examplePerson
+```
+
+Another way to structure this app is by just using records for `Person` and `Address`, rather than wrapping with `newtype`. This provides more convenient record updates, but, comes at the cost of type safety. This simplification is up for [consideration](https://github.com/purescript-contrib/purescript-book/issues/118).
+
+
+Each form field is tracked as a separate piece of state with the `useState` hook. For example:
+```haskell
+Tuple firstName setFirstName <- useState p.firstName
+```
+
+In other examples, you may encounter the `/\` infix operator for `Tuple`. This is equivalent to the above line:
+```hs
+firstName /\ setFirstName <- useState p.firstName
+```
+
+`useState` takes a default initial value and returns the current value and a way to update the value. We can check the type of `useState` to gain more insight the types of `firstName` and `setFirstName`:
+```hs
+useState ::
+  forall state.
+  state ->
+  Hook (UseState state) (Tuple state ((state -> state) -> Effect Unit))
+```
+
+We can strip the `Hook (UseState state)` wrapper off of the return value because `useState` is called within an `R.do` block. We'll elaborate on `R.do` later.
+
+So now we can observe the following signatures:
+```hs
+firstName :: state
+setFirstName :: (state -> state) -> Effect Unit
+```
+
+The specific type of `state` is determined by our initial default value. For this first `useState` hook, we pass in `p.firstName` which is `"John"` (a `String`) from our `examplePerson`.
+
+`firstName` is how we access the current state at each rerender.
+
+`setFirstName` is how we update the state. We simply provide a function that describes how to transform the current state to the new state. In many situations we can write an update function which ignores the state input argument as we either:
+  * Completely overwrite the state, e.g.:
+```hs
+setFirstName (\_ -> "Natasha")
+```
+  * Already have access to the current state via the first `Tuple` value, e.g.:
+```hs
+setFirstName (\_ -> "The Honerable " <> firstName)
+```
+
+In other situations where we want to modify the state, but don't have access to the latest value (such as with a timed event), we need to use the state input.
+```hs
+setCount (c -> c + 1)
+-- equivalent to:
+setCount (_ + 1)
+```
+
+Recall that `useState` is used within an `R.do` block. `R.do` is a special react hooks variant of `do`. The `R.` prefix "qualifies" this as coming from `React.Basic.Hooks`, and means we use their hooks-compatible version of `bind` in the `R.do` block. This is known as a "qualified do". It lets us ignore the `Hook (UseState state)` wrapping and bind the inner `Tuple` of values to variables.
+
+Another possible state management strategy is with `useReducer`, but that is outside the scope of this chapter.
+
+Rendering `JSX` occurs here:
+```hs
+pure
+  $ D.div
+      { className: "container"
+      , children:
+          renderValidationErrors errors
+            <> [ D.div
+                  { className: "row"
+                  , children:
+                      [ D.form_
+                          $ [ D.h3_ [ D.text "Basic Information" ]
+                            , formField "First Name" "First Name" firstName setFirstName
+                            , formField "Last Name" "Last Name" lastName setLastName
+                            , D.h3_ [ D.text "Address" ]
+                            , formField "Street" "Street" street setStreet
+                            , formField "City" "City" city setCity
+                            , formField "State" "State" state setState
+                            , D.h3_ [ D.text "Contact Information" ]
+                            ]
+                          <> mapWithIndex renderPhoneNumber phoneNumbers
+                      ]
+                  }
+              ]
+      }
+```
+
+Here we produce `JSX` which represents the intended state of the DOM. This JSX is typically created by applying functions corresponding to HTML tags (e.g. `div`, `form`, `h3`, `li`, `ul`, `label`, `input`) which create single HTML elements. These HTML elements are actually React components themselves, converted to JSX. There are usually three variants of each of these functions:
+* `div_`: Accepts an array of child elements. Uses default attributes.
+* `div`: Accepts a `Record` of attributes. An array of child elements may be passed to the `children` field of this record.
+* `div'`: Same as `div`, but returns the `ReactComponent` before conversion to `JSX`.
+
+To display validation errors (if any) at the top of our form, we create a `renderValidationErrors` helper function that turns the `Errors` structure into an array of JSX. This array is prepended to the rest of our form.
 
 ```haskell
-launchAff_ :: forall a. Aff a -> Effect Unit
+renderValidationErrors :: Errors -> Array R.JSX
+renderValidationErrors [] = []
+renderValidationErrors xs =
+  let
+    rendererror :: String -> R.JSX
+    rendererror err = D.li_ [ D.text err ]
+  in
+    [ D.div
+        { className: "alert alert-danger row"
+        , children: [ D.ul_ (map rendererror xs) ]
+        }
+    ]
 ```
+
+Note that since we are simply manipulating regular data structures here, we can use functions like `map` to build up more interesting elements:
+```hs
+children: [ D.ul_ (map rendererror xs)]
+```
+
+We use the `className` property to define classes for CSS styling. We're using the [Bootstrap](https://getbootstrap.com/) `stylesheet` for this project, which is imported in `index.html`. For example, we want items in our form arranged as `row`s, and validation errors to be emphasized with `alert-danger` styling:
+```hs
+className: "alert alert-danger row"
+```
+
+A second helper function is `formField`, which creates a text input for a single form field:
+
+```hs
+formField :: String -> String -> String -> ((String -> String) -> Effect Unit) -> R.JSX
+formField name placeholder value setValue =
+  D.label
+    { className: "form-group row"
+    , children:
+        [ D.div
+            { className: "col-sm col-form-label"
+            , children: [ D.text name ]
+            }
+        , D.div
+            { className: "col-sm"
+            , children:
+                [ D.input
+                    { className: "form-control"
+                    , placeholder
+                    , value
+                    , onChange:
+                        let
+                          handleValue :: Maybe String -> Effect Unit
+                          handleValue (Just v) = setValue (\_ -> v)
+                          handleValue Nothing = pure unit
+                        in
+                          handler targetValue handleValue
+                    }
+                ]
+            }
+        ]
+    }
+```
+Putting the `input` and display `text` in a `label` aids in accessibility for screen readers.
+
+The `onChange` attribute allows us to describe how to respond to user input. We use the `handler` function, which has the following type:
 ```haskell
-launchAff :: forall a. Aff a -> Effect (Fiber a)
+handler :: forall a. EventFn SyntheticEvent a -> (a -> Effect Unit) -> EventHandler
 ```
 
-`launchAff` gives back a `Fiber` wrapped in an `Effect`. A `Fiber` is a *forked* computation that can be *joined* back into an `Aff`. You can read more about `Fiber` in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an `Aff` once it's been converted to an `Effect`. For this reason it makes sense to write most of your program in terms of `Aff` instead of `Effect` if you intend to perform asynchronous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the `main` function by wiring up event handlers and listeners, which typically results in a `Unit` and can be run with `launchAff_`.
+For the first argument (`EventFn SyntheticEvent a`) we use `targetValue`. The type variable `a` in this case is `Maybe String`.
+```hs
+targetValue :: EventFn SyntheticEvent (Maybe String)
+```
+In JavaScript, the `input` element's `onChange` event is actually accompanied by a `String` value, but since strings in JavaScript can be null, `Maybe` is used for safety.
 
-# MonadError
-
-`Aff` has an instance of `MonadError`, a type class for clean error handling. `MonadError` is covered in more detail in the *Monadic Adventures* chapter, so below is just a motivating example.
-
-Imagine you wished to write a `quickCheckout` function by combining several preexisting functions. Without utilizing `MonadError` the code might look like the following:
+The second argument to `handler`, `(a -> Effect Unit)`, must therefore have this signature:
+```hs
+Maybe String -> Effect Unit
+```
+It is a function that describes how to convert this `Maybe String` value into our desired effect. We create this `handleValue` function and pass it to `handler` as follows:
 
 ```haskell
-module Main where
-
-import Prelude
-
-import Data.Either (Either(..))
-import Effect.Aff (Aff, throwError)
-import Effect.Exception (Error)
-
-data UserInfo = UserInfo
-data User = User
-data Item = Item
-data Receipt = Receipt
-data Basket = Basket
-
-registerUser :: UserInfo -> Aff (Either Error User)
-registerUser user = pure $ Right User
-
-createBasket :: User -> Aff (Either Error Basket)
-createBasket user = pure $ Right Basket
-
-addItemToBasket :: Item -> Basket -> Aff (Either Error Basket)
-addItemToBasket item basket = pure $ Right basket
-
-purchaseBasket :: User -> Basket -> Aff (Either Error Receipt)
-purchaseBasket user basket = pure $ Right Receipt
-
-quickCheckout :: Item -> UserInfo -> Aff (Either Error Receipt)
-quickCheckout item userInfo = do
-  eitherRegister <- registerUser userInfo
-  case eitherRegister of
-    Left error -> pure $ Left error
-    Right user -> do
-      eitherBasket <- createBasket user
-      case eitherBasket of
-        Left error -> pure $ Left error
-        Right basket -> do
-          eitherItemInBasket <- addItemToBasket item basket
-          case eitherItemInBasket of
-            Left error -> pure $ Left error
-            Right itemInBasket -> purchaseBasket user itemInBasket
-
+onChange:
+  let
+    handleValue :: Maybe String -> Effect Unit
+    handleValue (Just v) = setValue (\_ -> v)
+    handleValue Nothing = pure unit
+  in
+    handler targetValue handleValue
 ```
 
-All of the data types and functions (aside from `quickCheckout`) are stubs, and meant to be ignored aside from their types. Note that `quickCheckout` is pretty ugly and the error checking is deeply nested. This is because there is a monad (`Either`) inside of a monad (`Aff`). Monads don't nicely compose so, we've got to step down into each `Aff` and check each `Either`. It's a bit annoying. This is where `MonadError` can help.
+`setValue` is a function that has the same signature as the second tuple value returned by `useState` hook. In most cases we pass that function through to `formField` from the hook as-is. For phone numbers, a custom `setPhoneNumber` function is used to update the phone number at a particular index.
 
-Take a look at the alternate implementation below.
-
-
-```haskell
-module Main where
-
-import Prelude
-
-import Data.Either (Either(..))
-import Effect (Effect)
-import Effect.Aff (Aff, launchAff_, throwError, try)
-import Effect.Class (liftEffect)
-import Effect.Console (log)
-import Effect.Exception (Error)
-
-data UserInfo = UserInfo
-data User = User
-data Item = Item
-data Receipt = Receipt
-data Basket = Basket
-
-registerUser :: UserInfo -> Aff (Either Error User)
-registerUser user = pure $ Right User
-
-createBasket :: User -> Aff (Either Error Basket)
-createBasket user = pure $ Right Basket
-
-addItemToBasket :: Item -> Basket -> Aff (Either Error Basket)
-addItemToBasket item basket = pure $ Right basket
-
-purchaseBasket :: User -> Basket -> Aff (Either Error Receipt)
-purchaseBasket user basket = pure $ Right Receipt
-
-rethrow :: forall a. Aff (Either Error a) -> Aff a
-rethrow aff = do
-  either <- aff
-  case either of
-    Left error -> throwError error
-    Right a -> pure a
-
-quickCheckout :: Item -> UserInfo -> Aff Receipt
-quickCheckout item userInfo = do
-  user <- registerUser userInfo # rethrow
-  basket <- createBasket user # rethrow
-  itemInBasket <- addItemToBasket item basket # rethrow
-  purchaseBasket user itemInBasket # rethrow
-
-main :: Effect Unit
-main = launchAff_ do
-  either <- try $ quickCheckout Item UserInfo
-  case either of
-    Left error -> log "There was an error checking out!" # liftEffect
-    Right _ -> log "Checkout Successful" # liftEffect
-
+Note that `handleValue` can be substituted as this:
+```hs
+onChange: handler targetValue $ traverse_ \v -> setValue \_ -> v
 ```
 
-Note here that `quickCheckout` is much cleaner and the intent of the code is much clearer. This is made possible by the `rethrow` function, which uses `throwError` from `MonadError` to *eliminate* the `Either` type. Your next question might be, "but what happens to the error?". Notice in the `main` function, `try` is called on the result of `quickCheckout`. `try` will catch the error thrown by `throwError` - if one is thrown - and wrap the result in an `Either`, so you can handle it from there. If one doesn't use `try` as is done in the `main` function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of `MonadError` it's a good idea to call `try` on an `Aff` before converting it into an `Effect`.
+Or even this:
+```hs
+onChange: handler targetValue $ traverse_ $ setValue <<< const
+```
 
+Feel free to investigate the definitions of `traverse_` and `const` to see how these three forms are indeed equivalent.
 
+That covers the basics of our component implementation. However, you should read the source accompanying this chapter in order to get a full understanding of the way the component works.
 
+Obviously, this user interface can be improved in a number of ways. The exercises will explore some ways in which we can make the application more usable.
+
+## Exercises
+
+1. (Easy) Modify the application to include a work phone number text box.
+1. (Medium) Instead of using a `ul` element to show the validation errors in a list, modify the code to create one `div` with the `alert` style for each error.
+1. (Difficult, Extended) One problem with this user interface is that the validation errors are not displayed next to the form fields they originated from. Modify the code to fix this problem.
+
+  _Hint_: the error type returned by the validator should be extended to indicate which field caused the error. You might want to use the following modified `Errors` type:
+
+  ```haskell
+  data Field = FirstNameField
+             | LastNameField
+             | StreetField
+             | CityField
+             | StateField
+             | PhoneField PhoneType
+
+  data ValidationError = ValidationError String Field
+
+  type Errors = Array ValidationError
+  ```
+
+  You will need to write a function which extracts the validation error for a particular `Field` from the `Errors` structure.
+
+## Conclusion
+
+This chapter has covered a lot of ideas about handling side-effects in PureScript:
+
+- We met the `Monad` type class, and its connection to do notation.
+- We introduced the monad laws, and saw how they allow us to transform code written using do notation.
+- We saw how monads can be used abstractly, to write code which works with different side-effects.
+- We saw how monads are examples of applicative functors, how both allow us to compute with side-effects, and the differences between the two approaches.
+- The concept of native effects was defined, and we met the `Effect` monad, which is used to handle native side-effects.
+- We used the `Effect` monad to handle a variety of effects: random number generation, exceptions, console IO, mutable state, and DOM manipulation using React.
+
+The `Effect` monad is a fundamental tool in real-world PureScript code. It will be used in the rest of the book to handle side-effects in a number of other use-cases.
