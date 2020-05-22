@@ -522,13 +522,13 @@ We can try this function in PSCi:
 > import Data.AddressBook.Validation
 
 > validateAddress $ address "" "" ""
-(Invalid [ "Field 'Street' cannot be empty"
+(invalid [ "Field 'Street' cannot be empty"
          , "Field 'City' cannot be empty"
          , "Field 'State' must have length 2"
          ])
 
 > validateAddress $ address "" "" "CA"
-(Invalid [ "Field 'Street' cannot be empty"
+(invalid [ "Field 'Street' cannot be empty"
          , "Field 'City' cannot be empty"
          ])
 ```
@@ -572,10 +572,10 @@ Again, try running this validator against some valid and invalid inputs in PSCi:
 
 ```text
 > validatePhoneNumber $ phoneNumber HomePhone "555-555-5555"
-Valid ({ type: HomePhone, number: "555-555-5555" })
+pure ({ type: HomePhone, number: "555-555-5555" })
 
 > validatePhoneNumber $ phoneNumber HomePhone "555.555.5555"
-Invalid (["Field 'Number' did not match the required format"])
+invalid (["Field 'Number' did not match the required format"])
 ```
 
  ## Exercises
