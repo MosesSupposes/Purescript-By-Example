@@ -288,9 +288,9 @@ The `foldM safeDivide` function returns `Nothing` if a division by zero was atte
 
 ## Monads and Applicatives
 
-Every instance of the `Monad` type class is also an instance of the `Applicative` type class, by virtue of the superclass relationship between the two classes.
+Every instance of the `Monad` type class is also an instance of the `Apply` type class, by virtue of the superclass relationship between the two classes.
 
-However, there is also an implementation of the `Applicative` type class which comes "for free" for any instance of `Monad`, given by the `ap` function:
+However, there is also an implementation of the `Apply` type class which comes "for free" for any instance of `Monad`, given by the `ap` function:
 
 ```haskell
 ap :: forall m a b. Monad m => m (a -> b) -> m a -> m b
@@ -300,7 +300,7 @@ ap mf ma = do
   pure (f a)
 ```
 
-If `m` is a law-abiding member of the `Monad` type class, then there is a valid `Applicative` instance for `m` given by `ap`.
+If `m` is a law-abiding member of the `Monad` type class, then there is a valid `Apply` instance for `m` given by `ap`.
 
 The interested reader can check that `ap` agrees with `apply` for the monads we have already encountered: `Array`, `Maybe` and `Either e`.
 
@@ -360,10 +360,10 @@ In the last chapter, we saw that the `Applicative` type class can be used to exp
      lift2 f (pure a) (pure b) = pure (f a b)
      ```
 
-     where the `Applicative` instance uses the `ap` function defined above. Recall that `lift2` was defined as follows:
+     where the `Apply` instance uses the `ap` function defined above. Recall that `lift2` was defined as follows:
 
      ```haskell
-     lift2 :: forall f a b c. Applicative f => (a -> b -> c) -> f a -> f b -> f c
+     lift2 :: forall f a b c. Apply f => (a -> b -> c) -> f a -> f b -> f c
      lift2 f a b = f <$> a <*> b
      ```
 
