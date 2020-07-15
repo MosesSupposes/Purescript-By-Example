@@ -468,16 +468,13 @@ This API is similar to that provided by the `exceptions` package and the `Except
 Let's try out `ExceptT` by using it to wrap the `Writer` monad. Again, we are free to use actions from the monad transformer `ExceptT e` directly, but computations in the `Writer` monad should be lifted using `lift`:
 
 ```haskell
-import Control.Monad.Trans
+import Control.Monad.Except
 import Control.Monad.Writer
-import Control.Monad.Writer.Class
-import Control.Monad.Error.Class
-import Control.Monad.Except.Trans
 
 writerAndExceptT :: ExceptT String (Writer (Array String)) String
 writerAndExceptT = do
   lift $ tell ["Before the error"]
-  throwError "Error!"
+  _ <- throwError "Error!"
   lift $ tell ["After the error"]
   pure "Return value"
 ```
