@@ -1,10 +1,9 @@
 module Test.Main where
 
 import Prelude
-import Test.Copy (copyFile)
-import Test.HTTP (getUrl)
-import Test.NoPeeking.Solutions  -- Note to reader: Delete this line
 import Test.MySolutions
+import Test.NoPeeking.Solutions -- Note to reader: Delete this line
+
 import Data.Array ((..))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
@@ -15,9 +14,11 @@ import Data.String (Pattern(..), split)
 import Effect (Effect)
 import Effect.Exception (message)
 import Node.Encoding (Encoding(..))
-import Node.FS.Aff (readTextFile, readdir, unlink)
+import Node.FS.Aff (readTextFile, readdir, realpath, unlink)
 import Node.Path (FilePath)
 import Node.Path as Path
+import Test.Copy (copyFile)
+import Test.HTTP (getUrl)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
@@ -28,6 +29,20 @@ inDir = Path.concat [ "test", "data" ]
 outDir :: FilePath
 outDir = Path.concat [ "test", "data-out" ]
 
+-- If, for any reason, you want or need to run this test offline, or without
+-- full internet access, you can create this API endpoint locally by installing
+-- http-server (npm i -g http-server) and running it in the "/test/data"
+-- directory (http-server -p 42524)
+reqUrl :: String
+reqUrl =
+  -- Both http and https work for this API endpoint.
+  "https://reqres.in/api/users/1"
+  -- If you want or need to use the http version (not the https), just
+  -- remove the 's' from `https://`:
+  --"http://reqres.in/api/users/1"
+  -- Use this url for the http-server solution:
+  --"http://localhost:42524/user.txt"
+
 main :: Effect Unit
 main =
   runTest do
@@ -37,8 +52,7 @@ main =
       for_ files \f -> unlink $ Path.concat [ outDir, f ]
     runChapterExamples
     {-  Move this block comment starting point to enable more tests
--}
-    -- Note to reader: Delete this line to expand comment block
+Note to reader: Delete this line to expand comment block -}
     test "concatenateFiles" do
       let
         inFoo = Path.concat [ inDir, "foo.txt" ]
@@ -66,17 +80,18 @@ main =
       Assert.equal expectedOutTxt actualOutTxt
     suite "countCharacters" do
       test "exists" do
-        chars <- countCharacters $ Path.concat [ inDir, "foo.txt" ]
-        Assert.equal (Right 41) $ lmap message chars
+        chars <- countCharacters $ Path.concat [ inDir, "nbChars.txt" ]
+        Assert.equal (Right 42) $ lmap message chars
       test "missing" do
-        chars <- countCharacters $ Path.concat [ inDir, "foof.txt" ]
-        Assert.equal (Left "ENOENT: no such file or directory, open 'test/data/foof.txt'") $ lmap message chars
+        absolutePath <- realpath $ Path.concat [ inDir ]
+        chars <- countCharacters $ Path.concat [ absolutePath, "foof.txt" ]
+        Assert.equal (Left ("ENOENT: no such file or directory, open '" <> absolutePath <> "/foof.txt'")) $ lmap message chars
     test "writeGet" do
       let
         outFile = Path.concat [ outDir, "user.txt" ]
 
         expectedOutFile = Path.concat [ inDir, "user.txt" ]
-      writeGet "https://reqres.in/api/users/1" outFile
+      writeGet reqUrl outFile
       -- Check for valid write
       actualOutTxt <- readTextFile UTF8 outFile
       expectedOutTxt <- readTextFile UTF8 expectedOutFile
@@ -97,7 +112,7 @@ main =
       test "valid site" do
         let
           expectedOutFile = Path.concat [ inDir, "user.txt" ]
-        actual <- getWithTimeout 1000.0 "https://reqres.in/api/users/1"
+        actual <- getWithTimeout 1000.0 reqUrl
         expected <- Just <$> readTextFile UTF8 expectedOutFile
         Assert.equal expected actual
       test "no response" do
@@ -139,7 +154,7 @@ runChapterExamples = do
   test "getUrl" do
     let
       expectedOutFile = Path.concat [ inDir, "user.txt" ]
-    str <- getUrl "https://reqres.in/api/users/1"
+    str <- getUrl reqUrl
     -- Check for valid read
     expectedOutTxt <- readTextFile UTF8 expectedOutFile
     Assert.equal expectedOutTxt str
