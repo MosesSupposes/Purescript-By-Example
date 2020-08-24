@@ -680,4 +680,6 @@ data Scene
 
 This approach is taken in the `drawing` package, and it brings the flexibility of being able to manipulate the scene as data in various ways before rendering.
 
+For examples of games rendered to the canvas, see the "Behavior" and "Signal" recipes in the [cookbook](https://github.com/JordanMartinez/purescript-cookbook/blob/master/README.md#recipes).
+
 In the next chapter, we will see how to implement libraries like `canvas` which wrap existing JavaScript functionality, by using PureScript's _foreign function interface_.
