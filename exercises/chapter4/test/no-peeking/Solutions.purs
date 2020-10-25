@@ -2,7 +2,7 @@ module Test.NoPeeking.Solutions where
 
 import Prelude
 import Control.MonadZero (guard)
-import Data.Array (cons, filter, head, last, length, tail, (..))
+import Data.Array (catMaybes, cons, filter, find, head, last, length, nub, tail, (..))
 import Data.Foldable (foldl)
 import Data.Int (rem, quot)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
@@ -97,27 +97,6 @@ reverse = foldl (\xs x -> [ x ] <> xs) []
 onlyFiles :: Path -> Array Path
 onlyFiles p = filter (\p' -> not $ isDirectory p') $ allFiles p
 
-maxSigned32BitInt :: Int
-maxSigned32BitInt = 2147483647
-
-largestSmallest :: Path -> Array (Tuple String Int)
-largestSmallest path = largestSmallestPaths (allFiles path)
-  where
-  largestSmallestPaths :: Array Path -> Array (Tuple String Int)
-  largestSmallestPaths paths = [ outlier (\i j -> i > j) 0 paths, outlier (\i j -> i < j) maxSigned32BitInt paths ]
-    where
-    outlier :: (Int -> Int -> Boolean) -> Int -> Array Path -> Tuple String Int
-    outlier criteria startValue paths' =
-      foldl
-        ( \acc p' ->
-            ( case size p' of
-                Just n -> if criteria n $ snd acc then Tuple (filename p') n else acc
-                Nothing -> acc
-            )
-        )
-        (Tuple "" startValue)
-        paths'
-
 allSizes :: Array Path -> Array (Tuple String Int)
 allSizes paths =
   map
@@ -136,3 +115,19 @@ whereIs path fileName = head $ whereIs' $ allFiles path
     child <- ls path
     guard $ eq fileName $ fromMaybe "" $ last $ split (Pattern "/") $ filename child
     pure path
+
+largestSmallest :: Path -> Array Path
+largestSmallest path = 
+  let files = onlyFiles path
+      maybeSizes = map size files
+      maybeMax = foldl (outlier (>)) Nothing maybeSizes
+      maybeMin = foldl (outlier (<)) Nothing maybeSizes
+  in catMaybes $ map (findFileBySize files) $ nub $ [maybeMax, maybeMin]
+  where
+  outlier :: (Int -> Int -> Boolean) -> Maybe Int -> Maybe Int -> Maybe Int
+  outlier criteria Nothing Nothing = Nothing
+  outlier criteria (Just x) Nothing = Just x
+  outlier criteria Nothing (Just x) = Just x
+  outlier criteria (Just x1) (Just x2) = if criteria x1 x2 then Just x1 else Just x2
+  findFileBySize :: Array Path -> Maybe Int -> Maybe Path
+  findFileBySize files maybeSize = find (\file -> size file == maybeSize) files
