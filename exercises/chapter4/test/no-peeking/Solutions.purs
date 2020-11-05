@@ -95,7 +95,7 @@ reverse :: ∀ a. Array a -> Array a
 reverse = foldl (\xs x -> [ x ] <> xs) []
 
 onlyFiles :: Path -> Array Path
-onlyFiles p = filter (\p' -> not $ isDirectory p') $ allFiles p
+onlyFiles path = filter (not isDirectory) (allFiles path)
 
 allSizes :: Array Path -> Array (Tuple String Int)
 allSizes paths =
