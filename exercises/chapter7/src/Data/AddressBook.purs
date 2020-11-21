@@ -1,6 +1,8 @@
 module Data.AddressBook where
 
 import Prelude
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 
 type Address
   = { street :: String
@@ -21,18 +23,26 @@ data PhoneType
   | OtherPhone
 -- ANCHOR_END: PhoneType
 
-{-| derive has not been discussed yet but will be
-covered in Ch 10.  Here it is needed by the unit
-tests to define how to compare the PhoneType values
+{-
+Eq and Show instances are needed by unit tests to
+compare and report differences between PhoneType values
 (HomePhone, WorkPhone, etc).
 -}
 derive instance eqPhoneType :: Eq PhoneType
 
+-- Generic Show instance
+derive instance genericPhoneType :: Generic PhoneType _
+
 instance showPhoneType :: Show PhoneType where
-  show HomePhone = "HomePhone"
-  show WorkPhone = "WorkPhone"
-  show CellPhone = "CellPhone"
+  show = genericShow
+{-
+-- Manually-written Show instance
+instance showPhoneType :: Show PhoneType where
+  show HomePhone  = "HomePhone"
+  show WorkPhone  = "WorkPhone"
+  show CellPhone  = "CellPhone"
   show OtherPhone = "OtherPhone"
+-}
 
 type PhoneNumber
   = { "type" :: PhoneType
