@@ -24,17 +24,13 @@ The `Data.Picture` module defines a data type `Shape` for simple shapes, and a t
 The module imports the `Data.Foldable` module, which provides functions for folding data structures:
 
 ```haskell
-module Data.Picture where
-
-import Prelude
-import Data.Foldable (foldl)
+{{#include ../exercises/chapter5/src/Data/Picture.purs:module_picture}}
 ```
 
 The `Data.Picture` module also imports the `Global` and `Math` modules, but this time using the `as` keyword:
 
 ```haskell
-import Global as Global
-import Math as Math
+{{#include ../exercises/chapter5/src/Data/Picture.purs:picture_import_as}}
 ```
 
 This makes the types and functions in those modules available for use, but only by using _qualified names_, like `Global.infinity` and `Math.max`. This can be useful to avoid overlapping imports, or just to make it clearer which modules certain things are imported from.
@@ -46,12 +42,7 @@ _Note_: it is not necessary to use the same module name as the original module f
 Let's begin by looking at an example. Here is a function which computes the greatest common divisor of two integers using pattern matching:
 
 ```haskell
-gcd :: Int -> Int -> Int
-gcd n 0 = n
-gcd 0 m = m
-gcd n m = if n > m
-            then gcd (n - m) m
-            else gcd n (m - n)
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:gcd}}
 ```
 
 This algorithm is called the Euclidean Algorithm. If you search for its definition online, you will likely find a set of mathematical equations which look a lot like the code above. This is one benefit of pattern matching: it allows you to define code by cases, writing simple, declarative code which looks like a specification of a mathematical function.
@@ -81,13 +72,9 @@ There are other types of simple patterns:
 Here are two more examples which demonstrate using these simple patterns:
 
 ```haskell
-fromString :: String -> Boolean
-fromString "true" = true
-fromString _      = false
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:fromString}}
 
-toString :: Boolean -> String
-toString true  = "true"
-toString false = "false"
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:toString}}
 ```
 
 Try these functions in PSCi.
@@ -99,11 +86,7 @@ In the Euclidean algorithm example, we used an `if .. then .. else` expression t
 A guard is a boolean-valued expression which must be satisfied in addition to the constraints imposed by the patterns. Here is the Euclidean algorithm rewritten to use a guard:
 
 ```haskell
-gcd :: Int -> Int -> Int
-gcd n 0 = n
-gcd 0 n = n
-gcd n m | n > m     = gcd (n - m) m
-        | otherwise = gcd n (m - n)
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:gcdV2}}
 ```
 
 In this case, the third line uses a guard to impose the extra condition that the first argument is strictly larger than the second.
@@ -121,17 +104,13 @@ As this example demonstrates, guards appear on the left of the equals symbol, se
 _Array literal patterns_ provide a way to match arrays of a fixed length. For example, suppose we want to write a function `isEmpty` which identifies empty arrays. We could do this by using an empty array pattern (`[]`) in the first alternative:
 
 ```haskell
-isEmpty :: forall a. Array a -> Boolean
-isEmpty [] = true
-isEmpty _ = false
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:isEmpty}}
 ```
 
 Here is another function which matches arrays of length five, binding each of its five elements in a different way:
 
 ```haskell
-takeFive :: Array Int -> Int
-takeFive [0, 1, a, b, _] = a * b
-takeFive _ = 0
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:takeFive}}
 ```
 
 The first pattern only matches arrays with five elements, whose first and second elements are 0 and 1 respectively. In that case, the function returns the product of the third and fourth elements. In every other case, the function returns zero. For example, in PSCi:
@@ -163,8 +142,7 @@ Record patterns look just like record literals, but instead of values on the rig
 For example: this pattern matches any record which contains fields called `first` and `last`, and binds their values to the names `x` and `y` respectively:
 
 ```haskell
-showPerson :: { first :: String, last :: String } -> String
-showPerson { first: x, last: y } = y <> ", " <> x
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:showPerson}}
 ```
 
 Record patterns provide a good example of an interesting feature of the PureScript type system: _row polymorphism_. Suppose we had defined `showPerson` without a type signature above. What would its inferred type have been? Interestingly, it is not the same as the type we gave:
@@ -206,6 +184,24 @@ Note that we could have also written
 
 and PSCi would have inferred the same type.
 
+## Record Puns
+
+Recall that the `showPerson` function matches a record inside its argument, binding the `first` and `last` fields to values named `x` and `y`. We could alternatively just reuse the field names themselves, and simplify this sort of pattern match as follows:
+
+```haskell
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:showPersonV2}}
+```
+
+Here, we only specify the names of the fields, and we do not need to specify the names of the values we want to introduce. This is called a _record pun_.
+
+It is also possible to use record puns to _construct_ records. For example, if we have values named `first` and `last` in scope, we can construct a person record using `{ first, last }`:
+
+```haskell
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:unknownPerson}}
+```
+
+This may improve readability of code in some circumstances.
+
 ## Nested Patterns
 
 Array patterns and record patterns both combine smaller patterns to build larger patterns. For the most part, the examples above have only used simple patterns inside array patterns and record patterns, but it is important to note that patterns can be arbitrarily _nested_, which allows functions to be defined using conditions on potentially complex data types.
@@ -213,13 +209,7 @@ Array patterns and record patterns both combine smaller patterns to build larger
 For example, this code combines two record patterns:
 
 ```haskell
-type Address = { street :: String, city :: String }
-
-type Person = { name :: String, address :: Address }
-
-livesInLA :: Person -> Boolean
-livesInLA { address: { city: "Los Angeles" } } = true
-livesInLA _ = false
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:livesInLA}}
 ```
 
 ## Named Patterns
@@ -229,14 +219,10 @@ Patterns can be _named_ to bring additional names into scope when using nested p
 For example, this function sorts two-element arrays, naming the two elements, but also naming the array itself:
 
 ```haskell
-sortPair :: Array Int -> Array Int
-sortPair arr@[x, y]
-  | x <= y = arr
-  | otherwise = [y, x]
-sortPair arr = arr
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:sortPair}}
 ```
 
-This way, we save ourselves from allocating a new array if the pair is already sorted.
+This way, we save ourselves from allocating a new array if the pair is already sorted. Note that if the input array does not contain _exactly_ two elements, then this function simply returns it unchanged, even if it's unsorted.
 
 ## Exercises
 
@@ -251,15 +237,9 @@ Patterns do not only appear in top-level function declarations. It is possible t
 Here is an example. This function computes "longest zero suffix" of an array (the longest suffix which sums to zero):
 
 ```haskell
-import Data.Array (tail)
-import Data.Foldable (sum)
-import Data.Maybe (fromMaybe)
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:lzsImport}}
 
-lzs :: Array Int -> Array Int
-lzs [] = []
-lzs xs = case sum xs of
-           0 -> xs
-           _ -> lzs (fromMaybe [] $ tail xs)
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:lzs}}
 ```
 
 For example:
@@ -281,10 +261,9 @@ If patterns in a case expression are tried in order, then what happens in the ca
 We can see this behavior with a simple example:
 
 ```haskell
-import Partial.Unsafe (unsafePartial)
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:unsafePartialImport}}
 
-partialFunction :: Boolean -> Boolean
-partialFunction = unsafePartial \true -> true
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:partialFunction}}
 ```
 
 This function contains only a single case, which only matches a single input, `true`. If we compile this file, and test in PSCi with any other argument, we will see an error at runtime:
@@ -360,31 +339,14 @@ Algebraic data types provide a type-safe way to solve this sort of problem, if t
 Here is how `Shape` might be represented as an algebraic data type:
 
 ```haskell
-data Shape
-  = Circle Point Number
-  | Rectangle Point Number Number
-  | Line Point Point
-  | Text Point String
+{{#include ../exercises/chapter5/src/Data/Picture.purs:Shape}}
+
+{{#include ../exercises/chapter5/src/Data/Picture.purs:Point}}
 ```
-
-The `Point` type might also be defined as an algebraic data type, as follows:
-
-```haskell
-data Point = Point
-  { x :: Number
-  , y :: Number
-  }
-```
-
-The `Point` data type illustrates some interesting points:
-
-- The data carried by an ADT's constructors doesn't have to be restricted to primitive types: constructors can include records, arrays, or even other ADTs.
-- Even though ADTs are useful for describing data with multiple constructors, they can also be useful when there is only a single constructor.
-- The constructors of an algebraic data type might have the same name as the ADT itself. This is quite common, and it is important not to confuse the `Point` _type constructor_ with the `Point` _data constructor_ - they live in different namespaces.
 
 This declaration defines `Shape` as a sum of different constructors, and for each constructor identifies the data that is included. A `Shape` is either a `Circle` which contains a center `Point` and a radius (a number), or a `Rectangle`, or a `Line`, or `Text`. There are no other ways to construct a value of type `Shape`.
 
-An algebraic data type is introduced using the `data` keyword, followed by the name of the new type and any type arguments. The type's constructors (i.e. its _data constructors_) are defined after the equals symbol, and are separated by pipe characters (`|`).
+An algebraic data type is introduced using the `data` keyword, followed by the name of the new type and any type arguments. The type's constructors (i.e. its _data constructors_) are defined after the equals symbol, and are separated by pipe characters (`|`). The data carried by an ADT's constructors doesn't have to be restricted to primitive types: constructors can include records, arrays, or even other ADTs.
 
 Let's see another example from PureScript's standard libraries. We saw the `Maybe` type, which is used to define optional values, earlier in the book. Here is its definition from the `maybe` package:
 
@@ -409,14 +371,7 @@ It is simple enough to use the constructors of an algebraic data type to constru
 For example, the `Line` constructor defined above required two `Point`s, so to construct a `Shape` using the `Line` constructor, we have to provide two arguments of type `Point`:
 
 ```haskell
-exampleLine :: Shape
-exampleLine = Line p1 p2
-  where
-    p1 :: Point
-    p1 = Point { x: 0.0, y: 0.0 }
-
-    p2 :: Point
-    p2 = Point { x: 100.0, y: 50.0 }
+{{#include ../exercises/chapter5/src/Data/Picture.purs:exampleLine}}
 ```
 
 To construct the points `p1` and `p2`, we apply the `Point` constructor to its single argument, which is a record.
@@ -426,43 +381,12 @@ So, constructing values of algebraic data types is simple, but how do we use the
 Let's see an example. Suppose we want to convert a `Shape` into a `String`. We have to use pattern matching to discover which constructor was used to construct the `Shape`. We can do this as follows:
 
 ```haskell
-showPoint :: Point -> String
-showPoint (Point { x: x, y: y }) =
-  "(" <> show x <> ", " <> show y <> ")"
+{{#include ../exercises/chapter5/src/Data/Picture.purs:showShape}}
 
-showShape :: Shape -> String
-showShape (Circle c r)      = ...
-showShape (Rectangle c w h) = ...
-showShape (Line start end)  = ...
-showShape (Text p text) = ...
+{{#include ../exercises/chapter5/src/Data/Picture.purs:showPoint}}
 ```
 
 Each constructor can be used as a pattern, and the arguments to the constructor can themselves be bound using patterns of their own. Consider the first case of `showShape`: if the `Shape` matches the `Circle` constructor, then we bring the arguments of `Circle` (center and radius) into scope using two variable patterns, `c` and `r`. The other cases are similar.
-
-`showPoint` is another example of pattern matching. In this case, there is only a single case, but we use a nested pattern to match the fields of the record contained inside the `Point` constructor.
-
-## Record Puns
-
-The `showPoint` function matches a record inside its argument, binding the `x` and `y` properties to values with the same names. In PureScript, we can simplify this sort of pattern match as follows:
-
-```haskell
-showPoint :: Point -> String
-showPoint (Point { x, y }) = ...
-```
-
-Here, we only specify the names of the properties, and we do not need to specify the names of the values we want to introduce. This is called a _record pun_.
-
-It is also possible to use record puns to _construct_ records. For example, if we have values named `x` and `y` in scope, we can construct a `Point` using `Point { x, y }`:
-
-```haskell
-origin :: Point
-origin = Point { x, y }
-  where
-    x = 0.0
-    y = 0.0
-```
-
-This can be useful for improving readability of code in some circumstances.
 
 ## Exercises
 
@@ -472,20 +396,65 @@ This can be useful for improving readability of code in some circumstances.
 
 ## Newtypes
 
-There is an important special case of algebraic data types, called _newtypes_. Newtypes are introduced using the `newtype` keyword instead of the `data` keyword.
+There is a special case of algebraic data types, called _newtypes_. Newtypes are introduced using the `newtype` keyword instead of the `data` keyword.
 
-Newtypes must define _exactly one_ constructor, and that constructor must take _exactly one_ argument. That is, a newtype gives a new name to an existing type. In fact, the values of a newtype have the same runtime representation as the underlying type. They are, however, distinct from the point of view of the type system. This gives an extra layer of type safety.
+Newtypes must define _exactly one_ constructor, and that constructor must take _exactly one_ argument. That is, a newtype gives a new name to an existing type. In fact, the values of a newtype have the same runtime representation as the underlying type, so there is no runtime performance overhead. They are, however, distinct from the point of view of the type system. This gives an extra layer of type safety.
 
-As an example, we might want to define newtypes as type-level aliases for `Number`, to ascribe units like pixels and inches:
+As an example, we might want to define newtypes as type-level aliases for `Number`, to ascribe units like volts, amps, and ohms:
 
 ```haskell
-newtype Pixels = Pixels Number
-newtype Inches = Inches Number
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:electricalUnits}}
 ```
 
-This way, it is impossible to pass a value of type `Pixels` to a function which expects `Inches`, but there is no runtime performance overhead.
+Then we define functions and values using these types:
 
-Newtypes will become important when we cover _type classes_ in the next chapter, since they allow us to attach different behavior to a type without changing its representation at runtime.
+```haskell
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:calculateCurrent}}
+```
+
+This prevents us from making silly mistakes, such as attempting to calculate the current produced by _two_ lightbulbs _without_ a voltage source.
+
+```haskell
+current :: Amp
+current = calculateCurrent lightbulb lightbulb
+{-
+TypesDoNotUnify:
+  current = calculateCurrent lightbulb lightbulb
+                             ^^^^^^^^^
+  Could not match type
+    Ohm
+  with type
+    Volt
+-}
+```
+
+If we instead just used `Number` without `newtype`, then the compiler can't help us catch this mistake:
+
+```haskell
+-- This also compiles, but is not as type safe.
+calculateCurrent :: Number -> Number -> Number
+calculateCurrent v r = v / r
+
+battery :: Number
+battery = 1.5
+
+lightbulb :: Number
+lightbulb = 500.0
+
+current :: Number
+current = calculateCurrent lightbulb lightbulb -- uncaught mistake
+```
+
+This design principle is perhaps better [communicated visually](https://twitter.com/jusrin00/status/875238742621028355/photo/1).
+
+Note that the constructor of a newtype often has the same name as the newtype itself, but this is not a requirement. For example, unique names are also valid:
+```haskell
+{{#include ../exercises/chapter5/src/ChapterExamples.purs:Watt}}
+```
+
+In this case, `Watt` is the _type constructor_ and `MakeWatt` is the _data constructor_. These constructors live in different namespaces, even when the names are identical, such as with the `Volt` example. This is true for all ADTs.
+
+Another application of newtypes is to attach different _behavior_ to an existing type without changing its representation at runtime. We cover that use case in the next chapter when we discuss _type classes_.
 
 ## A Library for Vector Graphics
 
@@ -494,14 +463,13 @@ Let's use the data types we have defined above to create a simple library for us
 Define a type synonym for a `Picture` - just an array of `Shape`s:
 
 ```haskell
-type Picture = Array Shape
+{{#include ../exercises/chapter5/src/Data/Picture.purs:Picture}}
 ```
 
 For debugging purposes, we'll want to be able to turn a `Picture` into something readable. The `showPicture` function lets us do that:
 
 ```haskell
-showPicture :: Picture -> Array String
-showPicture = map showShape
+{{#include ../exercises/chapter5/src/Data/Picture.purs:showPicture}}
 ```
 
 Let's try it out. Compile your module with `spago build` and open PSCi with `spago repl`:
@@ -512,12 +480,7 @@ $ spago repl
 
 > import Data.Picture
 
-> :paste
-… showPicture
-…   [ Line (Point { x: 0.0, y: 0.0 })
-…          (Point { x: 1.0, y: 1.0 })
-…   ]
-… ^D
+> showPicture [ Line { x: 0.0, y: 0.0 } { x: 1.0, y: 1.0 } ]
 
 ["Line [start: (0.0, 0.0), end: (1.0, 1.0)]"]
 ```
@@ -526,25 +489,16 @@ $ spago repl
 
 The example code for this module contains a function `bounds` which computes the smallest bounding rectangle for a `Picture`.
 
-The `Bounds` data type defines a bounding rectangle. It is also defined as an algebraic data type with a single constructor:
+The `Bounds` type defines a bounding rectangle.
 
 ```haskell
-data Bounds = Bounds
-  { top    :: Number
-  , left   :: Number
-  , bottom :: Number
-  , right  :: Number
-  }
+{{#include ../exercises/chapter5/src/Data/Picture.purs:Bounds}}
 ```
 
 `bounds` uses the `foldl` function from `Data.Foldable` to traverse the array of `Shapes` in a `Picture`, and accumulate the smallest bounding rectangle:
 
 ```haskell
-bounds :: Picture -> Bounds
-bounds = foldl combine emptyBounds
-  where
-    combine :: Bounds -> Shape -> Bounds
-    combine b shape = union (shapeBounds shape) b
+{{#include ../exercises/chapter5/src/Data/Picture.purs:bounds}}
 ```
 
 In the base case, we need to find the smallest bounding rectangle of an empty `Picture`, and the empty bounding rectangle defined by `emptyBounds` suffices.
