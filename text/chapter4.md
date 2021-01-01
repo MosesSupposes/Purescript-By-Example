@@ -32,8 +32,11 @@ Here is the usual _factorial function_ example:
 
 ```haskell
 fact :: Int -> Int
-fact 0 = 1
-fact n = n * fact (n - 1)
+fact n =
+  if n == 0 then
+    1
+  else
+    n * fact (n - 1)
 ```
 
 Here, we can see how the factorial function is computed by reducing the problem to a subproblem - that of computing the factorial of a smaller integer. When we reach zero, the answer is immediate.
@@ -42,12 +45,16 @@ Here is another common example, which computes the _Fibonacci function_:
 
 ```haskell
 fib :: Int -> Int
-fib 0 = 1
-fib 1 = 1
-fib n = fib (n - 1) + fib (n - 2)
+fib n =
+  if n == 0 || n == 1 then
+    1
+  else
+    fib (n - 1) + fib (n - 2)
 ```
 
 Again, this problem is solved by considering the solutions to subproblems. In this case, there are two subproblems, corresponding to the expressions `fib (n - 1)` and `fib (n - 2)`. When these two subproblems are solved, we assemble the result by adding the partial results.
+
+Note that, while the above examples of `fact` and `fib` work as intended, a more idiomatic implementation would use pattern matching instead of `if`/`then`/`else`. Pattern matching techniques are discussed in a later chapter.
 
 ## Recursion on Arrays
 
