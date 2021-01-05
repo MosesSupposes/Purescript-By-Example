@@ -479,6 +479,38 @@ This process is called _eta conversion_, and can be used (along with some other 
 
 In the case of `insertEntry`, _eta conversion_ has resulted in a very clear definition of our function - "`insertEntry` is just cons on lists". However, it is arguable whether point-free form is better in general.
 
+## Property Accessors
+
+One common pattern is to use a function to access individual fields (or "properties") of a record. An inline function to extract an `Address` from an `Entry` could be written as:
+
+```haskell
+\entry -> entry.address
+```
+
+PureScript also allows [_property accessor_](https://github.com/purescript/documentation/blob/master/language/Syntax.md#property-accessors) shorthand, where an underscore acts as the anonymous fuction argument, so the inline function above is equivalent to:
+
+```haskell
+_.address
+```
+
+This works with any number of levels or properties, so a function to extract the city associated with an `Entry` could be written as:
+
+```haskell
+_.address.city
+```
+
+For example:
+
+```text
+> address = { street: "123 Fake St.", city: "Faketown", state: "CA" }
+> entry = { firstName: "John", lastName: "Smith", address: address }
+> _.lastName entry
+"Smith"
+
+> _.address.city entry
+"Faketown"
+```
+
 ## Querying the Address Book
 
 The last function we need to implement for our minimal address book application will look up a person by name and return the correct `Entry`. This will be a nice application of building programs by composing small functions - a key idea from functional programming.
@@ -529,7 +561,7 @@ This type signature says that `findEntry` takes two strings, the first and last 
 And here is the definition of `findEntry`:
 
 ```haskell
-findEntry firstName lastName book = head $ filter filterEntry book
+findEntry firstName lastName book = head (filter filterEntry book)
   where
     filterEntry :: Entry -> Boolean
     filterEntry entry = entry.firstName == firstName && entry.lastName == lastName
@@ -547,11 +579,76 @@ Note that, just like for top-level declarations, it was not necessary to specify
 
 ## Infix Function Application
 
-In the code for `findEntry` above, we used a different form of function application: the `head` function was applied to the expression `filter filterEntry book` by using the infix `$` symbol.
+Most of the functions discussed so far used _prefix_ function application, where the function name was put _before_ the arguments. For example, when using the `insertEntry` function to add an `Entry` (`john`) to an empty `AddressBook`, we might write:
 
-This is equivalent to the usual application `head (filter filterEntry book)`
+```haskell
+> book1 = insertEntry john emptyBook
+```
 
-`($)` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
+However, this chapter has also included examples of _infix_ [binary operators](https://github.com/purescript/documentation/blob/master/language/Syntax.md#binary-operators), such as  the `==` operator in the definition of `filterEntry`, where the operator is put _between_ the two arguments. These infix operators are actually defined in the PureScript source as infix aliases for their underlying _prefix_ implementations. For example, `==` is defined as an infix alias for the prefix `eq` function with the line:
+
+```haskell
+infix 4 eq as ==
+```
+
+and therefore `entry.firstName == firstName` in `filterEntry` could be replaced with the `eq entry.firstName firstName`. We'll cover a few more examples of defining infix operators later in this section.
+
+There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
+
+```text
+> mod 8 3
+2
+```
+
+This is fine, but doesn't line up with common usage (in conversation, one might say "eight mod three"). Wrapping a prefix function in backticks (\`) lets you use that it in infix position as an operator, e.g.,
+
+```text
+> 8 `mod` 3
+2
+```
+
+In the same way, wrapping `insertEntry` in backticks turns it into an infix operator, such that `book1` and `book2` below are equivalent:
+
+```haskell
+book1 = insertEntry john emptyBook
+book2 = john `insertEntry` emptyBook
+```
+
+We can make an `AddressBook` with multiple entries by using multiple applications of `insertEntry` as a prefix function (`book3`) or as an infix operator (`book4`) as shown below:
+
+```haskell
+book3 = insertEntry john (insertEntry peggy (insertEntry ned emptyBook))
+book4 = john `insertEntry` (peggy `insertEntry` (ned `insertEntry` emptyBook))
+```
+
+We can also define an infix operator alias (or synonym) for `insertEntry.` We'll arbitrarily choose `++` for this operator, give it a [precedence](https://github.com/purescript/documentation/blob/master/language/Syntax.md#precedence) of `5`, and make it right [associative](https://github.com/purescript/documentation/blob/master/language/Syntax.md#associativity) using `infixr`:
+
+```haskell
+infixr 5 insertEntry as ++
+```
+
+This new operator lets us rewrite the above `book4` example as:
+
+```haskell
+book5 = john ++ (peggy ++ (ned ++ emptyBook))
+```
+
+and the right associativity of our new `++` operator lets us get rid of the parentheses without changing the meaning:
+
+```haskell
+book6 = john ++ peggy ++ ned ++ emptyBook
+```
+
+Another common technique for eliminating parens is to use `apply`'s infix operator `$`, along with your standard prefix functions.
+
+For example, the earlier `book3` example could be rewritten as:
+```haskell
+book7 = insertEntry john $ insertEntry peggy $ insertEntry ned emptyBook
+```
+
+Substituting `$` for parens is usually easier to type and (arguably) easier to read. A mnemonic to remember the meaning of this symbol is to think of the dollar sign as being drawn from two parens that are also being crossed-out, suggesting the parens are now unnecessary.
+
+Note that `$` isn't special syntax that's hardcoded into the language. It's simply the infix operator for a regular function called `apply`, which is defined in the Prelude as follows:
 
 ```haskell
 apply :: forall a b. (a -> b) -> a -> b
@@ -560,20 +657,43 @@ apply f x = f x
 infixr 0 apply as $
 ```
 
-So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `($)` as an alias for `apply`.
+The `apply` function takes another function (of type `(a -> b)`) as its first argument and a value (of type `a`) as its second argument, then calls that function with that value. If it seems like this function doesn't contribute anything meaningful, you are absolutely correct! Your program is logically identical without it (see [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency)). The syntactic utility of this function comes from the special properties assigned to its infix operator. `$` is a right-associative (`infixr`), low precedence (`0`) operator, which lets us remove sets of parentheses for deeply-nested applications.
 
-But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative, low precedence operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
-
-For example, the following nested function application, which finds the street in the address of an employee's boss:
-
+Another parens-busting opportunity for the `$` operator is in our earlier `findEntry` function:
 ```haskell
-street (address (boss employee))
+findEntry firstName lastName book = head $ filter filterEntry book
+```
+We'll see an even more elegant way to rewrite this line with "function composition" in the next section.
+
+If you'd like to use a concise infix operator alias as a prefix function, you can surround it in parentheses:
+
+```text
+> 8 + 3
+11
+
+> (+) 8 3
+11
 ```
 
-becomes (arguably) easier to read when expressed using `$`:
+Alternatively, operators can be partially applied by surrounding the expression with parentheses and using `_` as an operand in an [operator section](https://github.com/purescript/documentation/blob/master/language/Syntax.md#operator-sections). You can think of this as a more convenient way to create simple anonymous functions (although in the below example, we're then binding that anonymous function to a name, so it's not so anonymous anymore):
+
+```text
+> add3 = (3 + _)
+> add3 2
+5
+```
+
+To summarize, the following are equivalent definitions of a function that adds `5` to its argument:
 
 ```haskell
-street $ address $ boss employee
+add5 x = 5 + x
+add5 x = add 5 x
+add5 x = (+) 5 x
+add5 x = 5 `add` x
+add5   = add 5
+add5   = \x -> 5 + x
+add5   = (5 + _)
+add5 x = 5 `(+)` x  -- Yo Dawg, I herd you like infix, so we put infix in your infix!
 ```
 
 ## Function Composition
@@ -612,6 +732,7 @@ I will let you make your own decision which definition is easier to understand, 
 
  1. (Easy) Test your understanding of the `findEntry` function by writing down the types of each of its major subexpressions. For example, the type of the `head` function as used is specialized to `AddressBook -> Maybe Entry`. _Note_: There is no test for this exercise.
  1. (Medium) Write a function `findEntryByStreet :: String -> AddressBook -> Maybe Entry` which looks up an `Entry` given a street address. _Hint_ reusing the existing code in `findEntry`. Test your function in PSCi and by running `spago test`.
+ 1. (Medium) Rewrite `findEntryByStreet` to replace `filterEntry` with the composition (using `<<<` or `>>>`) of: a property accessor (using the `_.` notation); and a function that tests whether its given string argument is equal to the given street address.
  1. (Medium) Write a function `isInBook` which tests whether a name appears in a `AddressBook`, returning a Boolean value. _Hint_: Use PSCi to find the type of the `Data.List.null` function, which tests whether a list is empty or not.
  1. (Difficult) Write a function `removeDuplicates` which removes "duplicate" address book entries. We'll consider entries duplicated if they share the same first and last names, while ignoring `address` fields. _Hint_: Use PSCi to find the type of the `Data.List.nubBy` function, which removes duplicate elements from a list based on an equality predicate. Note that the first element in each set of duplicates (closest to list head) is the one that is kept.
 
