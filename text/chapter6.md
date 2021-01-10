@@ -455,7 +455,7 @@ When the program is compiled, the correct type class instance for `Show` is chos
 
 1. (Medium) Write a `dedupShapes :: Array Shape -> Array Shape` function which removes duplicate `Shape`s from an array using the `nubEq` function.
 
-1. (Medium) Write a `dedupShapesFast` function which is the same as `dudupShapes`, but uses the more efficient `nub` function.
+1. (Medium) Write a `dedupShapesFast` function which is the same as `dedupShapes`, but uses the more efficient `nub` function.
 
 ## Multi Parameter Type Classes
 
@@ -591,7 +591,15 @@ We've already seen the `unsafePartial` function, which allows us to treat a part
 unsafePartial :: forall a. (Partial => a) -> a
 ```
 
-Note that the `Partial` constraint appears _inside the parentheses_ on the left of the function arrow, but not in the outer `forall`. That is, `unsafePartial` is a function from partial values to regular values.
+Note that the `Partial` constraint appears _inside the parentheses_ on the left of the function arrow, but not in the outer `forall`. That is, `unsafePartial` is a function from partial values to regular values:
+
+```text
+> unsafePartial head [1, 2, 3]
+1
+
+> unsafePartial secondElement [1, 2, 3]
+2
+```
 
 ## Superclasses
 
