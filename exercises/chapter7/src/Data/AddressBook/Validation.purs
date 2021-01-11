@@ -1,11 +1,13 @@
 module Data.AddressBook.Validation where
 
 import Prelude
+
 import Data.AddressBook (Address, Person, PhoneNumber, address, person, phoneNumber)
 import Data.Either (Either(..))
 import Data.String (length)
-import Data.String.Regex (Regex, test, regex)
+import Data.String.Regex (Regex, test)
 import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Validation.Semigroup (V, invalid)
 
@@ -64,16 +66,37 @@ lengthIs _     _   value = pure value
 -- ANCHOR_END: lengthIs
 
 -- ANCHOR: phoneNumberRegex
-phoneNumberRegex :: Either String Regex
-phoneNumberRegex = regex "^\\d{3}-\\d{3}-\\d{4}$" noFlags
+-- | We use `Data.String.Regex.Unsafe.unsafeRegex` here instead of `Data.String.Regex.regex`
+-- | in order to simplify the code.
+-- |
+-- | The safe function has this signature:
+-- |
+-- | ```purescript
+-- | regex :: String -> RegexFlags -> Either String Regex
+-- | ```
+-- |
+-- | which can fail if passed an invalid regex `String`. This potential failure is worth
+-- | checking for at runtime when working with a user-provided regex `String`.
+-- | But in our case, we hardcode a literal regex `String`, so it's not as problematic
+-- | to use this more convenient "unsafe" version that may throw an exception:
+-- |
+-- | ```purescript
+-- | unsafeRegex :: String -> RegexFlags -> Regex
+-- | ```
+-- |
+-- | We can achieve a bit more safety by binding our `Regex` values at the top level,
+-- | so any potential runtime exceptions are thrown as soon as our application starts.
+-- | This is better than defining these values in a local context, where the error may
+-- | not be encountered until later on during application execution.
+phoneNumberRegex :: Regex
+phoneNumberRegex = unsafeRegex "^\\d{3}-\\d{3}-\\d{4}$" noFlags
 -- ANCHOR_END: phoneNumberRegex
 
 -- ANCHOR: matches
-matches :: String -> Either String Regex -> String -> V Errors String
-matches _    (Right regex) value | test regex value 
-                                 = pure value
-matches _    (Left  error) _     = invalid [ error ]
-matches field _            _     = invalid [ "Field '" <> field <> "' did not match the required format" ]
+matches :: String -> Regex -> String -> V Errors String
+matches _     regex value | test regex value
+                          = pure value
+matches field _     _     = invalid [ "Field '" <> field <> "' did not match the required format" ]
 -- ANCHOR_END: matches
 
 -- ANCHOR: validateAddress
