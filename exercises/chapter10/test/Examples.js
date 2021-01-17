@@ -1,9 +1,10 @@
 "use strict";
 
+// ANCHOR: square
 exports.square = function (n) {
   return n * n;
 };
-
+// ANCHOR_END: square
 
 exports.diagonal = function (w, h) {
   return Math.sqrt(w * w + h * h);
