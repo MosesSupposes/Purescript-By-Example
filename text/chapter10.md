@@ -794,11 +794,9 @@ exports.addComplexJson = exports.addComplexBroken
 And then write a wrapper to decode the returned foreign `Json` value:
 
 ```hs
-cumulativeSumsDecoded :: Array Int ->  Either String (Array Int)
-cumulativeSumsDecoded arr = decodeJson $ cumulativeSumsJson arr
+{{#include ../exercises/chapter10/test/Examples.purs:cumulativeSumsDecoded}}
 
-addComplexDecoded :: Complex -> Complex ->  Either String Complex
-addComplexDecoded a b = decodeJson $ addComplexJson a b
+{{#include ../exercises/chapter10/test/Examples.purs:addComplexDecoded}}
 ```
 
 Then any values that can't be successfully decoded to our return type appear as a `Left` error `String`:
@@ -841,19 +839,16 @@ Using JSON is also the easiest way to pass other structural types, such as `Map`
 Here's an example of a foreign function signature that modifies a `Map` of `String` keys and `Int` values, along with the wrapper function that handles JSON encoding and decoding.
 
 ```hs
-foreign import mapSetFooJson :: Json -> Json
-
-mapSetFoo :: Map String Int -> Either String (Map String Int)
-mapSetFoo m = decodeJson $ mapSetFooJson $ encodeJson m
+{{#include ../exercises/chapter10/test/Examples.purs:mapSetFooJson}}
 ```
 
 Note that this is a prime use case for function composition. Both of these alternatives are equivalent to the above:
 
 ```hs
-mapSetFoo :: Map String Int -> Either String (Map String Int)
+mapSetFoo :: Map String Int -> Either JsonDecodeError (Map String Int)
 mapSetFoo = decodeJson <<< mapSetFooJson <<< encodeJson
 
-mapSetFoo :: Map String Int -> Either String (Map String Int)
+mapSetFoo :: Map String Int -> Either JsonDecodeError (Map String Int)
 mapSetFoo = encodeJson >>> mapSetFooJson >>> decodeJson
 ```
 
@@ -890,8 +885,8 @@ Map String Int
 
 ## Exercises
 
-1. (Medium) Write a JavaScript function and PureScript wrapper `valuesOfMap :: Map String Int -> Either String (Set Int)` that returns a `Set` of all the values in a `Map`. _Hint_: The `.values()` instance method for Map may be useful in your JavaScript code.
-1. (Easy) Write a new wrapper for the previous JavaScript function with the signature `valuesOfMapGeneric :: forall k v. Map k v -> Either String (Set v)` so it works with a wider variety of maps. Note that you'll need to add some type class constraints for `k` and `v`. The compiler will guide you.
+1. (Medium) Write a JavaScript function and PureScript wrapper `valuesOfMap :: Map String Int -> Either JsonDecodeError (Set Int)` that returns a `Set` of all the values in a `Map`. _Hint_: The `.values()` instance method for Map may be useful in your JavaScript code.
+1. (Easy) Write a new wrapper for the previous JavaScript function with the signature `valuesOfMapGeneric :: forall k v. Map k v -> Either JsonDecodeError (Set v)` so it works with a wider variety of maps. Note that you'll need to add some type class constraints for `k` and `v`. The compiler will guide you.
 1. (Medium) Rewrite the earlier `quadraticRoots` function as `quadraticRootsSet` which returns the `Complex` roots as a `Set` via JSON (instead of as a `Pair`).
 1. (Difficult) Rewrite the earlier `quadraticRoots` function as `quadraticRootsSafe` which uses JSON to pass the `Pair` of `Complex` roots over FFI. Don't use the `Pair` constructor in JavaScript, but instead, just return the pair in a decoder-compatible format.
 _Hint_: You'll need to write a `DecodeJson` instance for `Pair`. Consult the [argonaut docs](https://github.com/purescript-contrib/purescript-argonaut-codecs#writing-new-instances) for instruction on writing your own decode instance. Their [decodeJsonTuple](https://github.com/purescript-contrib/purescript-argonaut-codecs/blob/master/src/Data/Argonaut/Decode/Class.purs) instance may also be a helpful reference.  Note that you'll need a `newtype` wrapper for `Pair` to avoid creating an "orphan instance".
