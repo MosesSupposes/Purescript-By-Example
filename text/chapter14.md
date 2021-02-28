@@ -56,7 +56,7 @@ $ spago repl
 > import Prelude
 > import Data.DOM.Simple
 > import Data.Maybe
-> import Control.Monad.Eff.Console
+> import Effect.Console
 
 > :paste
 … log $ render $ Element
@@ -237,7 +237,7 @@ $ spago repl
 
 > import Prelude
 > import Data.DOM.Smart
-> import Control.Monad.Eff.Console
+> import Effect.Console
 > log $ render $ p [ _class := "main" ] [ text "Hello World!" ]
 
 <p class="main">Hello World!</p>
@@ -335,7 +335,7 @@ Now we find it is impossible to represent these invalid HTML documents, and we a
 ```text
 > import Prelude
 > import Data.DOM.Phantom
-> import Control.Monad.Eff.Console
+> import Effect.Console
 
 > :paste
 … log $ render $ img
@@ -554,7 +554,7 @@ That's it! We can test our new monadic API in PSCi, as follows:
 ```text
 > import Prelude
 > import Data.DOM.Free
-> import Control.Monad.Eff.Console
+> import Effect.Console
 
 > :paste
 … log $ render $ p [] $ do
@@ -684,7 +684,7 @@ With that, we can try out our new functionality in PSCi, by generating a unique 
 ```text
 > import Prelude
 > import Data.DOM.Name
-> import Control.Monad.Eff.Console
+> import Effect.Console
 
 > :paste
 … render $ p [ ] $ do
