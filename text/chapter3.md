@@ -648,7 +648,7 @@ book7 = insertEntry john $ insertEntry peggy $ insertEntry ned emptyBook
 
 Substituting `$` for parens is usually easier to type and (arguably) easier to read. A mnemonic to remember the meaning of this symbol is to think of the dollar sign as being drawn from two parens that are also being crossed-out, suggesting the parens are now unnecessary.
 
-Note that `$` isn't special syntax that's hardcoded into the language. It's simply the infix operator for a regular function called `apply`, which is defined in the Prelude as follows:
+Note that `$` isn't special syntax that's hardcoded into the language. It's simply the infix operator for a regular function called `apply`, which is defined in `Data.Function` as follows:
 
 ```haskell
 apply :: forall a b. (a -> b) -> a -> b
