@@ -648,7 +648,8 @@ Another reason to define a superclass relationship is in the case where there is
      ```haskell
      instance actionMultiplyInt :: Action Multiply Int
      ```
-     Verify that this instance satisfies the laws listed above.
+     
+     Remember, your instance must satisfy the laws listed above.
 
 1. (Difficult) There are actually multiple ways to implement an instance of `Action Multiply Int`. How many can you think of? Purescript does not allow multiple implementations of a same instance, so you will have to replace your original implementation. _Note_: the tests cover 3 implementations.
 
@@ -657,6 +658,7 @@ Another reason to define a superclass relationship is in the case where there is
      ```haskell
      instance actionMultiplyString :: Action Multiply String
      ```
+     
      _Hint_: Search Pursuit for a helper-function with the signature [`String -> Int -> String`](https://pursuit.purescript.org/search?q=String%20-%3E%20Int%20-%3E%20String). Note that `String` might appear as a more generic type (such as `Monoid`).
 
      Does this instance satisfy the laws listed above?
