@@ -6,19 +6,24 @@ exports.square = function (n) {
 };
 // ANCHOR_END: square
 
-exports.diagonal = function (w, h) {
-  return Math.sqrt(w * w + h * h);
-};
-
-exports.diagonalNested = function (w) {
+// ANCHOR: diagonal
+exports.diagonal = function (w) {
   return function (h) {
     return Math.sqrt(w * w + h * h);
   };
 };
+// ANCHOR_END: diagonal
 
+// ANCHOR: diagonal_arrow
 exports.diagonalArrow = w => h =>
   Math.sqrt(w * w + h * h);
+// ANCHOR_END: diagonal_arrow
 
+// ANCHOR: diagonal_uncurried
+exports.diagonalUncurried = function (w, h) {
+  return Math.sqrt(w * w + h * h);
+};
+// ANCHOR_END: diagonal_uncurried
 
 exports.cumulativeSums = arr => {
   let sum = 0

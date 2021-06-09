@@ -231,19 +231,25 @@ runChapterExamples =
         $ square 5.0
     test "diagonal" do
       Assert.equal 5.0
-        $ runFn2 diagonal 3.0 4.0
-    test "diagonalNested" do
-      Assert.equal 5.0
-        $ diagonalNested 3.0 4.0
+        $ diagonal 3.0 4.0
     test "diagonalArrow" do
       Assert.equal 5.0
         $ diagonalArrow 3.0 4.0
+    test "diagonalUncurried" do
+      Assert.equal 5.0
+        $ runFn2 diagonalUncurried 3.0 4.0
     test "uncurriedAdd" do
       Assert.equal 13
         $ runFn2 uncurriedAdd 3 10
+    test "uncurriedSum" do
+      Assert.equal 13
+        $ uncurriedSum
     test "curriedAdd" do
       Assert.equal 13
         $ curriedAdd 3 10
+    test "curriedSum" do
+      Assert.equal 13
+        $ curriedSum
     test "cumulativeSums" do
       Assert.equal [ 1, 3, 6 ]
         $ cumulativeSums [ 1, 2, 3 ]
