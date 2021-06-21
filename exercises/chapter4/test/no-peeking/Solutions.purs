@@ -2,7 +2,7 @@ module Test.NoPeeking.Solutions where
 
 import Prelude
 import Control.MonadZero (guard)
-import Data.Array (catMaybes, cons, filter, find, head, last, length, nub, tail, (..))
+import Data.Array (catMaybes, cons, filter, find, head, last, length, nub, null, tail, (..))
 import Data.Foldable (foldl)
 import Data.Int (rem, quot)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
@@ -24,12 +24,9 @@ oneIfEven :: Int -> Int
 oneIfEven n = if isEven n then 1 else 0
 
 countEven :: Array Int -> Int
-countEven ints = countEven' ints 0
-  where
-  countEven' :: Array Int -> Int -> Int
-  countEven' [] count = count
-
-  countEven' ints' count = countEven' (fromMaybe [] (tail ints')) $ add count $ maybe 0 oneIfEven $ head ints'
+countEven xs =
+    if null xs then 0
+    else oneIfEven (fromMaybe 1 $ head xs ) + countEven (fromMaybe [] $ tail xs)
 
 squared :: Array Number -> Array Number
 squared arr = map (\n -> n * n) arr
