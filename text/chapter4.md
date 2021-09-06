@@ -31,7 +31,7 @@ Let's see some simple examples of recursion in PureScript.
 Here is the usual _factorial function_ example:
 
 ```haskell
-{{#include ../exercises/chapter4/test/Examples.purs:fact}}
+{{#include ../exercises/chapter4/test/Examples.purs:factorial}}
 ```
 
 Here, we can see how the factorial function is computed by reducing the problem to a subproblem - that of computing the factorial of a smaller integer. When we reach zero, the answer is immediate.
@@ -44,7 +44,7 @@ Here is another common example, which computes the _Fibonacci function_:
 
 Again, this problem is solved by considering the solutions to subproblems. In this case, there are two subproblems, corresponding to the expressions `fib (n - 1)` and `fib (n - 2)`. When these two subproblems are solved, we assemble the result by adding the partial results.
 
-Note that, while the above examples of `fact` and `fib` work as intended, a more idiomatic implementation would use pattern matching instead of `if`/`then`/`else`. Pattern matching techniques are discussed in a later chapter.
+Note that, while the above examples of `factorial` and `fib` work as intended, a more idiomatic implementation would use pattern matching instead of `if`/`then`/`else`. Pattern matching techniques are discussed in a later chapter.
 
 ## Recursion on Arrays
 
@@ -365,7 +365,7 @@ This means that if the guard fails, then the current branch of the array compreh
  1. (Easy) Write a function `isPrime` which tests if its integer argument is prime or not. _Hint_: Use the `factors` function.
  1. (Medium) Write a function `cartesianProduct` which uses do notation to find the _cartesian product_ of two arrays, i.e. the set of all pairs of elements `a`, `b`, where `a` is an element of the first array, and `b` is an element of the second.
  1. (Medium) Write a function `triples :: Int -> Array (Array Int)` which takes a number `n` and returns all Pythagorean triples whose components (the `a`, `b` and `c` values) are each less than or equal to `n`. A _Pythagorean triple_ is an array of numbers `[a, b, c]` such that `a² + b² = c²`. _Hint_: Use the `guard` function in an array comprehension.
- 1. (Difficult) Write a function `factorize` which produces the [prime factorization](https://www.mathsisfun.com/prime-factorization.html) of `n`, i.e. the array of prime integers whose product is `n`. _Hint_: for an integer greater than 1, break the problem down into two subproblems: finding the first factor, and finding the remaining factors.
+ 1. (Difficult) Write a function `primeFactors` which produces the [prime factorization](https://www.mathsisfun.com/prime-factorization.html) of `n`, i.e. the array of prime integers whose product is `n`. _Hint_: for an integer greater than 1, break the problem down into two subproblems: finding the first factor, and finding the remaining factors.
 
 ## Folds
 
@@ -441,7 +441,7 @@ It is easy to verify this problem, with the following code in PSCi:
 
 ```text
 > :paste
-… f n = 
+… f n =
 …   if n == 0
 …     then 0
 …     else 1 + f (n - 1)
@@ -467,10 +467,10 @@ In practice, the PureScript compiler does not replace the recursive call with a 
 Here is an example of a recursive function with all recursive calls in tail position:
 
 ```haskell
-{{#include ../exercises/chapter4/test/Examples.purs:factTailRec}}
+{{#include ../exercises/chapter4/test/Examples.purs:factorialTailRec}}
 ```
 
-Notice that the recursive call to `factTailRec` is the last thing that happens in this function - it is in tail position.
+Notice that the recursive call to `factorialTailRec` is the last thing that happens in this function - it is in tail position.
 
 ## Accumulators
 

@@ -5,9 +5,10 @@ import Test.Examples
 import Test.MySolutions
 import Test.NoPeeking.Solutions  -- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 import Data.Array (sort)
+import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..))
 import Data.Path (Path(..), filename, root)
-import Data.Tuple (fst)
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert (assert, assertFalse)
@@ -122,13 +123,21 @@ This line should have been automatically deleted by resetSolutions.sh. See Chapt
           Assert.equal (sort [ [ 3, 4, 5 ], [ 5, 12, 13 ], [ 6, 8, 10 ] ])
             $ sort
             $ triples 13
-      suite "Exercise - factorize" do
-        test "Test small non-prime number" do
-          Assert.equal [ 3, 2 ]
-            $ factorize 6
-        test "Test number that uses the prime numbers less than 10" do
-          Assert.equal [ 7, 5, 3, 2 ]
-            $ factorize 210
+      suite "Exercise - primeFactors" do
+        let
+          primeFactorsTest :: Int -> Array Int -> _
+          primeFactorsTest n xs =
+            test (show n) do
+              Assert.equal (sort xs)
+                $ sort
+                $ primeFactors n
+        primeFactorsTest 1 []
+        primeFactorsTest 2 [2]
+        primeFactorsTest 3 [3]
+        primeFactorsTest 4 [2, 2]
+        primeFactorsTest 6 [3, 2]
+        primeFactorsTest 18 [3, 3, 2]
+        primeFactorsTest 210 [ 7, 5, 3, 2 ]
     suite "Exercise Group - Folds and Tail Recursion" do
       test "Exercise - allTrue" do
         assert "all elements true"
@@ -198,27 +207,35 @@ This line should have been automatically deleted by resetSolutions.sh. See Chapt
 runChapterExamples :: TestSuite
 runChapterExamples =
   suite "Chapter Examples" do
-    test "fact" do
+    test "factorial" do
       Assert.equal 120
-        $ fact 5
+        $ factorial 5
     test "fib" do
       Assert.equal 34
         $ fib 9
     test "length" do
       Assert.equal 3
         $ length [ 0, 0, 0 ]
-    test "factors" do
-      Assert.equal [ [ 1, 10 ], [ 2, 5 ] ]
-        $ factors 10
-    test "factorsV2" do
-      Assert.equal [ [ 1, 10 ], [ 2, 5 ] ]
-        $ factorsV2 10
-    test "factorsV3" do
-      Assert.equal [ [ 1, 10 ], [ 2, 5 ] ]
-        $ factorsV3 10
-    test "factTailRec" do
+    sequence_ do
+      name /\ f <-
+        [ "factors" /\ factors
+        , "factorsV2" /\ factorsV2
+        , "factorsV3" /\ factorsV3
+        ]
+      n /\ xs <-
+        [ 1 /\ [[1,1]]
+        , 2 /\ [[1,2]]
+        , 3 /\ [[1,3]]
+        , 4 /\ [[1,4],[2,2]]
+        , 10 /\ [[1,10],[2,5]]
+        , 100 /\ [[1,100],[2,50],[4,25],[5,20],[10,10]]
+        ]
+      pure $ test (name <> " " <> show n) do
+        Assert.equal (sort $ map sort xs)
+          $ sort $ map sort f n
+    test "factorialTailRec" do
       Assert.equal 120
-        $ factTailRec 5 1
+        $ factorialTailRec 5 1
     test "lengthTailRec" do
       Assert.equal 3
         $ lengthTailRec [ 0, 0, 0 ]
