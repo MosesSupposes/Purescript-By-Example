@@ -235,6 +235,13 @@ instance actionMultiplyInt :: Action Multiply Int where
 -}
 
 {-
+-- Alternative solution #3
+instance actionMultiplyInt :: Action Multiply Int where
+  act (Multiply n) 1 = n
+  act m1 a           = act (m1 <> Multiply a) 1
+-}
+
+{-
 -- Here's another solution that satisfies the typeclass laws
 -- but for practicality is not accepted by the tests
 instance actionMultiplyInt :: Action Multiply Int where
