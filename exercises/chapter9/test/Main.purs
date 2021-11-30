@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude
 import Test.MySolutions
-import Test.NoPeeking.Solutions  -- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 
 import Data.Array ((..))
 import Data.Bifunctor (lmap)
@@ -52,7 +51,6 @@ main =
       for_ files \f -> unlink $ Path.concat [ outDir, f ]
     runChapterExamples
     {-  Move this block comment starting point to enable more tests
-This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions. -}
     test "concatenateFiles" do
       let
         inFoo = Path.concat [ inDir, "foo.txt" ]
@@ -137,7 +135,6 @@ This line should have been automatically deleted by resetSolutions.sh. See Chapt
         actual <- recurseFiles file
         Assert.equal (Set.fromFoldable expected) $ Set.fromFoldable actual
 
-{- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 -}
 runChapterExamples :: TestSuite
 runChapterExamples = do

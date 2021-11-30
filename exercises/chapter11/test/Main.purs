@@ -3,7 +3,6 @@ module Test.Main where
 import Prelude (Unit, discard, negate, ($), (*>), (<>), (==))
 import Test.MySolutions
 import Game
-import Test.NoPeeking.Solutions  -- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 
 import Control.Monad.Except (runExceptT)
 import Control.Monad.RWS (RWSResult(..), runRWS)
@@ -30,7 +29,6 @@ main =
   runTest do
     test "" success
     {-  Move this block comment starting point to enable more tests
-This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions. -}
     suite "Exercises Group - The State Monad" do
       suite "testParens" do
         let
@@ -168,5 +166,4 @@ This line should have been automatically deleted by resetSolutions.sh. See Chapt
         runCheatTest "pickup matches and cheat" $ pickUp Matches *> cheat
         runCheatTest "pickup all, move, and cheat" $ pickUp Matches *> move 0 1 *> pickUp Candle *> cheat
 
-{- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 -}

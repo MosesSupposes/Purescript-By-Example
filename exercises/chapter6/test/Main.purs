@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude
 import Test.MySolutions
-import Test.NoPeeking.Solutions  -- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 
 import Data.Array (elem)
 import Data.Foldable (foldMap, foldl, foldr)
@@ -19,7 +18,6 @@ main =
   runTest do
     runChapterExamples
     {-  Move this block comment starting point to enable more tests
-This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions. -}
     suite "Show Me!" do
       test "Show Point" do
         Assert.equal "(1.0, 2.0)"
@@ -263,7 +261,6 @@ This line should have been automatically deleted by resetSolutions.sh. See Chapt
             $ hash
             $ Hour 14
 
-{- This line should have been automatically deleted by resetSolutions.sh. See Chapter 2 for instructions.
 -}
 runChapterExamples :: TestSuite
 runChapterExamples =
