@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude hiding (gcd)
 import Test.MySolutions
-
 import ChapterExamples (Amp(..), current, fromString, gcd, gcdV2, isEmpty, livesInLA, lzs, partialFunction, showPerson, showPersonV2, sortPair, takeFive, toString, unknownPerson, Volt(..))
 import Data.Int (round)
 import Data.Maybe (Maybe(Just, Nothing))
@@ -33,7 +32,6 @@ main :: Effect Unit
 main =
   runTest do
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
     suite "Exercise Group - Simple Pattern Matching" do
       test "Exercise - factorial" do
         Assert.equal 1
@@ -76,28 +74,37 @@ main =
         Assert.equal "default"
           $ fromSingleton "default" []
         Assert.equal "B"
-          $ fromSingleton "default" ["B"]
+          $ fromSingleton "default" [ "B" ]
         Assert.equal "default"
-          $ fromSingleton "default" ["B", "C", "D"]
+          $ fromSingleton "default" [ "B", "C", "D" ]
+    {-
     suite "Exercise Group - Algebraic Data Types" do
       test "Exercise - circleAtOrigin" do
         Assert.equal origin
           $ getCenter circleAtOrigin
       test "Exercise - doubleScaleAndCenter" do
         Assert.equal (Circle origin 10.0)
-          $ doubleScaleAndCenter $ Circle origin 5.0
+          $ doubleScaleAndCenter
+          $ Circle origin 5.0
         Assert.equal (Circle origin 10.0)
-          $ doubleScaleAndCenter $ Circle { x: 2.0, y: 2.0 } 5.0
+          $ doubleScaleAndCenter
+          $ Circle { x: 2.0, y: 2.0 } 5.0
         Assert.equal (Rectangle origin 10.0 10.0)
-          $ doubleScaleAndCenter $ Rectangle { x: 0.0, y: 0.0 } 5.0 5.0
+          $ doubleScaleAndCenter
+          $ Rectangle { x: 0.0, y: 0.0 } 5.0 5.0
         Assert.equal (Rectangle origin 40.0 40.0)
-          $ doubleScaleAndCenter $ Rectangle { x: 30.0, y: 30.0 } 20.0 20.0
+          $ doubleScaleAndCenter
+          $ Rectangle { x: 30.0, y: 30.0 } 20.0 20.0
         Assert.equal (Line { x: -4.0, y: -4.0 } { x: 4.0, y: 4.0 })
-          $ doubleScaleAndCenter $ Line { x: -2.0, y: -2.0 } { x: 2.0, y: 2.0 }
+          $ doubleScaleAndCenter
+          $ Line { x: -2.0, y: -2.0 } { x: 2.0, y: 2.0 }
         Assert.equal (Line { x: -4.0, y: -4.0 } { x: 4.0, y: 4.0 })
-          $ doubleScaleAndCenter $ Line { x: 0.0, y: 4.0 } { x: 4.0, y: 8.0 }
-        Assert.equal (Text { x: 0.0, y: 0.0 } "Hello .purs!" )
-          $ doubleScaleAndCenter $ Text { x: 4.0, y: 6.0 } "Hello .purs!"
+          $ doubleScaleAndCenter
+          $ Line { x: 0.0, y: 4.0 } { x: 4.0, y: 8.0 }
+        Assert.equal (Text { x: 0.0, y: 0.0 } "Hello .purs!")
+          $ doubleScaleAndCenter
+          $ Text { x: 4.0, y: 6.0 } "Hello .purs!"
+
       test "Exercise - shapeText" do
         Assert.equal (Just "Hello .purs!")
           $ shapeText $ Text origin "Hello .purs!"
@@ -107,11 +114,17 @@ main =
           $ shapeText $ Rectangle origin 1.0 1.0
         Assert.equal Nothing
           $ shapeText $ Line origin { x: 1.0, y: 1.0 }
+
+          -}
     suite "Exercise Group - Newtype" do
       test "Exercise - calculateWattage" do
         Assert.equal 60.0
-          $ let (Watt w) = calculateWattage (Amp 0.5) (Volt 120.0)
-            in w
+          $ let
+              (Watt w) = calculateWattage (Amp 0.5) (Volt 120.0)
+            in
+              w
+
+{-  Move this block comment starting point to enable more tests
     suite "Exercise Group - Vector Graphics" do
       test "Exercise - area" do
         Assert.equal 50
@@ -150,27 +163,27 @@ runChapterExamples =
         $ gcdV2 60 100
     test "isEmpty" do
       Assert.equal false
-        $ isEmpty [2, 3]
+        $ isEmpty [ 2, 3 ]
     test "takeFive" do
       Assert.equal 6
-        $ takeFive [0, 1, 2, 3, 4]
+        $ takeFive [ 0, 1, 2, 3, 4 ]
     test "showPerson" do
       Assert.equal "Lovelace, Ada"
-        $ showPerson {first: "Ada", last: "Lovelace"}
+        $ showPerson { first: "Ada", last: "Lovelace" }
     test "showPersonV2" do
       Assert.equal "Lovelace, Ada"
-        $ showPersonV2 {first: "Ada", last: "Lovelace"}
+        $ showPersonV2 { first: "Ada", last: "Lovelace" }
     test "unknownPerson" do
-      Assert.equal {first: "Jane", last: "Doe"} unknownPerson
+      Assert.equal { first: "Jane", last: "Doe" } unknownPerson
     test "livesInLA" do
       Assert.equal true
-        $ livesInLA {name: "Suraj", address: {street: "123 Main St", city: "Los Angeles"}}
+        $ livesInLA { name: "Suraj", address: { street: "123 Main St", city: "Los Angeles" } }
     test "sortPair" do
-      Assert.equal [1, 2]
-        $ sortPair [2, 1]
+      Assert.equal [ 1, 2 ]
+        $ sortPair [ 2, 1 ]
     test "lzs" do
-      Assert.equal [-1, -2, 3]
-        $ lzs [1, -1, -2, 3]
+      Assert.equal [ -1, -2, 3 ]
+        $ lzs [ 1, -1, -2, 3 ]
     test "partialFunction" do
       Assert.equal true
         $ partialFunction true
