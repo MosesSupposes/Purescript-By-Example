@@ -17,7 +17,6 @@ main :: Effect Unit
 main =
   runTest do
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
     suite "Show Me!" do
       test "Show Point" do
         Assert.equal "(1.0, 2.0)"
@@ -73,6 +72,7 @@ main =
         test "text" do
           Assert.equal "(Text (1.0, 2.0) \"Hello\")"
             $ show $ Text (Point {x: 1.0, y: 2.0}) "Hello"
+    {-  Move this block comment starting point to enable more tests
     suite "Type Class Constraints" do
       suite "Eq NonEmpty" do
         test "equals" do
