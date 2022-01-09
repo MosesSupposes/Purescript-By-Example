@@ -72,7 +72,6 @@ main =
         test "text" do
           Assert.equal "(Text (1.0, 2.0) \"Hello\")"
             $ show $ Text (Point {x: 1.0, y: 2.0}) "Hello"
-    {-  Move this block comment starting point to enable more tests
     suite "Type Class Constraints" do
       suite "Eq NonEmpty" do
         test "equals" do
@@ -160,6 +159,7 @@ main =
       test "dedupShapesFast" do
         Assert.equal noDups
           $ dedupShapesFast withDups
+    {-  Move this block comment starting point to enable more tests
     suite "Multi Parameter Type Classes " do
       test "unsafeMaximum" do
         Assert.equal 42
