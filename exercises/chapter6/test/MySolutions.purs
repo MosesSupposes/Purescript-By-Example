@@ -1,12 +1,15 @@
 module Test.MySolutions where
 
 import Data.Foldable
+import Data.Maybe
 import Data.Newtype
 import Prelude
 
 import Data.Array (nub, nubEq)
 import Data.Generic.Rep (class Generic)
+import Data.Monoid (power)
 import Data.Show.Generic (genericShow)
+import Partial.Unsafe (unsafePartial)
 
 -- Note to reader: Add your solutions to this file
 newtype Point
@@ -108,3 +111,38 @@ derive instance ordShape :: Ord Shape
 
 dedupShapesFast :: Array Shape -> Array Shape
 dedupShapesFast = nub
+
+unsafeMaximum :: Partial => Array Int -> Int
+unsafeMaximum xs = case maximum xs of 
+  Just x -> x
+
+class Monoid m <= Action m a where
+  act :: m -> a -> a
+
+newtype Multiply = Multiply Int
+
+derive newtype instance showMultiply :: Show Multiply 
+derive newtype instance eqMultiply :: Eq Multiply
+
+instance semigroupMultiply :: Semigroup Multiply where
+      append (Multiply n) (Multiply m) = Multiply (n * m)
+
+instance monoidMultiply :: Monoid Multiply where
+      mempty = Multiply 1
+
+instance actionMultiplyInt :: Action Multiply Int where
+  act (Multiply n) m = n * m 
+
+instance actionMultiplyString :: Action Multiply String where
+ act (Multiply n) s = power s n
+
+instance actionArray :: Action m a => Action m (Array a) where
+  act m arr = map (act m) arr
+
+newtype Self m = Self m
+
+derive newtype instance showSelf :: Show m => Show (Self m)
+derive newtype instance eqSelf :: Eq m => Eq (Self m)
+
+instance actionSelf :: Monoid m => Action m (Self m) where
+  act m1 (Self m2) = Self (m1 <> m2)

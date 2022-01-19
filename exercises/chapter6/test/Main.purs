@@ -159,7 +159,6 @@ main =
       test "dedupShapesFast" do
         Assert.equal noDups
           $ dedupShapesFast withDups
-    {-  Move this block comment starting point to enable more tests
     suite "Multi Parameter Type Classes " do
       test "unsafeMaximum" do
         Assert.equal 42
@@ -239,6 +238,7 @@ main =
         test "concrete" do
           Assert.equal (Self (Multiply 12))
             $ act m2 a
+    {-  Move this block comment starting point to enable more tests
     suite "A Type Class for Hashes" do
       suite "arrayHasDuplicates" do
         test "no dupe" do
