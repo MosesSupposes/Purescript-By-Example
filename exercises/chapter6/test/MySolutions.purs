@@ -3,9 +3,11 @@ module Test.MySolutions where
 import Data.Foldable
 import Data.Maybe
 import Data.Newtype
+import Data.Function
 import Prelude
-import Data.Array (nub, nubEq)
+import Data.Array (nub, nubByEq, nubEq)
 import Data.Generic.Rep (class Generic)
+import Data.Hashable
 import Data.Monoid (power)
 import Data.Show.Generic (genericShow)
 import Partial.Unsafe (unsafePartial)
@@ -157,3 +159,21 @@ derive newtype instance eqSelf :: Eq m => Eq (Self m)
 
 instance actionSelf :: Monoid m => Action m (Self m) where
   act m1 (Self m2) = Self (m1 <> m2)
+
+-- arrayHasDuplicates :: forall a. Hashable a => Eq a => Array a -> Boolean
+-- arrayHasDuplicates xs =
+--   let
+--     hashAndValEqual x y = hashEqual x y && x == y
+--   in
+--     length xs /= (length $ nubByEq hashAndValEqual xs)
+arrayHasDuplicates :: forall a. Hashable a => Array a -> Boolean
+arrayHasDuplicates arr = nubByEq (eq && eq `on` hash) arr /= arr
+
+newtype Hour
+  = Hour Int
+
+instance eqHour :: Eq Hour where
+  eq (Hour n) (Hour m) = mod n 12 == mod m 12
+
+instance hashableHour :: Hashable Hour where
+  hash (Hour h) = hash $ mod h 12
